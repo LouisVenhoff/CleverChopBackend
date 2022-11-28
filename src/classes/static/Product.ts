@@ -1,5 +1,5 @@
 
-type MinimalProduct = {
+export type MinimalProduct = {
     error:number,
     name:string,
     detail:string,
@@ -29,9 +29,7 @@ class Product
 
     constructor(apiString:string)
     {
-        this.convertApiString(apiString);
-
-        
+        this.convertApiString(apiString);   
     }
 
 
@@ -39,11 +37,11 @@ class Product
 
     private convertApiString(input:string)
     {
-        let lineArr:string[] = input.split("\n\r");
+        let lineArr:string[] = input.split("\n");
 
         for(let i:number = 0; i < lineArr.length; i++)
         {
-           this.fillObjData(lineArr[i]);
+            this.fillObjData(lineArr[i]);
         }
     }
 
@@ -55,14 +53,16 @@ class Product
         }
 
         let processValue:string[] = input.split("=");
-
-        switch(input[0])
+        switch(processValue[0])
         {
             case "error":
                 this.error = parseInt(processValue[1]);
                 break;
             case "name":
                 this.name = processValue[1];
+                break;
+            case "detailname":
+                this.detail = processValue[1];
                 break;
             case "vendor":
                 this.manufacturer = processValue[1];
@@ -79,15 +79,13 @@ class Product
             case "pack":
                 this.packageInfo = parseInt(processValue[1]);
                 break;
-            case "desc":
+            case "descr":
                 this.description = processValue[1];
                 break;
             case "origin":
                 this.origin = processValue[1]
                 break;
-            default:
-                return;
-                break;
+           
         }
     }
 
@@ -112,3 +110,5 @@ class Product
     }
 
 }
+
+export default Product;
