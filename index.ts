@@ -18,7 +18,7 @@ app.get("/", (req:any, res:any) => {
 })
 
 app.get("/api/sendCode/:code", async (req:any, res:any) => {
-    console.log("Got code Route" + req.params.code);
+    
 
     let result:MinimalProduct = await eanSource.requestEan(req.params.code);
 
