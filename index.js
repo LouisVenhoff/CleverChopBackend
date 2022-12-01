@@ -37,15 +37,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var eanApiController_1 = require("./src/classes/openEan/eanApiController");
+var cors = require("cors");
 var express = require("express");
 var app = express();
 var port = 3014;
+app.use(cors());
 var eanSource = new eanApiController_1["default"]("400000000");
 app.get("/", function (req, res) {
     console.log("Working");
 });
 app.get("/api/sendCode/:code", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var result, test;
+    var result;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -53,8 +55,7 @@ app.get("/api/sendCode/:code", function (req, res) { return __awaiter(void 0, vo
                 return [4 /*yield*/, eanSource.requestEan(req.params.code)];
             case 1:
                 result = _a.sent();
-                test = JSON.stringify(result);
-                console.log(test);
+                res.send(JSON.stringify(result));
                 return [2 /*return*/];
         }
     });

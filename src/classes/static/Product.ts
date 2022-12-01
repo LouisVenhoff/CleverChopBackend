@@ -33,8 +33,6 @@ class Product
     }
 
 
-    
-
     private convertApiString(input:string)
     {
         let lineArr:string[] = input.split("\n");
@@ -87,6 +85,13 @@ class Product
                 break;
            
         }
+
+        if(this.name == "")
+        {
+            this.name = this.detail;
+        }
+
+
     }
 
     public reduceObj():MinimalProduct

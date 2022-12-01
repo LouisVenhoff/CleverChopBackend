@@ -57,6 +57,9 @@ var Product = /** @class */ (function () {
                 this.origin = processValue[1];
                 break;
         }
+        if (this.name == "") {
+            this.name = this.detail;
+        }
     };
     Product.prototype.reduceObj = function () {
         var outObj = {
