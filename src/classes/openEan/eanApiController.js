@@ -37,23 +37,37 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var axios_1 = require("axios");
+var Product_1 = require("../static/Product");
 var EanApiController = /** @class */ (function () {
     function EanApiController(_userId) {
         this._userId = _userId;
     }
     EanApiController.prototype.requestEan = function (ean) {
         return __awaiter(this, void 0, void 0, function () {
-            var queryString, test;
+            var queryString;
+            var _this = this;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        queryString = "http://opengtindb.org/?ean=".concat(ean, "&cmd=query&queryid=").concat(this._userId);
-                        return [4 /*yield*/, axios_1["default"].get(queryString)];
-                    case 1:
-                        test = _a.sent();
-                        console.log(test.data);
-                        return [2 /*return*/];
-                }
+                queryString = "http://opengtindb.org/?ean=".concat(ean, "&cmd=query&queryid=").concat(this._userId);
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var result, outObj, _a;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _b.trys.push([0, 2, , 3]);
+                                    return [4 /*yield*/, axios_1["default"].get(queryString)];
+                                case 1:
+                                    result = _b.sent();
+                                    outObj = new Product_1["default"](result.data);
+                                    resolve(outObj.reduceObj());
+                                    return [3 /*break*/, 3];
+                                case 2:
+                                    _a = _b.sent();
+                                    reject(null);
+                                    return [3 /*break*/, 3];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); })];
             });
         });
     };
