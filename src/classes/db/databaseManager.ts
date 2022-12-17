@@ -1,6 +1,6 @@
 
 var mysql = require('mysql');
-
+import Product from "../static/Product";
 
 class DatabaseManager
 {
@@ -45,6 +45,37 @@ class DatabaseManager
     public disconnect()
     {
         this.sqlConnection.end();
+    }
+
+    public checkProduct(ean:string):boolean
+    {
+        //TODO: Prüfen ob produkt vorhanden
+        return true;
+    }
+
+    public addProduct(prod:Product)
+    {
+        //TODO: Neues Produkt hinzufügen
+    }
+
+    private checkOrigin(origin:string)
+    {
+        //TODO: Prüfen ob Herstellerland vorhanden
+    }
+
+    private addOrigin(origin:string)
+    {
+        //TODO: Herstellerland hinzufügen
+    }
+
+    private checkCategory(category:string)
+    {
+        //TODO: Prüfen ob Kategorie vorhandne
+    }
+
+    private addCategory(category:string)
+    {
+        //TODO: hinzufügen einer Kategorie
     }
 
 
