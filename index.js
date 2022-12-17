@@ -37,10 +37,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var eanApiController_1 = require("./src/classes/openEan/eanApiController");
+var databaseManager_1 = require("./src/classes/db/databaseManager");
 var cors = require("cors");
 var express = require("express");
 var app = express();
 var port = 3014;
+var dbMng = new databaseManager_1["default"]("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724");
 app.use(cors());
 var eanSource = new eanApiController_1["default"]("400000000");
 app.get("/", function (req, res) {
