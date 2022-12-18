@@ -1,7 +1,7 @@
 
 var mysql = require('mysql');
-import Product from "../static/Product";
-
+import Product, { MinimalProduct } from "../static/Product";
+import Tables from "../../enums/tables";
 class DatabaseManager
 {
 
@@ -53,9 +53,50 @@ class DatabaseManager
         return true;
     }
 
-    public addProduct(prod:Product)
+    
+    public async addProduct(prod:MinimalProduct)
     {
         //TODO: Neues Produkt hinzufügen
+        const categoryRows:any = await this.sqlConnection.query(`SELECT * FROM category WHERE name = ${prod.mainCat}`);
+    
+    }
+
+    private async addToSecTable(value:string, table:Tables)
+    {
+
+        let catType:string
+        let tableName:string;
+        
+        switch(table)
+        {
+            case Tables.CATEGORY:
+                catType = "Category";
+                tableName = "category"
+                break;
+            case Tables.SUBCATEGORY:
+                catType = "Category";
+                tableName = "subcategory"
+                break;
+            case Tables.ORIGIN:
+                catType = "Origin";
+                tableName = "origin"
+                break;
+            default:
+                return;
+
+        }
+
+        const rows:any = await this.sqlConnection.query(`INSERT INTO ${tableName} (${catType}) VALUES (${value})`);
+    
+    }
+
+    private async checkSecTable(value:string, table:Tables):Promise<number>
+    {
+        //const rows:any[] = await this.sqlConnection.query("SELECT id FROM ");
+
+        return new Promise(async (resolve, reject) => {
+            
+        });
     }
 
     private checkOrigin(origin:string)
@@ -76,6 +117,11 @@ class DatabaseManager
     private addCategory(category:string)
     {
         //TODO: hinzufügen einer Kategorie
+    }
+
+    private checkConnection()
+    {
+        if(this.sqlConnection.Conne)
     }
 
 

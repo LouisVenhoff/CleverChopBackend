@@ -9,7 +9,8 @@ export type MinimalProduct = {
     contents:number,
     packageInfo:number,
     description:string,
-    origin:string
+    origin:string,
+    code:string
 }
 
 class Product
@@ -24,13 +25,19 @@ class Product
     packageInfo:number = 0;
     description:string = "";
     origin:string = "";
-
+    code:string = "";
    
 
     constructor(apiString:string)
     {
         this.convertApiString(apiString);   
     }
+
+    public set Code(code:string)
+    {
+        this.code = code;
+    }
+
 
 
     private convertApiString(input:string)
@@ -94,6 +101,10 @@ class Product
 
     }
 
+
+
+  
+
     public reduceObj():MinimalProduct
     {
         
@@ -108,6 +119,7 @@ class Product
                 packageInfo:this.packageInfo,
                 description:this.description,
                 origin:this.origin,
+                code:this.code,
             }
         
 
