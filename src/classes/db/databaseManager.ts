@@ -48,13 +48,36 @@ class DatabaseManager
         this.sqlConnection.end();
     }
 
-    public provideProduct(ean:string):boolean
+    
+    public async provideProduct(ean:string)
     {
-        //TODO: Prüfen ob produkt vorhanden
-        return true;
+        let productId:number = await this.findProduct(ean);
+
+
     }
 
     
+    private async findProduct(ean:string):Promise<number>
+    {
+        
+        return new Promise(async (resolve, reject) => {
+            let rows:any[] = this.sqlConnection.query(`SELECT id FROM Product WHERE Code = '${ean}'`);
+
+            if(rows.length === 0)
+            {
+               let Product:MinimalProduct = await this.eanSource.requestEan(ean);
+               await this.addProduct(Product);
+               this.findProduct(ean).then((e:number) => {resolve(e)});
+            }
+            else
+            {
+                resolve(rows[0].id);
+            }
+        });
+        
+        
+    }
+
     private async addProduct(prod:MinimalProduct)
     {
         //TODO: Neues Produkt hinzufügen
@@ -67,25 +90,11 @@ class DatabaseManager
     
     }
 
-    private async checkProduct(ean:string):Promise<number>
+    private async getProductById(productId:number):Promise<MinimalProduct | null>
     {
-        
-        return new Promise(async (resolve, reject) => {
-            let rows:any[] = this.sqlConnection.query(`SELECT id FROM Product WHERE Code = '${ean}'`);
-
-            if(rows.length === 0)
-            {
-               let Product:MinimalProduct = await this.eanSource.requestEan(ean);
-               await this.addProduct(Product);
-               this.checkProduct(ean).then((e:number) => {resolve(e)});
-            }
-            else
-            {
-                resolve(rows.length);
-            }
-        });
-        
-        
+        //TODO: Gibt ein Minimalproduct Obj zurück
+        let result:any[] = this.sqlConnection.query('');
+        return null;
     }
 
 
