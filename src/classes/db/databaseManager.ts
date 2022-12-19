@@ -2,6 +2,7 @@
 var mysql = require('mysql');
 import Product, { MinimalProduct } from "../static/Product";
 import Tables from "../../enums/tables";
+import EanApiController from "../openEan/eanApiController";
 class DatabaseManager
 {
 
@@ -9,7 +10,7 @@ class DatabaseManager
     username:string;
     password:string;
     sqlConnection:any;
-   
+    eanSource:EanApiController = new EanApiController("400000000");
     
     constructor(host:string, username:string, password:string)
     {
@@ -47,24 +48,117 @@ class DatabaseManager
         this.sqlConnection.end();
     }
 
-    public checkProduct(ean:string):boolean
+    public provideProduct(ean:string):boolean
     {
         //TODO: Prüfen ob produkt vorhanden
         return true;
     }
 
     
-    public async addProduct(prod:MinimalProduct)
+    private async addProduct(prod:MinimalProduct)
     {
         //TODO: Neues Produkt hinzufügen
-        const categoryRows:any = await this.sqlConnection.query(`SELECT * FROM category WHERE name = ${prod.mainCat}`);
+       let mainCatId:number = await this.provideSecTable(prod.mainCat, Tables.CATEGORY);
+       let subCatId:number = await this.provideSecTable(prod.subCat, Tables.SUBCATEGORY);
+       let originId:number = await this.provideSecTable(prod.origin, Tables.ORIGIN);
+
+       await this.sqlConnection.query(`INSERT INTO product (Name, Detail, Code, Content, Pack, Description, OriginId, CatId, SubCatId)` +  
+                                        `VALUES ('${prod.name}', '${prod.detail}', '${prod.code}', '${prod.contents}', '${prod.packageInfo}', '${prod.description}', '${originId}', '${mainCatId}', '${subCatId}')`);
     
     }
 
-    private async addToSecTable(value:string, table:Tables)
+    private async checkProduct(ean:string):Promise<number>
+    {
+        
+        return new Promise(async (resolve, reject) => {
+            let rows:any[] = this.sqlConnection.query(`SELECT id FROM Product WHERE Code = '${ean}'`);
+
+            if(rows.length === 0)
+            {
+               let Product:MinimalProduct = await this.eanSource.requestEan(ean);
+               await this.addProduct(Product);
+               this.checkProduct(ean).then((e:number) => {resolve(e)});
+            }
+            else
+            {
+                resolve(rows.length);
+            }
+        });
+        
+        
+    }
+
+
+    private async addToSecTable(value:string, table:Tables):Promise<boolean>
     {
 
         let catType:string
+        let tableName:string;
+        
+        let dbConfig:any = this.getSecTableConfig(table);
+
+        const rows:any[] = await this.sqlConnection.query(`INSERT INTO ${dbConfig.tableName} (${dbConfig.catType}) VALUES (${value})`);
+    
+       return new Promise((resolve, reject) => {
+            if(rows.length > 0)
+            {
+                resolve(true);
+            }
+            else
+            {
+                resolve(false);
+            }
+       });
+
+    }
+
+    private async checkSecTable(value:string, table:Tables):Promise<number>
+    {
+        //const rows:any[] = await this.sqlConnection.query("SELECT id FROM ");
+
+        let dbConfig:any = this.getSecTableConfig(table);
+
+        let rows:any[] = await this.sqlConnection.query(`SELECT id FROM ${dbConfig.tableName} WHERE ${dbConfig.catType} = '${value}'`);
+
+        return new Promise(async (resolve, reject) => {
+            if(rows.length > 0)
+            {
+                resolve(parseInt(rows[0]));
+            }
+            else
+            {
+                resolve(0);
+            }
+        });
+    }
+
+    private async provideSecTable(value:string, table:Tables):Promise<number>
+    {
+        
+        return new Promise(async (resolve, reject) => {
+            let secId:number = await this.checkSecTable(value, table);
+
+            let finalId:number;
+
+            if(secId === 0)
+            {
+                await this.addToSecTable(value, table);
+                resolve(await this.checkSecTable(value, table));
+            }
+            else
+            {
+                resolve(secId);
+            }
+        });
+
+
+        
+    }
+
+
+    private getSecTableConfig(table:Tables):{catType:string, tableName:string} | null
+    {
+        let catType:string;
         let tableName:string;
         
         switch(table)
@@ -82,48 +176,14 @@ class DatabaseManager
                 tableName = "origin"
                 break;
             default:
-                return;
-
+                return null;
         }
-
-        const rows:any = await this.sqlConnection.query(`INSERT INTO ${tableName} (${catType}) VALUES (${value})`);
-    
+        
+        
+        return {catType:catType, tableName:tableName};
     }
 
-    private async checkSecTable(value:string, table:Tables):Promise<number>
-    {
-        //const rows:any[] = await this.sqlConnection.query("SELECT id FROM ");
-
-        return new Promise(async (resolve, reject) => {
-            
-        });
-    }
-
-    private checkOrigin(origin:string)
-    {
-        //TODO: Prüfen ob Herstellerland vorhanden
-    }
-
-    private addOrigin(origin:string)
-    {
-        //TODO: Herstellerland hinzufügen
-    }
-
-    private checkCategory(category:string)
-    {
-        //TODO: Prüfen ob Kategorie vorhandne
-    }
-
-    private addCategory(category:string)
-    {
-        //TODO: hinzufügen einer Kategorie
-    }
-
-    private checkConnection()
-    {
-        if(this.sqlConnection.Conne)
-    }
-
+   
 
 }
 
