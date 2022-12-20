@@ -23,11 +23,12 @@ app.get("/", (req:any, res:any) => {
 app.get("/api/sendCode/:code", async (req:any, res:any) => {
     
 
-    let result:MinimalProduct = await eanSource.requestEan(req.params.code);
+    let result:MinimalProduct = await dbMng.provideProduct(req.params.code);
 
     res.send(JSON.stringify(result));
 })
 
 app.listen(port, () => {
     console.log("Listening on Port " + port);
+    
 })

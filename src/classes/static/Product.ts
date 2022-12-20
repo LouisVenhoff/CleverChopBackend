@@ -25,7 +25,7 @@ class Product
     packageInfo:number = 0;
     description:string = "";
     origin:string = "";
-    code:string = "";
+    public code:string = "";
    
 
     constructor(apiString:string)
@@ -33,10 +33,10 @@ class Product
         this.convertApiString(apiString);   
     }
 
-    public set Code(code:string)
-    {
-        this.code = code;
-    }
+    // public setCode(code:string)
+    // {
+    //     this.code = code;
+    // }
 
 
 

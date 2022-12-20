@@ -12,8 +12,13 @@ var Product = /** @class */ (function () {
         this.packageInfo = 0;
         this.description = "";
         this.origin = "";
+        this.code = "";
         this.convertApiString(apiString);
     }
+    // public setCode(code:string)
+    // {
+    //     this.code = code;
+    // }
     Product.prototype.convertApiString = function (input) {
         var lineArr = input.split("\n");
         for (var i = 0; i < lineArr.length; i++) {
@@ -72,7 +77,8 @@ var Product = /** @class */ (function () {
             contents: this.contents,
             packageInfo: this.packageInfo,
             description: this.description,
-            origin: this.origin
+            origin: this.origin,
+            code: this.code
         };
         return outObj;
     };

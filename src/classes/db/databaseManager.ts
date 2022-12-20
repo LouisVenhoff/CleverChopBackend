@@ -27,6 +27,7 @@ class DatabaseManager
             host: this.host,
             user: this.username,
             password: this.password,
+            database: "heroku_554b26e8f85d455"
         });
 
         this.sqlConnection.connect((err:any) => {
@@ -49,10 +50,49 @@ class DatabaseManager
     }
 
     
-    public async provideProduct(ean:string)
+    public async provideProduct(ean:string):Promise<MinimalProduct>
     {
         let productId:number = await this.findProduct(ean);
 
+        return new Promise(async (resolve, reject) => {
+            try
+            {
+                        let objRow:any[] = this.sqlConnection.query(`SELECT Name, Detail, Code, Content, Pack, Description, Origin, Category.category as MainCat, Subcategory.Category as SubCat FROM Product
+                                                                    JOIN Origin ON Origin.id = Product.originId
+                                                                    JOIN category ON Category.id = Product.catId
+                                                                    JOIN subcategory ON Subcategory.id = Product.SubCatId
+                                                                    WHERE Product.id = "${productId}";`);
+
+                        if(objRow.length === 0)
+                        {
+                            reject(0);
+                        }
+                        
+                        let loadedItem:MinimalProduct = {error: 0,
+                                                         name: objRow[0].Name,
+                                                         detail: objRow[0].Detail,
+                                                         code: objRow[0].Code,
+                                                         contents: objRow[0].Content,
+                                                         packageInfo: objRow[0],
+                                                         description: objRow[0].Description,
+                                                         origin: objRow[0].Origin,
+                                                         mainCat: objRow[0].MainCat,
+                                                         subCat: objRow[0].SubCat,
+                                                         manufacturer: "",
+                                                        };
+
+                        resolve(loadedItem);
+
+
+            }
+            catch
+            {
+                reject(null);
+            }
+            
+
+            
+        });
 
     }
 
@@ -61,18 +101,23 @@ class DatabaseManager
     {
         
         return new Promise(async (resolve, reject) => {
-            let rows:any[] = this.sqlConnection.query(`SELECT id FROM Product WHERE Code = '${ean}'`);
+           this.sqlConnection.query(`SELECT id FROM Product WHERE Code = '${ean}'`, async (error:any, results:any, fields:any) => 
+            {
+                
+                if(results.length === 0)
+                {
+                   let Product:MinimalProduct = await this.eanSource.requestEan(ean);
+                   await this.addProduct(Product);
+                   this.findProduct(ean).then((e:number) => {resolve(e)});
+                }
+                else
+                {
+                    console.log(results[0]);
+                    resolve(results[0].id);
+                }
+            });
 
-            if(rows.length === 0)
-            {
-               let Product:MinimalProduct = await this.eanSource.requestEan(ean);
-               await this.addProduct(Product);
-               this.findProduct(ean).then((e:number) => {resolve(e)});
-            }
-            else
-            {
-                resolve(rows[0].id);
-            }
+           
         });
         
         
@@ -90,12 +135,6 @@ class DatabaseManager
     
     }
 
-    private async getProductById(productId:number):Promise<MinimalProduct | null>
-    {
-        //TODO: Gibt ein Minimalproduct Obj zurück
-        let result:any[] = this.sqlConnection.query('');
-        return null;
-    }
 
 
     private async addToSecTable(value:string, table:Tables):Promise<boolean>
@@ -104,19 +143,24 @@ class DatabaseManager
         let catType:string
         let tableName:string;
         
-        let dbConfig:any = this.getSecTableConfig(table);
-
-        const rows:any[] = await this.sqlConnection.query(`INSERT INTO ${dbConfig.tableName} (${dbConfig.catType}) VALUES (${value})`);
-    
-       return new Promise((resolve, reject) => {
-            if(rows.length > 0)
-            {
-                resolve(true);
-            }
-            else
+        
+        return new Promise(async (resolve, reject) => {
+            
+            let dbConfig:any = this.getSecTableConfig(table);
+          
+            await this.sqlConnection.query(`INSERT INTO ${dbConfig.tableName} (${dbConfig.catType}) VALUES ('${value}')`, async (error:any, results:any, fields:any) => {
+            if(error)
             {
                 resolve(false);
             }
+            else
+            {
+                resolve(true);
+            }
+        });
+    
+       
+           
        });
 
     }
