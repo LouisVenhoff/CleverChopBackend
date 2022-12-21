@@ -57,37 +57,40 @@ class DatabaseManager
         return new Promise(async (resolve, reject) => {
             try
             {
-                        let objRow:any[] = this.sqlConnection.query(`SELECT Name, Detail, Code, Content, Pack, Description, Origin, Category.category as MainCat, Subcategory.Category as SubCat FROM Product
+                        await this.sqlConnection.query(`SELECT Name, Detail, Code, Content, Pack, Description, Origin, Category.category as MainCat, Subcategory.Category as SubCat FROM Product
                                                                     JOIN Origin ON Origin.id = Product.originId
                                                                     JOIN category ON Category.id = Product.catId
                                                                     JOIN subcategory ON Subcategory.id = Product.SubCatId
-                                                                    WHERE Product.id = "${productId}";`);
+                                                                    WHERE Product.id = "${productId}";`, (error:any, results:any, fields:any) => {
 
-                        if(objRow.length === 0)
-                        {
-                            reject(0);
-                        }
-                        
-                        let loadedItem:MinimalProduct = {error: 0,
-                                                         name: objRow[0].Name,
-                                                         detail: objRow[0].Detail,
-                                                         code: objRow[0].Code,
-                                                         contents: objRow[0].Content,
-                                                         packageInfo: objRow[0],
-                                                         description: objRow[0].Description,
-                                                         origin: objRow[0].Origin,
-                                                         mainCat: objRow[0].MainCat,
-                                                         subCat: objRow[0].SubCat,
-                                                         manufacturer: "",
-                                                        };
+                                                                        if(results.length === 0)
+                                                                        {
+                                                                            console.log("Article Not Found!");
+                                                                            
+                                                                        }
+                                                                       
+                                                                        let loadedItem:MinimalProduct = {error: 0,
+                                                                                                         name: results[0].Name,
+                                                                                                         detail: results[0].Detail,
+                                                                                                         code: results[0].Code,
+                                                                                                         contents: results[0].Content,
+                                                                                                         packageInfo: results[0],
+                                                                                                         description: results[0].Description,
+                                                                                                         origin: results[0].Origin,
+                                                                                                         mainCat: results[0].MainCat,
+                                                                                                         subCat: results[0].SubCat,
+                                                                                                         manufacturer: "",
+                                                                                                        };
+                                                
+                                                                        resolve(loadedItem);
 
-                        resolve(loadedItem);
 
+                                                                    });
 
             }
             catch
             {
-                reject(null);
+                //reject(null);
             }
             
 
@@ -106,13 +109,12 @@ class DatabaseManager
                 
                 if(results.length === 0)
                 {
-                   let Product:MinimalProduct = await this.eanSource.requestEan(ean);
+                    let Product:MinimalProduct = await this.eanSource.requestEan(ean);
                    await this.addProduct(Product);
                    this.findProduct(ean).then((e:number) => {resolve(e)});
                 }
                 else
                 {
-                    console.log(results[0]);
                     resolve(results[0].id);
                 }
             });
@@ -125,10 +127,12 @@ class DatabaseManager
 
     private async addProduct(prod:MinimalProduct)
     {
-        //TODO: Neues Produkt hinzufügen
        let mainCatId:number = await this.provideSecTable(prod.mainCat, Tables.CATEGORY);
        let subCatId:number = await this.provideSecTable(prod.subCat, Tables.SUBCATEGORY);
        let originId:number = await this.provideSecTable(prod.origin, Tables.ORIGIN);
+
+       
+
 
        await this.sqlConnection.query(`INSERT INTO product (Name, Detail, Code, Content, Pack, Description, OriginId, CatId, SubCatId)` +  
                                         `VALUES ('${prod.name}', '${prod.detail}', '${prod.code}', '${prod.contents}', '${prod.packageInfo}', '${prod.description}', '${originId}', '${mainCatId}', '${subCatId}')`);
@@ -171,26 +175,29 @@ class DatabaseManager
 
         let dbConfig:any = this.getSecTableConfig(table);
 
-        let rows:any[] = await this.sqlConnection.query(`SELECT id FROM ${dbConfig.tableName} WHERE ${dbConfig.catType} = '${value}'`);
 
         return new Promise(async (resolve, reject) => {
-            if(rows.length > 0)
+
+        await this.sqlConnection.query(`SELECT id FROM ${dbConfig.tableName} WHERE ${dbConfig.catType} = '${value}'`, (error:any, result:any, fields:any) => {
+
+            if(result.length > 0)
             {
-                resolve(parseInt(rows[0]));
+                resolve(parseInt(result[0].id));
             }
             else
             {
                 resolve(0);
             }
         });
+        });
     }
+
 
     private async provideSecTable(value:string, table:Tables):Promise<number>
     {
         
         return new Promise(async (resolve, reject) => {
             let secId:number = await this.checkSecTable(value, table);
-
             let finalId:number;
 
             if(secId === 0)

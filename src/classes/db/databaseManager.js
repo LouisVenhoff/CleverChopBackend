@@ -76,31 +76,37 @@ var DatabaseManager = /** @class */ (function () {
                     case 1:
                         productId = _a.sent();
                         return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                                var objRow, loadedItem;
-                                return __generator(this, function (_a) {
-                                    try {
-                                        objRow = this.sqlConnection.query("SELECT Name, Detail, Code, Content, Pack, Description, Origin, Category.category as MainCat, Subcategory.Category as SubCat FROM Product\n                                                                    JOIN Origin ON Origin.id = Product.originId\n                                                                    JOIN category ON Category.id = Product.catId\n                                                                    JOIN subcategory ON Subcategory.id = Product.SubCatId\n                                                                    WHERE Product.id = \"".concat(productId, "\";"));
-                                        if (objRow.length === 0) {
-                                            reject(0);
-                                        }
-                                        loadedItem = { error: 0,
-                                            name: objRow[0].Name,
-                                            detail: objRow[0].Detail,
-                                            code: objRow[0].Code,
-                                            contents: objRow[0].Content,
-                                            packageInfo: objRow[0],
-                                            description: objRow[0].Description,
-                                            origin: objRow[0].Origin,
-                                            mainCat: objRow[0].MainCat,
-                                            subCat: objRow[0].SubCat,
-                                            manufacturer: ""
-                                        };
-                                        resolve(loadedItem);
+                                var _a;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
+                                        case 0:
+                                            _b.trys.push([0, 2, , 3]);
+                                            return [4 /*yield*/, this.sqlConnection.query("SELECT Name, Detail, Code, Content, Pack, Description, Origin, Category.category as MainCat, Subcategory.Category as SubCat FROM Product\n                                                                    JOIN Origin ON Origin.id = Product.originId\n                                                                    JOIN category ON Category.id = Product.catId\n                                                                    JOIN subcategory ON Subcategory.id = Product.SubCatId\n                                                                    WHERE Product.id = \"".concat(productId, "\";"), function (error, results, fields) {
+                                                    if (results.length === 0) {
+                                                        console.log("Article Not Found!");
+                                                    }
+                                                    var loadedItem = { error: 0,
+                                                        name: results[0].Name,
+                                                        detail: results[0].Detail,
+                                                        code: results[0].Code,
+                                                        contents: results[0].Content,
+                                                        packageInfo: results[0],
+                                                        description: results[0].Description,
+                                                        origin: results[0].Origin,
+                                                        mainCat: results[0].MainCat,
+                                                        subCat: results[0].SubCat,
+                                                        manufacturer: ""
+                                                    };
+                                                    resolve(loadedItem);
+                                                })];
+                                        case 1:
+                                            _b.sent();
+                                            return [3 /*break*/, 3];
+                                        case 2:
+                                            _a = _b.sent();
+                                            return [3 /*break*/, 3];
+                                        case 3: return [2 /*return*/];
                                     }
-                                    catch (_b) {
-                                        reject(null);
-                                    }
-                                    return [2 /*return*/];
                                 });
                             }); })];
                 }
@@ -129,7 +135,6 @@ var DatabaseManager = /** @class */ (function () {
                                             this.findProduct(ean).then(function (e) { resolve(e); });
                                             return [3 /*break*/, 4];
                                         case 3:
-                                            console.log(results[0]);
                                             resolve(results[0].id);
                                             _a.label = 4;
                                         case 4: return [2 /*return*/];
@@ -177,7 +182,6 @@ var DatabaseManager = /** @class */ (function () {
                             switch (_a.label) {
                                 case 0:
                                     dbConfig = this.getSecTableConfig(table);
-                                    console.log("IIIIIIIIIII= " + value);
                                     return [4 /*yield*/, this.sqlConnection.query("INSERT INTO ".concat(dbConfig.tableName, " (").concat(dbConfig.catType, ") VALUES ('").concat(value, "')"), function (error, results, fields) { return __awaiter(_this, void 0, void 0, function () {
                                             return __generator(this, function (_a) {
                                                 if (error) {
@@ -200,27 +204,27 @@ var DatabaseManager = /** @class */ (function () {
     };
     DatabaseManager.prototype.checkSecTable = function (value, table) {
         return __awaiter(this, void 0, void 0, function () {
-            var dbConfig, rows;
+            var dbConfig;
             var _this = this;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        dbConfig = this.getSecTableConfig(table);
-                        return [4 /*yield*/, this.sqlConnection.query("SELECT id FROM ".concat(dbConfig.tableName, " WHERE ").concat(dbConfig.catType, " = '").concat(value, "'"))];
-                    case 1:
-                        rows = _a.sent();
-                        return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                                return __generator(this, function (_a) {
-                                    if (rows.length > 0) {
-                                        resolve(parseInt(rows[0]));
-                                    }
-                                    else {
-                                        resolve(0);
-                                    }
+                dbConfig = this.getSecTableConfig(table);
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, this.sqlConnection.query("SELECT id FROM ".concat(dbConfig.tableName, " WHERE ").concat(dbConfig.catType, " = '").concat(value, "'"), function (error, result, fields) {
+                                        if (result.length > 0) {
+                                            resolve(parseInt(result[0].id));
+                                        }
+                                        else {
+                                            resolve(0);
+                                        }
+                                    })];
+                                case 1:
+                                    _a.sent();
                                     return [2 /*return*/];
-                                });
-                            }); })];
-                }
+                            }
+                        });
+                    }); })];
             });
         });
     };
