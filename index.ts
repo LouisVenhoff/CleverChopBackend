@@ -25,6 +25,11 @@ app.get("/api/sendCode/:code", async (req:any, res:any) => {
 
     let result:MinimalProduct = await dbMng.provideProduct(req.params.code);
 
+    if(result.error === 1)
+    {
+        await dbMng.writeUnknownEan(req.params.code);
+    }
+
     res.send(JSON.stringify(result));
 })
 

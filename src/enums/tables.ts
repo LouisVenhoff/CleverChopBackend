@@ -4,7 +4,8 @@ enum Tables
     SUBCATEGORY,
     ORIGIN,
     PRODUCT,
-    USAGE
+    USAGE,
+    UNKNOWNCODE
 }
 
 export default Tables;

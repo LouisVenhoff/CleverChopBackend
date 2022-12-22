@@ -82,6 +82,7 @@ var DatabaseManager = /** @class */ (function () {
                                         case 0:
                                             _b.trys.push([0, 2, , 3]);
                                             return [4 /*yield*/, this.sqlConnection.query("SELECT Name, Detail, Code, Content, Pack, Description, Origin, Category.category as MainCat, Subcategory.Category as SubCat FROM Product\n                                                                    JOIN Origin ON Origin.id = Product.originId\n                                                                    JOIN category ON Category.id = Product.catId\n                                                                    JOIN subcategory ON Subcategory.id = Product.SubCatId\n                                                                    WHERE Product.id = \"".concat(productId, "\";"), function (error, results, fields) {
+                                                    console.log(results);
                                                     if (results.length === 0) {
                                                         console.log("Article Not Found!");
                                                     }
@@ -111,6 +112,16 @@ var DatabaseManager = /** @class */ (function () {
                                 });
                             }); })];
                 }
+            });
+        });
+    };
+    DatabaseManager.prototype.writeUnknownEan = function (ean) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) {
+                        _this.sqlConnection.query("INSERT INTO unknowncode ('Code') VALUES (".concat(ean, ")"));
+                    })];
             });
         });
     };

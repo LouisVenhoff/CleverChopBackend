@@ -49,6 +49,7 @@ class DatabaseManager {
                                                                     JOIN subcategory ON Subcategory.id = Product.SubCatId
                                                                     WHERE Product.id = "${productId}";`,
           (error: any, results: any, fields: any) => {
+            console.log(results);
             if (results.length === 0) {
               console.log("Article Not Found!");
             }
@@ -76,6 +77,13 @@ class DatabaseManager {
     });
   }
 
+  public async writeUnknownEan(ean:string):Promise<boolean>
+  {
+        return new Promise((resolve, reject) => {
+            this.sqlConnection.query(`INSERT INTO unknowncode ('Code') VALUES (${ean})`);
+        });
+  }
+
   private async findProduct(ean: string): Promise<number> {
     return new Promise(async (resolve, reject) => {
       this.sqlConnection.query(
@@ -96,18 +104,9 @@ class DatabaseManager {
   }
 
   private async addProduct(prod: MinimalProduct) {
-    let mainCatId: number = await this.provideSecTable(
-      prod.mainCat,
-      Tables.CATEGORY
-    );
-    let subCatId: number = await this.provideSecTable(
-      prod.subCat,
-      Tables.SUBCATEGORY
-    );
-    let originId: number = await this.provideSecTable(
-      prod.origin,
-      Tables.ORIGIN
-    );
+    let mainCatId: number = await this.provideSecTable(prod.mainCat, Tables.CATEGORY);
+    let subCatId: number = await this.provideSecTable(prod.subCat, Tables.SUBCATEGORY);
+    let originId: number = await this.provideSecTable(prod.origin,Tables.ORIGIN);
 
     await this.sqlConnection.query(
       `INSERT INTO product (Name, Detail, Code, Content, Pack, Description, OriginId, CatId, SubCatId)` +
@@ -167,6 +166,7 @@ class DatabaseManager {
       }
     });
   }
+
 
   private getSecTableConfig(
     table: Tables

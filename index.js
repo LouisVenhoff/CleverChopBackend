@@ -55,6 +55,12 @@ app.get("/api/sendCode/:code", function (req, res) { return __awaiter(void 0, vo
             case 0: return [4 /*yield*/, dbMng.provideProduct(req.params.code)];
             case 1:
                 result = _a.sent();
+                if (!(result.error === 1)) return [3 /*break*/, 3];
+                return [4 /*yield*/, dbMng.writeUnknownEan(req.params.code)];
+            case 2:
+                _a.sent();
+                _a.label = 3;
+            case 3:
                 res.send(JSON.stringify(result));
                 return [2 /*return*/];
         }

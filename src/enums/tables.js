@@ -7,5 +7,6 @@ var Tables;
     Tables[Tables["ORIGIN"] = 2] = "ORIGIN";
     Tables[Tables["PRODUCT"] = 3] = "PRODUCT";
     Tables[Tables["USAGE"] = 4] = "USAGE";
+    Tables[Tables["UNKNOWNCODE"] = 5] = "UNKNOWNCODE";
 })(Tables || (Tables = {}));
 exports["default"] = Tables;
