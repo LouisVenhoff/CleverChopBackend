@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var mysql = require('mysql');
+var mysql = require("mysql");
 var tables_1 = require("../../enums/tables");
 var eanApiController_1 = require("../openEan/eanApiController");
 var DatabaseManager = /** @class */ (function () {
@@ -85,7 +85,8 @@ var DatabaseManager = /** @class */ (function () {
                                                     if (results.length === 0) {
                                                         console.log("Article Not Found!");
                                                     }
-                                                    var loadedItem = { error: 0,
+                                                    var loadedItem = {
+                                                        error: 0,
                                                         name: results[0].Name,
                                                         detail: results[0].Detail,
                                                         code: results[0].Code,
@@ -132,7 +133,9 @@ var DatabaseManager = /** @class */ (function () {
                                             return [4 /*yield*/, this.addProduct(Product_1)];
                                         case 2:
                                             _a.sent();
-                                            this.findProduct(ean).then(function (e) { resolve(e); });
+                                            this.findProduct(ean).then(function (e) {
+                                                resolve(e);
+                                            });
                                             return [3 /*break*/, 4];
                                         case 3:
                                             resolve(results[0].id);
