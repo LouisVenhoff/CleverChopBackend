@@ -58,6 +58,7 @@ var EanApiController = /** @class */ (function () {
                                 case 1:
                                     result = _b.sent();
                                     outObj = new Product_1["default"](result.data);
+                                    outObj.code = ean;
                                     resolve(outObj.reduceObj());
                                     return [3 /*break*/, 3];
                                 case 2:
