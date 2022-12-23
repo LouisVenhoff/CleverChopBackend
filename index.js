@@ -52,9 +52,12 @@ app.get("/api/sendCode/:code", function (req, res) { return __awaiter(void 0, vo
     var result;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, eanSource.requestEan(req.params.code)];
+            case 0: return [4 /*yield*/, dbMng.provideProduct(req.params.code)];
             case 1:
                 result = _a.sent();
+                if (result.error === 1) {
+                    dbMng.writeUnknownEan(req.params.code);
+                }
                 res.send(JSON.stringify(result));
                 return [2 /*return*/];
         }

@@ -22,6 +22,8 @@ class EanApiController
         {
             let result:any = await axios.get(queryString);
             let outObj:Product = new Product(result.data);
+            
+            outObj.code = ean;
             resolve(outObj.reduceObj());
         }
         catch
