@@ -38,49 +38,69 @@ class DatabaseManager {
   }
 
   public async provideProduct(ean: string): Promise<MinimalProduct> {
-    let productId: number = await this.findProduct(ean);
-
+    
     return new Promise(async (resolve, reject) => {
-      try {
-        await this.sqlConnection.query(
-          `SELECT Name, Detail, Code, Content, Pack, Description, Origin, Category.category as MainCat, Subcategory.Category as SubCat FROM Product
-                                                                    JOIN Origin ON Origin.id = Product.originId
-                                                                    JOIN category ON Category.id = Product.catId
-                                                                    JOIN subcategory ON Subcategory.id = Product.SubCatId
-                                                                    WHERE Product.id = "${productId}";`,
-          (error: any, results: any, fields: any) => {
-            console.log(results);
-            if (results.length === 0) {
-              console.log("Article Not Found!");
+      
+
+      let errorCode:number = 0;
+      let productId:number = 0;
+      
+      await this.findProduct(ean)
+      .then((e:number) => {
+        productId = e;
+      })
+      .catch((e:number) => {
+        errorCode = e;
+      });
+      
+      if(errorCode === 0)
+      {
+        try {
+          await this.sqlConnection.query(
+            `SELECT Name, Detail, Code, Content, Pack, Description, Origin, Category.category as MainCat, Subcategory.Category as SubCat FROM Product
+                                                                      JOIN Origin ON Origin.id = Product.originId
+                                                                      JOIN category ON Category.id = Product.catId
+                                                                      JOIN subcategory ON Subcategory.id = Product.SubCatId
+                                                                      WHERE Product.id = "${productId}";`,
+            (error: any, results: any, fields: any) => {
+              console.log(results);
+              if (results.length === 0) {
+                console.log("Article Not Found!");
+              }
+  
+              let loadedItem: MinimalProduct = {
+                error: 0,
+                name: results[0].Name,
+                detail: results[0].Detail,
+                code: results[0].Code,
+                contents: results[0].Content,
+                packageInfo: results[0],
+                description: results[0].Description,
+                origin: results[0].Origin,
+                mainCat: results[0].MainCat,
+                subCat: results[0].SubCat,
+                manufacturer: "",
+              };
+  
+              resolve(loadedItem);
             }
-
-            let loadedItem: MinimalProduct = {
-              error: 0,
-              name: results[0].Name,
-              detail: results[0].Detail,
-              code: results[0].Code,
-              contents: results[0].Content,
-              packageInfo: results[0],
-              description: results[0].Description,
-              origin: results[0].Origin,
-              mainCat: results[0].MainCat,
-              subCat: results[0].SubCat,
-              manufacturer: "",
-            };
-
-            resolve(loadedItem);
-          }
-        );
-      } catch {
-        //reject(null);
+          );
+        } catch {
+          //reject(null);
+        }
       }
+      else
+      {
+        resolve(this.generateErrorObj(errorCode));
+      }
+      
     });
   }
 
   public async writeUnknownEan(ean:string):Promise<boolean>
   {
-        return new Promise((resolve, reject) => {
-            this.sqlConnection.query(`INSERT INTO unknowncode ('Code') VALUES (${ean})`);
+      return new Promise((resolve, reject) => {
+            this.sqlConnection.query(`INSERT INTO unknowncode (Code) VALUES (${ean})`);
         });
   }
 
@@ -91,6 +111,11 @@ class DatabaseManager {
         async (error: any, results: any, fields: any) => {
           if (results.length === 0) {
             let Product: MinimalProduct = await this.eanSource.requestEan(ean);
+            if(Product.error !== 0)
+            {
+                reject(Product.error);
+                return;
+            }
             await this.addProduct(Product);
             this.findProduct(ean).then((e: number) => {
               resolve(e);
@@ -193,6 +218,24 @@ class DatabaseManager {
 
     return { catType: catType, tableName: tableName };
   }
+
+  private generateErrorObj(errorCode:number):MinimalProduct
+  {
+      return({error: errorCode,
+              name: "",
+              detail: "",
+              code: "",
+              contents: 0,
+              packageInfo: 0,
+              description: "",
+              origin: "",
+              mainCat: "",
+              subCat: "",
+              manufacturer: ""});
+  }
+
+
+
 }
 
 export default DatabaseManager;

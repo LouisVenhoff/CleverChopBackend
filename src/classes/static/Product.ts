@@ -107,7 +107,6 @@ class Product
 
     public reduceObj():MinimalProduct
     {
-        
            let outObj:MinimalProduct =  {
                 error:this.error,
                 name:this.name,

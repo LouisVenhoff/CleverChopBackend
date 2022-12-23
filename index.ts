@@ -27,7 +27,7 @@ app.get("/api/sendCode/:code", async (req:any, res:any) => {
 
     if(result.error === 1)
     {
-        await dbMng.writeUnknownEan(req.params.code);
+        dbMng.writeUnknownEan(req.params.code);
     }
 
     res.send(JSON.stringify(result));

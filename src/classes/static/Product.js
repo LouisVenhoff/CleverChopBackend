@@ -67,6 +67,7 @@ var Product = /** @class */ (function () {
         }
     };
     Product.prototype.reduceObj = function () {
+        console.log("Reduced Error: " + this.error);
         var outObj = {
             error: this.error,
             name: this.name,

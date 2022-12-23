@@ -68,50 +68,61 @@ var DatabaseManager = /** @class */ (function () {
     };
     DatabaseManager.prototype.provideProduct = function (ean) {
         return __awaiter(this, void 0, void 0, function () {
-            var productId;
             var _this = this;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.findProduct(ean)];
-                    case 1:
-                        productId = _a.sent();
-                        return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                                var _a;
-                                return __generator(this, function (_b) {
-                                    switch (_b.label) {
-                                        case 0:
-                                            _b.trys.push([0, 2, , 3]);
-                                            return [4 /*yield*/, this.sqlConnection.query("SELECT Name, Detail, Code, Content, Pack, Description, Origin, Category.category as MainCat, Subcategory.Category as SubCat FROM Product\n                                                                    JOIN Origin ON Origin.id = Product.originId\n                                                                    JOIN category ON Category.id = Product.catId\n                                                                    JOIN subcategory ON Subcategory.id = Product.SubCatId\n                                                                    WHERE Product.id = \"".concat(productId, "\";"), function (error, results, fields) {
-                                                    console.log(results);
-                                                    if (results.length === 0) {
-                                                        console.log("Article Not Found!");
-                                                    }
-                                                    var loadedItem = {
-                                                        error: 0,
-                                                        name: results[0].Name,
-                                                        detail: results[0].Detail,
-                                                        code: results[0].Code,
-                                                        contents: results[0].Content,
-                                                        packageInfo: results[0],
-                                                        description: results[0].Description,
-                                                        origin: results[0].Origin,
-                                                        mainCat: results[0].MainCat,
-                                                        subCat: results[0].SubCat,
-                                                        manufacturer: ""
-                                                    };
-                                                    resolve(loadedItem);
-                                                })];
-                                        case 1:
-                                            _b.sent();
-                                            return [3 /*break*/, 3];
-                                        case 2:
-                                            _a = _b.sent();
-                                            return [3 /*break*/, 3];
-                                        case 3: return [2 /*return*/];
-                                    }
-                                });
-                            }); })];
-                }
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var errorCode, productId, _a;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    errorCode = 0;
+                                    productId = 0;
+                                    return [4 /*yield*/, this.findProduct(ean)
+                                            .then(function (e) {
+                                            productId = e;
+                                        })["catch"](function (e) {
+                                            errorCode = e;
+                                        })];
+                                case 1:
+                                    _b.sent();
+                                    if (!(errorCode === 0)) return [3 /*break*/, 6];
+                                    _b.label = 2;
+                                case 2:
+                                    _b.trys.push([2, 4, , 5]);
+                                    return [4 /*yield*/, this.sqlConnection.query("SELECT Name, Detail, Code, Content, Pack, Description, Origin, Category.category as MainCat, Subcategory.Category as SubCat FROM Product\n                                                                      JOIN Origin ON Origin.id = Product.originId\n                                                                      JOIN category ON Category.id = Product.catId\n                                                                      JOIN subcategory ON Subcategory.id = Product.SubCatId\n                                                                      WHERE Product.id = \"".concat(productId, "\";"), function (error, results, fields) {
+                                            console.log(results);
+                                            if (results.length === 0) {
+                                                console.log("Article Not Found!");
+                                            }
+                                            var loadedItem = {
+                                                error: 0,
+                                                name: results[0].Name,
+                                                detail: results[0].Detail,
+                                                code: results[0].Code,
+                                                contents: results[0].Content,
+                                                packageInfo: results[0],
+                                                description: results[0].Description,
+                                                origin: results[0].Origin,
+                                                mainCat: results[0].MainCat,
+                                                subCat: results[0].SubCat,
+                                                manufacturer: ""
+                                            };
+                                            resolve(loadedItem);
+                                        })];
+                                case 3:
+                                    _b.sent();
+                                    return [3 /*break*/, 5];
+                                case 4:
+                                    _a = _b.sent();
+                                    return [3 /*break*/, 5];
+                                case 5: return [3 /*break*/, 7];
+                                case 6:
+                                    resolve(this.generateErrorObj(errorCode));
+                                    _b.label = 7;
+                                case 7: return [2 /*return*/];
+                            }
+                        });
+                    }); })];
             });
         });
     };
@@ -119,8 +130,9 @@ var DatabaseManager = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
+                console.log("Writing unknown EAN");
                 return [2 /*return*/, new Promise(function (resolve, reject) {
-                        _this.sqlConnection.query("INSERT INTO unknowncode ('Code') VALUES (".concat(ean, ")"));
+                        _this.sqlConnection.query("INSERT INTO unknowncode (Code) VALUES (".concat(ean, ")"));
                     })];
             });
         });
@@ -141,6 +153,10 @@ var DatabaseManager = /** @class */ (function () {
                                             return [4 /*yield*/, this.eanSource.requestEan(ean)];
                                         case 1:
                                             Product_1 = _a.sent();
+                                            if (Product_1.error !== 0) {
+                                                reject(Product_1.error);
+                                                return [2 /*return*/];
+                                            }
                                             return [4 /*yield*/, this.addProduct(Product_1)];
                                         case 2:
                                             _a.sent();
@@ -292,6 +308,19 @@ var DatabaseManager = /** @class */ (function () {
                 return null;
         }
         return { catType: catType, tableName: tableName };
+    };
+    DatabaseManager.prototype.generateErrorObj = function (errorCode) {
+        return ({ error: errorCode,
+            name: "",
+            detail: "",
+            code: "",
+            contents: 0,
+            packageInfo: 0,
+            description: "",
+            origin: "",
+            mainCat: "",
+            subCat: "",
+            manufacturer: "" });
     };
     return DatabaseManager;
 }());
