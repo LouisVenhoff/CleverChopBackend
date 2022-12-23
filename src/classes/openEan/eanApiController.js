@@ -36,33 +36,42 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var eanApiController_1 = require("./src/classes/openEan/eanApiController");
-var databaseManager_1 = require("./src/classes/db/databaseManager");
-var cors = require("cors");
-var express = require("express");
-var app = express();
-var port = 3014;
-var dbMng = new databaseManager_1["default"]("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724");
-app.use(cors());
-var eanSource = new eanApiController_1["default"]("400000000");
-app.get("/", function (req, res) {
-    console.log("Working");
-});
-app.get("/api/sendCode/:code", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var result;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, dbMng.provideProduct(req.params.code)];
-            case 1:
-                result = _a.sent();
-                if (result.error === 1) {
-                    dbMng.writeUnknownEan(req.params.code);
-                }
-                res.send(JSON.stringify(result));
-                return [2 /*return*/];
-        }
-    });
-}); });
-app.listen(port, function () {
-    console.log("Listening on Port " + port);
-});
+var axios_1 = require("axios");
+var Product_1 = require("../static/Product");
+var EanApiController = /** @class */ (function () {
+    function EanApiController(_userId) {
+        this._userId = _userId;
+    }
+    EanApiController.prototype.requestEan = function (ean) {
+        return __awaiter(this, void 0, void 0, function () {
+            var queryString;
+            var _this = this;
+            return __generator(this, function (_a) {
+                queryString = "http://opengtindb.org/?ean=".concat(ean, "&cmd=query&queryid=").concat(this._userId);
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var result, outObj, _a;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0:
+                                    _b.trys.push([0, 2, , 3]);
+                                    return [4 /*yield*/, axios_1["default"].get(queryString)];
+                                case 1:
+                                    result = _b.sent();
+                                    outObj = new Product_1["default"](result.data);
+                                    outObj.code = ean;
+                                    resolve(outObj.reduceObj());
+                                    return [3 /*break*/, 3];
+                                case 2:
+                                    _a = _b.sent();
+                                    reject(null);
+                                    return [3 /*break*/, 3];
+                                case 3: return [2 /*return*/];
+                            }
+                        });
+                    }); })];
+            });
+        });
+    };
+    return EanApiController;
+}());
+exports["default"] = EanApiController;
