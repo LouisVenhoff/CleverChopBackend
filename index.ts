@@ -1,6 +1,7 @@
 import EanApiController from "./src/classes/openEan/eanApiController";
 import { MinimalProduct } from "./src/classes/static/Product";
 import DatabaseManager from "./src/classes/db/databaseManager";
+import UnknownCodeSystem from "./src/classes/unknownCodeSystem/unknownCodeSystem";
 var cors = require("cors");
 
 const express = require("express");
@@ -9,6 +10,7 @@ const app = express();
 const port = 3014;
 
 const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724");
+const unknownSys:UnknownCodeSystem = new UnknownCodeSystem(dbMng, true);
 
 app.use(cors());
 
@@ -32,6 +34,22 @@ app.get("/api/sendCode/:code", async (req:any, res:any) => {
 
     res.send(JSON.stringify(result));
 })
+
+app.get("/api/admin/addtodb", async (req:any, res:any) => 
+{
+    //TODO: Picke den letzten wert aus der Unknown tabelle und schicke ihn zurück
+    let newCode:string = await unknownSys.getCodeFromUnknownTable();
+
+    let parsedObj:{code:string} = {code:newCode};
+
+    res.send(JSON.stringify(parsedObj));
+});
+
+app.get("/api/admin/validateUnknown", async (req:any, res:any) => 
+{
+    //TODO: Prüfe ob code vorhanden wenn ja: schicke true und lösche code aus der Unknown tabelle
+
+});
 
 app.listen(port, () => {
     console.log("Listening on Port " + port);

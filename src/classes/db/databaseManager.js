@@ -42,29 +42,47 @@ var eanApiController_1 = require("../openEan/eanApiController");
 var DatabaseManager = /** @class */ (function () {
     function DatabaseManager(host, username, password) {
         this.eanSource = new eanApiController_1["default"]("400000000");
+        this.connectionState = false;
         this.host = host;
         this.username = username;
         this.password = password;
         this.connect();
     }
     DatabaseManager.prototype.connect = function () {
-        this.sqlConnection = mysql.createConnection({
-            host: this.host,
-            user: this.username,
-            password: this.password,
-            database: "heroku_554b26e8f85d455"
-        });
-        this.sqlConnection.connect(function (err) {
-            if (!err) {
-                console.log("Connection successfully!");
-            }
-            else {
-                console.log("Connection error!");
-            }
+        return __awaiter(this, void 0, void 0, function () {
+            var _a;
+            var _this = this;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0:
+                        _a = this;
+                        return [4 /*yield*/, mysql.createConnection({
+                                host: this.host,
+                                user: this.username,
+                                password: this.password,
+                                database: "heroku_554b26e8f85d455"
+                            })];
+                    case 1:
+                        _a.sqlConnection = _b.sent();
+                        this.sqlConnection.connect(function (err) {
+                            if (!err) {
+                                console.log("Connection successfully!");
+                                _this.connectionState = true;
+                            }
+                            else {
+                                console.log("Connection error!");
+                            }
+                        });
+                        return [2 /*return*/];
+                }
+            });
         });
     };
     DatabaseManager.prototype.disconnect = function () {
         this.sqlConnection.end();
+    };
+    DatabaseManager.prototype.getConnectionState = function () {
+        return this.connectionState;
     };
     DatabaseManager.prototype.provideProduct = function (ean) {
         return __awaiter(this, void 0, void 0, function () {
@@ -130,10 +148,33 @@ var DatabaseManager = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
-                console.log("Writing unknown EAN");
                 return [2 /*return*/, new Promise(function (resolve, reject) {
                         _this.sqlConnection.query("INSERT INTO unknowncode (Code) VALUES (".concat(ean, ")"));
                     })];
+            });
+        });
+    };
+    DatabaseManager.prototype.getUnknownCodeRows = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, this.sqlConnection.query("SELECT code FROM unknowncode", function (error, results, fields) {
+                                        if (!error) {
+                                            resolve(results);
+                                        }
+                                        else {
+                                            throw error;
+                                        }
+                                    })];
+                                case 1:
+                                    _a.sent();
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); })];
             });
         });
     };
