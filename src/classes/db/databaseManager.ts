@@ -9,6 +9,8 @@ class DatabaseManager {
   sqlConnection: any;
   eanSource: EanApiController = new EanApiController("400000000");
 
+  private connectionState = false;
+
   constructor(host: string, username: string, password: string) {
     this.host = host;
     this.username = username;
@@ -16,8 +18,8 @@ class DatabaseManager {
     this.connect();
   }
 
-  public connect() {
-    this.sqlConnection = mysql.createConnection({
+  public async connect() {
+    this.sqlConnection = await mysql.createConnection({
       host: this.host,
       user: this.username,
       password: this.password,
@@ -27,6 +29,7 @@ class DatabaseManager {
     this.sqlConnection.connect((err: any) => {
       if (!err) {
         console.log("Connection successfully!");
+        this.connectionState = true;
       } else {
         console.log("Connection error!");
       }
@@ -35,6 +38,11 @@ class DatabaseManager {
 
   public disconnect() {
     this.sqlConnection.end();
+  }
+
+  public getConnectionState():boolean
+  {
+    return this.connectionState;
   }
 
   public async provideProduct(ean: string): Promise<MinimalProduct> {
@@ -103,6 +111,29 @@ class DatabaseManager {
             this.sqlConnection.query(`INSERT INTO unknowncode (Code) VALUES (${ean})`);
         });
   }
+
+  public async getUnknownCodeRows():Promise<any[]>
+  {
+      return new Promise(async (resolve, reject) => {
+        await this.sqlConnection.query(`SELECT code FROM unknowncode`, (error:any, results:any, fields:any) => {
+            if(!error)
+            {
+                resolve(results);
+            }
+            else
+            {
+                throw error;
+            }
+        });
+      });
+  }
+
+  public deleteUnknownCode(code:string)
+  {
+      this.sqlConnection.query(`DELETE FROM unknowncode WHERE code = ${code}`);
+  }
+
+
 
   private async findProduct(ean: string): Promise<number> {
     return new Promise(async (resolve, reject) => {
