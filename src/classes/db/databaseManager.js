@@ -178,6 +178,9 @@ var DatabaseManager = /** @class */ (function () {
             });
         });
     };
+    DatabaseManager.prototype.deleteUnknownCode = function (code) {
+        this.sqlConnection.query("DELETE FROM unknowncode WHERE code = ".concat(code));
+    };
     DatabaseManager.prototype.findProduct = function (ean) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;

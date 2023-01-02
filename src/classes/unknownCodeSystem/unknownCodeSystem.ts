@@ -1,4 +1,5 @@
 import DatabaseManager from "../db/databaseManager";
+import { MinimalProduct } from "../static/Product";
 
 class UnknownCodeSystem
 {
@@ -54,6 +55,25 @@ class UnknownCodeSystem
         this.codesInProcess.push(selectedCode);
 
         return selectedCode;
+    }
+
+    public async validateCode(code:string):Promise<boolean>
+    {
+        return new Promise(async (resolve, reject) => {
+
+            let testObj:MinimalProduct = await this.dbMng.provideProduct(code);
+
+            if(testObj.error === 0)
+            {
+                this.dbMng.deleteUnknownCode(code);
+                resolve(true);
+            }
+            else
+            {
+                resolve(false);
+            }
+
+        });
     }
 
     private checkCode(code:string):boolean

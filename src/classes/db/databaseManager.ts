@@ -128,6 +128,11 @@ class DatabaseManager {
       });
   }
 
+  public deleteUnknownCode(code:string)
+  {
+      this.sqlConnection.query(`DELETE FROM unknowncode WHERE code = ${code}`);
+  }
+
 
 
   private async findProduct(ean: string): Promise<number> {

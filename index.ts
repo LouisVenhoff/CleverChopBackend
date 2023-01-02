@@ -45,10 +45,14 @@ app.get("/api/admin/addtodb", async (req:any, res:any) =>
     res.send(JSON.stringify(parsedObj));
 });
 
-app.get("/api/admin/validateUnknown", async (req:any, res:any) => 
+app.get("/api/admin/validateUnknown/:code", async (req:any, res:any) => 
 {
     //TODO: Prüfe ob code vorhanden wenn ja: schicke true und lösche code aus der Unknown tabelle
+    let validationState:boolean = await unknownSys.validateCode(req.params.code);
+    
+    let validatedObj:{validated:boolean} = {validated:validationState};
 
+    res.send(JSON.stringify(validatedObj));
 });
 
 app.listen(port, () => {

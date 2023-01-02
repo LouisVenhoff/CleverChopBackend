@@ -78,9 +78,17 @@ app.get("/api/admin/addtodb", function (req, res) { return __awaiter(void 0, voi
         }
     });
 }); });
-app.get("/api/admin/validateUnknown", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+app.get("/api/admin/validateUnknown/:code", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var validationState, validatedObj;
     return __generator(this, function (_a) {
-        return [2 /*return*/];
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, unknownSys.validateCode(req.params.code)];
+            case 1:
+                validationState = _a.sent();
+                validatedObj = { validated: validationState };
+                res.send(JSON.stringify(validatedObj));
+                return [2 /*return*/];
+        }
     });
 }); });
 app.listen(port, function () {

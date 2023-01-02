@@ -72,6 +72,31 @@ var UnknownCodeSystem = /** @class */ (function () {
             });
         });
     };
+    UnknownCodeSystem.prototype.validateCode = function (code) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var testObj;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, this.dbMng.provideProduct(code)];
+                                case 1:
+                                    testObj = _a.sent();
+                                    if (testObj.error === 0) {
+                                        this.dbMng.deleteUnknownCode(code);
+                                        resolve(true);
+                                    }
+                                    else {
+                                        resolve(false);
+                                    }
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); })];
+            });
+        });
+    };
     UnknownCodeSystem.prototype.checkCode = function (code) {
         for (var i = 0; i < this.codesInProcess.length; i++) {
             if (this.codesInProcess[i] === code) {
