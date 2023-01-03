@@ -66,6 +66,7 @@ class UnknownCodeSystem
             if(testObj.error === 0)
             {
                 this.dbMng.deleteUnknownCode(code);
+                this.codesInProcess = this.codesInProcess.filter(element => element !== code);
                 resolve(true);
             }
             else

@@ -85,6 +85,7 @@ var UnknownCodeSystem = /** @class */ (function () {
                                     testObj = _a.sent();
                                     if (testObj.error === 0) {
                                         this.dbMng.deleteUnknownCode(code);
+                                        this.codesInProcess = this.codesInProcess.filter(function (element) { return element !== code; });
                                         resolve(true);
                                     }
                                     else {
