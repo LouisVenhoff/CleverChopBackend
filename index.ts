@@ -9,7 +9,7 @@ const express = require("express");
 const app = express();
 const port = 3014;
 
-const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724");
+const dbMng:DatabaseManager = new DatabaseManager("localhost", "serversys", "chopclever");
 const unknownSys:UnknownCodeSystem = new UnknownCodeSystem(dbMng, true);
 
 app.use(cors());
