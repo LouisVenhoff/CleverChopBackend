@@ -6,15 +6,17 @@ class DatabaseManager {
   host: string;
   username: string;
   password: string;
+  database:string;
   sqlConnection: any;
   eanSource: EanApiController = new EanApiController("400000000");
 
   private connectionState = false;
 
-  constructor(host: string, username: string, password: string) {
+  constructor(host: string, username: string, password: string, database:string) {
     this.host = host;
     this.username = username;
     this.password = password;
+    this.database = database;
     this.connect();
   }
 
@@ -23,7 +25,7 @@ class DatabaseManager {
       host: this.host,
       user: this.username,
       password: this.password,
-      database: "heroku_554b26e8f85d455",
+      database: this.database,
     });
 
     this.sqlConnection.connect((err: any) => {
@@ -140,7 +142,15 @@ class DatabaseManager {
       this.sqlConnection.query(
         `SELECT id FROM Product WHERE Code = '${ean}'`,
         async (error: any, results: any, fields: any) => {
-          if (results.length === 0) {
+          
+          let checkedRes:any[] = [];
+          
+          if(results !== undefined)
+          {
+             checkedRes = results;
+          }
+          
+          if (checkedRes.length === 0) {
             let Product: MinimalProduct = await this.eanSource.requestEan(ean);
             if(Product.error !== 0)
             {
@@ -152,7 +162,7 @@ class DatabaseManager {
               resolve(e);
             });
           } else {
-            resolve(results[0].id);
+            resolve(checkedRes[0].id);
           }
         }
       );

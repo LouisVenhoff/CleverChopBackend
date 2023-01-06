@@ -9,7 +9,8 @@ const express = require("express");
 const app = express();
 const port = 3014;
 
-const dbMng:DatabaseManager = new DatabaseManager("localhost", "serversys", "chopclever");
+const dbMng:DatabaseManager = new DatabaseManager("localhost", "system", "Iwaaz2001g!", "cleverchopdb");
+//const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724", "heroku_554b26e8f85d455");
 const unknownSys:UnknownCodeSystem = new UnknownCodeSystem(dbMng, true);
 
 app.use(cors());
@@ -26,7 +27,8 @@ app.get("/api/sendCode/:code", async (req:any, res:any) => {
     
 
     let result:MinimalProduct = await dbMng.provideProduct(req.params.code);
-
+    console.log("Result: ");
+    console.log(result);
     if(result.error === 1)
     {
         dbMng.writeUnknownEan(req.params.code);

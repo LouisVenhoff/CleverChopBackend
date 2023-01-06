@@ -43,7 +43,8 @@ var cors = require("cors");
 var express = require("express");
 var app = express();
 var port = 3014;
-var dbMng = new databaseManager_1["default"]("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724");
+var dbMng = new databaseManager_1["default"]("localhost", "system", "Iwaaz2001g!", "cleverchopdb");
+//const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724", "heroku_554b26e8f85d455");
 var unknownSys = new unknownCodeSystem_1["default"](dbMng, true);
 app.use(cors());
 var eanSource = new eanApiController_1["default"]("400000000");
@@ -57,6 +58,8 @@ app.get("/api/sendCode/:code", function (req, res) { return __awaiter(void 0, vo
             case 0: return [4 /*yield*/, dbMng.provideProduct(req.params.code)];
             case 1:
                 result = _a.sent();
+                console.log("Result: ");
+                console.log(result);
                 if (result.error === 1) {
                     dbMng.writeUnknownEan(req.params.code);
                 }

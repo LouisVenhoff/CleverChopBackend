@@ -40,12 +40,13 @@ var mysql = require("mysql");
 var tables_1 = require("../../enums/tables");
 var eanApiController_1 = require("../openEan/eanApiController");
 var DatabaseManager = /** @class */ (function () {
-    function DatabaseManager(host, username, password) {
+    function DatabaseManager(host, username, password, database) {
         this.eanSource = new eanApiController_1["default"]("400000000");
         this.connectionState = false;
         this.host = host;
         this.username = username;
         this.password = password;
+        this.database = database;
         this.connect();
     }
     DatabaseManager.prototype.connect = function () {
@@ -60,7 +61,7 @@ var DatabaseManager = /** @class */ (function () {
                                 host: this.host,
                                 user: this.username,
                                 password: this.password,
-                                database: "heroku_554b26e8f85d455"
+                                database: this.database
                             })];
                     case 1:
                         _a.sqlConnection = _b.sent();
@@ -189,11 +190,15 @@ var DatabaseManager = /** @class */ (function () {
                         var _this = this;
                         return __generator(this, function (_a) {
                             this.sqlConnection.query("SELECT id FROM Product WHERE Code = '".concat(ean, "'"), function (error, results, fields) { return __awaiter(_this, void 0, void 0, function () {
-                                var Product_1;
+                                var checkedRes, Product_1;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
-                                            if (!(results.length === 0)) return [3 /*break*/, 3];
+                                            checkedRes = [];
+                                            if (results !== undefined) {
+                                                checkedRes = results;
+                                            }
+                                            if (!(checkedRes.length === 0)) return [3 /*break*/, 3];
                                             return [4 /*yield*/, this.eanSource.requestEan(ean)];
                                         case 1:
                                             Product_1 = _a.sent();
@@ -209,7 +214,7 @@ var DatabaseManager = /** @class */ (function () {
                                             });
                                             return [3 /*break*/, 4];
                                         case 3:
-                                            resolve(results[0].id);
+                                            resolve(checkedRes[0].id);
                                             _a.label = 4;
                                         case 4: return [2 /*return*/];
                                     }
