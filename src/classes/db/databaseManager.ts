@@ -67,13 +67,20 @@ class DatabaseManager {
       {
         try {
           await this.sqlConnection.query(
-            `SELECT Name, Detail, Code, Content, Pack, Description, Origin, Category.category as MainCat, Subcategory.Category as SubCat FROM Product
-                                                                      JOIN Origin ON Origin.id = Product.originId
-                                                                      JOIN category ON Category.id = Product.catId
-                                                                      JOIN subcategory ON Subcategory.id = Product.SubCatId
-                                                                      WHERE Product.id = "${productId}";`,
+            `SELECT Name, Detail, Code, Content, Pack, Description, Origin, category.category as MainCat, subcategory.category as SubCat FROM product
+                                                                      JOIN origin ON origin.id = product.originId
+                                                                      JOIN category ON category.id = product.catId
+                                                                      JOIN subcategory ON subcategory.id = product.SubCatId
+                                                                      WHERE product.id = "${productId}";`,
             (error: any, results: any, fields: any) => {
-              console.log(results);
+              
+              if(error)
+              {
+                console.log(error.message);
+                reject();
+              }
+
+
               if (results.length === 0) {
                 console.log("Article Not Found!");
               }
@@ -140,9 +147,14 @@ class DatabaseManager {
   private async findProduct(ean: string): Promise<number> {
     return new Promise(async (resolve, reject) => {
       this.sqlConnection.query(
-        `SELECT id FROM Product WHERE Code = '${ean}'`,
+        `SELECT id FROM product WHERE Code = '${ean}'`,
         async (error: any, results: any, fields: any) => {
           
+          if(error)
+          {
+            console.log("Error: " + error.message);
+            return;
+          }
           let checkedRes:any[] = [];
           
           if(results !== undefined)

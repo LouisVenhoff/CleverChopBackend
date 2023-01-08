@@ -108,8 +108,11 @@ var DatabaseManager = /** @class */ (function () {
                                     _b.label = 2;
                                 case 2:
                                     _b.trys.push([2, 4, , 5]);
-                                    return [4 /*yield*/, this.sqlConnection.query("SELECT Name, Detail, Code, Content, Pack, Description, Origin, Category.category as MainCat, Subcategory.Category as SubCat FROM Product\n                                                                      JOIN Origin ON Origin.id = Product.originId\n                                                                      JOIN category ON Category.id = Product.catId\n                                                                      JOIN subcategory ON Subcategory.id = Product.SubCatId\n                                                                      WHERE Product.id = \"".concat(productId, "\";"), function (error, results, fields) {
-                                            console.log(results);
+                                    return [4 /*yield*/, this.sqlConnection.query("SELECT Name, Detail, Code, Content, Pack, Description, Origin, category.category as MainCat, subcategory.category as SubCat FROM product\n                                                                      JOIN origin ON origin.id = product.originId\n                                                                      JOIN category ON category.id = product.catId\n                                                                      JOIN subcategory ON subcategory.id = product.SubCatId\n                                                                      WHERE product.id = \"".concat(productId, "\";"), function (error, results, fields) {
+                                            if (error) {
+                                                console.log(error.message);
+                                                reject();
+                                            }
                                             if (results.length === 0) {
                                                 console.log("Article Not Found!");
                                             }
@@ -189,11 +192,15 @@ var DatabaseManager = /** @class */ (function () {
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var _this = this;
                         return __generator(this, function (_a) {
-                            this.sqlConnection.query("SELECT id FROM Product WHERE Code = '".concat(ean, "'"), function (error, results, fields) { return __awaiter(_this, void 0, void 0, function () {
+                            this.sqlConnection.query("SELECT id FROM product WHERE Code = '".concat(ean, "'"), function (error, results, fields) { return __awaiter(_this, void 0, void 0, function () {
                                 var checkedRes, Product_1;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
+                                            if (error) {
+                                                console.log("Error: " + error.message);
+                                                return [2 /*return*/];
+                                            }
                                             checkedRes = [];
                                             if (results !== undefined) {
                                                 checkedRes = results;
