@@ -7,6 +7,7 @@ class UnknownCodeSystem
     
     private dbMng:DatabaseManager;
     private codesInProcess:string[] = [];
+    private expireControllers:ValidationObj[] =[];
 
     constructor(dbMng:DatabaseManager, force:boolean)
     {
@@ -51,6 +52,8 @@ class UnknownCodeSystem
         while(!this.checkCode(selectedCode))
        
         this.codesInProcess.push(selectedCode);
+
+        this.expireControllers.push(new ValidationObj(selectedCode, this.codesInProcess, 600, this.codeExpireHandler));
 
         return selectedCode;
     }
@@ -101,6 +104,21 @@ class UnknownCodeSystem
                 throw("Class UnknownCodeSystem: The DatabaseManager cant Connect!");
             }
         }
+    }
+
+    private codeExpireHandler(expiredName:string)
+    {
+        let tempList:ValidationObj[] = []
+        
+        for(let i = 0; i < this.expireControllers.length; i++)
+        {
+            if(this.expireControllers[i].getCode() != expiredName)
+            {
+                tempList.push(this.expireControllers[i]);
+            }
+        }
+
+        this.expireControllers = tempList;
     }
 
 

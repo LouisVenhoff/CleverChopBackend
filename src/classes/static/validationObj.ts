@@ -1,16 +1,16 @@
 class ValidationObj
 {
-    productName:string;
-    listOfProducts:string[];
+    code:string;
+    listOfCodes:string[];
 
     public obsolete:boolean = false;
 
-    private onExpire:() => void = () => {};
+    private onExpire:(productName:string) => void = (productName:string) => {};
 
-    constructor(productName:string, listOfProducts:string[], expirationTime:number, onExpire?:() => void)
+    constructor(code:string, listOfProducts:string[], expirationTime:number, onExpire?:(productName:string) => void)
     {
-        this.productName = productName;
-        this.listOfProducts = listOfProducts;
+        this.code = code;
+        this.listOfCodes = listOfProducts;
 
         if(onExpire != undefined)
         {
@@ -22,26 +22,32 @@ class ValidationObj
         }, expirationTime);
     }
 
+    public getCode():string
+    {
+        return this.code;
+    }
+
+
     private expire()
     {
         this.deleteFromList();
         this.obsolete = true;
-        this.onExpire();
+        this.onExpire(this.code);
     }
 
     private deleteFromList()
     {
         let tempList:string[] = [];
 
-        for(let i = 0; i < this.listOfProducts.length; i++)
+        for(let i = 0; i < this.listOfCodes.length; i++)
         {
-            if(this.listOfProducts[i] != this.productName)
+            if(this.listOfCodes[i] != this.code)
             {
-                tempList.push(this.listOfProducts[i]);
+                tempList.push(this.listOfCodes[i]);
             }
         }
 
-        this.listOfProducts = tempList;
+        this.listOfCodes = tempList;
     }
 
 
