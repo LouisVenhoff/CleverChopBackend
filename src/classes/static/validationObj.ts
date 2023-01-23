@@ -18,9 +18,7 @@ class ValidationObj
         }
 
         setTimeout(() => {
-            this.deleteFromList();
-            this.obsolete = true;
-            this.onExpire();
+            this.expire();
         }, expirationTime);
     }
 
@@ -28,7 +26,7 @@ class ValidationObj
     {
         this.deleteFromList();
         this.obsolete = true;
-        if()
+        this.onExpire();
     }
 
     private deleteFromList()

@@ -1,5 +1,6 @@
 import DatabaseManager from "../db/databaseManager";
 import { MinimalProduct } from "../static/Product";
+import ValidationObj from "../../classes/static/validationObj";
 
 class UnknownCodeSystem
 {
