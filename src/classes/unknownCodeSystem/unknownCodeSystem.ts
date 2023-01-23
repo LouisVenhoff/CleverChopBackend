@@ -18,9 +18,6 @@ class UnknownCodeSystem
         
     }
 
-
-
-
     public async getCodeFromUnknownTable():Promise<string>
     {
         
