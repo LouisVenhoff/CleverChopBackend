@@ -106,16 +106,30 @@ class UnknownCodeSystem
         }
     }
 
-    private codeExpireHandler(expiredName:string)
+    private codeExpireHandler(expiredCode:string)
     {
         let tempList:ValidationObj[] = []
         
         for(let i = 0; i < this.expireControllers.length; i++)
         {
-            if(this.expireControllers[i].getCode() != expiredName)
+            if(this.expireControllers[i].getCode() != expiredCode)
             {
                 tempList.push(this.expireControllers[i]);
             }
+        }
+        //Check if code is Deleted from the CodesInProcess Method
+        let checkNumber:number = this.codesInProcess.findIndex(function(value:string, index:number, arr:string[]) 
+        {
+            return value === expiredCode;
+        });
+
+        if(checkNumber !== -1)
+        {
+            console.log(`Warning: The Code: ${expiredCode} could not deleted from the CodesInProcess list!` );
+        }
+        else
+        {
+            console.log(`${expiredCode} expired!`);
         }
 
         this.expireControllers = tempList;

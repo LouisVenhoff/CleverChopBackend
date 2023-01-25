@@ -36,9 +36,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+var validationObj_1 = require("../../classes/static/validationObj");
 var UnknownCodeSystem = /** @class */ (function () {
     function UnknownCodeSystem(dbMng, force) {
         this.codesInProcess = [];
+        this.expireControllers = [];
         this.dbMng = dbMng;
         if (!force) {
             this.checkDbConnection();
@@ -67,6 +69,7 @@ var UnknownCodeSystem = /** @class */ (function () {
                             counter++;
                         } while (!this.checkCode(selectedCode));
                         this.codesInProcess.push(selectedCode);
+                        this.expireControllers.push(new validationObj_1["default"](selectedCode, this.codesInProcess, 600, this.codeExpireHandler));
                         return [2 /*return*/, selectedCode];
                 }
             });
@@ -124,6 +127,25 @@ var UnknownCodeSystem = /** @class */ (function () {
                 }
             });
         });
+    };
+    UnknownCodeSystem.prototype.codeExpireHandler = function (expiredCode) {
+        var tempList = [];
+        for (var i = 0; i < this.expireControllers.length; i++) {
+            if (this.expireControllers[i].getCode() != expiredCode) {
+                tempList.push(this.expireControllers[i]);
+            }
+        }
+        //Check if code is Deleted from the CodesInProcess Method
+        var checkNumber = this.codesInProcess.findIndex(function (value, index, arr) {
+            return value === expiredCode;
+        });
+        if (checkNumber !== -1) {
+            console.log("Warning: The Code: ".concat(expiredCode, " could not deleted from the CodesInProcess list!"));
+        }
+        else {
+            console.log("".concat(expiredCode, " expired!"));
+        }
+        this.expireControllers = tempList;
     };
     return UnknownCodeSystem;
 }());
