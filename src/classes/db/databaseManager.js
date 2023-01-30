@@ -42,6 +42,7 @@ var eanApiController_1 = require("../openEan/eanApiController");
 var DatabaseManager = /** @class */ (function () {
     function DatabaseManager(host, username, password, database) {
         this.eanSource = new eanApiController_1["default"]("400000000");
+        this.dbConAttempts = 0;
         this.connectionState = false;
         this.host = host;
         this.username = username;
@@ -56,6 +57,7 @@ var DatabaseManager = /** @class */ (function () {
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
+                        this.dbConAttempts++;
                         _a = this;
                         return [4 /*yield*/, mysql.createConnection({
                                 host: this.host,
@@ -67,11 +69,16 @@ var DatabaseManager = /** @class */ (function () {
                         _a.sqlConnection = _b.sent();
                         this.sqlConnection.connect(function (err) {
                             if (!err) {
-                                console.log("Connection successfully!");
+                                console.log("Database Connection successfully!");
                                 _this.connectionState = true;
                             }
                             else {
-                                console.log("Connection error!");
+                                if (_this.dbConAttempts < 100) {
+                                    setTimeout(function () { _this.connect(); }, 1000);
+                                }
+                                else {
+                                    console.log("Connection error!");
+                                }
                             }
                         });
                         return [2 /*return*/];

@@ -2,6 +2,9 @@ var mysql = require("mysql");
 import Product, { MinimalProduct } from "../static/Product";
 import Tables from "../../enums/tables";
 import EanApiController from "../openEan/eanApiController";
+import NetworkProvider from "../network/networkProvider";
+
+
 class DatabaseManager {
   host: string;
   username: string;
@@ -9,6 +12,7 @@ class DatabaseManager {
   database:string;
   sqlConnection: any;
   eanSource: EanApiController = new EanApiController("400000000");
+  dbConAttempts:number = 0;
 
   private connectionState = false;
 
@@ -21,6 +25,9 @@ class DatabaseManager {
   }
 
   public async connect() {
+    
+    this.dbConAttempts++;
+    
     this.sqlConnection = await mysql.createConnection({
       host: this.host,
       user: this.username,
@@ -30,10 +37,17 @@ class DatabaseManager {
 
     this.sqlConnection.connect((err: any) => {
       if (!err) {
-        console.log("Connection successfully!");
+        console.log("Database Connection successfully!");
         this.connectionState = true;
       } else {
-        console.log("Connection error!");
+        if(this.dbConAttempts < 100)
+        {
+           setTimeout(() => {this.connect();}, 1000)
+        }
+        else
+        {
+          console.log("Connection error!");
+        }
       }
     });
   }
