@@ -1,11 +1,13 @@
 import DatabaseManager from "../db/databaseManager";
 import { MinimalProduct } from "../static/Product";
+import ValidationObj from "../../classes/static/validationObj";
 
 class UnknownCodeSystem
 {
     
     private dbMng:DatabaseManager;
     private codesInProcess:string[] = [];
+    private expireControllers:ValidationObj[] =[];
 
     constructor(dbMng:DatabaseManager, force:boolean)
     {
@@ -17,9 +19,6 @@ class UnknownCodeSystem
         }
         
     }
-
-
-
 
     public async getCodeFromUnknownTable():Promise<string>
     {
@@ -53,6 +52,8 @@ class UnknownCodeSystem
         while(!this.checkCode(selectedCode))
        
         this.codesInProcess.push(selectedCode);
+
+        this.expireControllers.push(new ValidationObj(selectedCode, this.codesInProcess, 600000, (code:string) => {this.codeExpireHandler(code)}));
 
         return selectedCode;
     }
@@ -103,6 +104,38 @@ class UnknownCodeSystem
                 throw("Class UnknownCodeSystem: The DatabaseManager cant Connect!");
             }
         }
+    }
+
+    private codeExpireHandler(expiredCode:string)
+    {
+        let tempValidationList:ValidationObj[] = [];
+        let tempCodeList:string[] = [];
+        
+        for(let i = 0; i < this.expireControllers.length; i++)
+        {
+            if(this.expireControllers[i].getCode() !== expiredCode)
+            {
+                tempValidationList.push(this.expireControllers[i]);
+                tempCodeList.push(this.expireControllers[i].getCode());
+            }
+        }
+        this.codesInProcess = tempCodeList;
+        //Check if code is Deleted from the CodesInProcess Method
+        let checkNumber:number = this.codesInProcess.findIndex(function(value:string, index:number, arr:string[]) 
+        {
+            return value === expiredCode;
+        });
+
+        if(checkNumber !== -1)
+        {
+            console.log(`Warning: The Code: ${expiredCode} could not deleted from the CodesInProcess list!` );
+        }
+        else
+        {
+            console.log(`${expiredCode} expired!`);
+        }
+
+        this.expireControllers = tempValidationList;
     }
 
 
