@@ -49,6 +49,7 @@ var UnknownCodeSystem = /** @class */ (function () {
     UnknownCodeSystem.prototype.getCodeFromUnknownTable = function () {
         return __awaiter(this, void 0, void 0, function () {
             var rows, selectedCode, counter;
+            var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.dbMng.getUnknownCodeRows()];
@@ -69,7 +70,7 @@ var UnknownCodeSystem = /** @class */ (function () {
                             counter++;
                         } while (!this.checkCode(selectedCode));
                         this.codesInProcess.push(selectedCode);
-                        this.expireControllers.push(new validationObj_1["default"](selectedCode, this.codesInProcess, 600, this.codeExpireHandler));
+                        this.expireControllers.push(new validationObj_1["default"](selectedCode, this.codesInProcess, 600000, function (code) { _this.codeExpireHandler(code); }));
                         return [2 /*return*/, selectedCode];
                 }
             });
@@ -129,12 +130,15 @@ var UnknownCodeSystem = /** @class */ (function () {
         });
     };
     UnknownCodeSystem.prototype.codeExpireHandler = function (expiredCode) {
-        var tempList = [];
+        var tempValidationList = [];
+        var tempCodeList = [];
         for (var i = 0; i < this.expireControllers.length; i++) {
-            if (this.expireControllers[i].getCode() != expiredCode) {
-                tempList.push(this.expireControllers[i]);
+            if (this.expireControllers[i].getCode() !== expiredCode) {
+                tempValidationList.push(this.expireControllers[i]);
+                tempCodeList.push(this.expireControllers[i].getCode());
             }
         }
+        this.codesInProcess = tempCodeList;
         //Check if code is Deleted from the CodesInProcess Method
         var checkNumber = this.codesInProcess.findIndex(function (value, index, arr) {
             return value === expiredCode;
@@ -145,7 +149,7 @@ var UnknownCodeSystem = /** @class */ (function () {
         else {
             console.log("".concat(expiredCode, " expired!"));
         }
-        this.expireControllers = tempList;
+        this.expireControllers = tempValidationList;
     };
     return UnknownCodeSystem;
 }());

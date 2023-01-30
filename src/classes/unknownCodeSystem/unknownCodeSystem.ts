@@ -53,7 +53,7 @@ class UnknownCodeSystem
        
         this.codesInProcess.push(selectedCode);
 
-        this.expireControllers.push(new ValidationObj(selectedCode, this.codesInProcess, 600, this.codeExpireHandler));
+        this.expireControllers.push(new ValidationObj(selectedCode, this.codesInProcess, 600000, (code:string) => {this.codeExpireHandler(code)}));
 
         return selectedCode;
     }
@@ -108,15 +108,18 @@ class UnknownCodeSystem
 
     private codeExpireHandler(expiredCode:string)
     {
-        let tempList:ValidationObj[] = []
+        let tempValidationList:ValidationObj[] = [];
+        let tempCodeList:string[] = [];
         
         for(let i = 0; i < this.expireControllers.length; i++)
         {
-            if(this.expireControllers[i].getCode() != expiredCode)
+            if(this.expireControllers[i].getCode() !== expiredCode)
             {
-                tempList.push(this.expireControllers[i]);
+                tempValidationList.push(this.expireControllers[i]);
+                tempCodeList.push(this.expireControllers[i].getCode());
             }
         }
+        this.codesInProcess = tempCodeList;
         //Check if code is Deleted from the CodesInProcess Method
         let checkNumber:number = this.codesInProcess.findIndex(function(value:string, index:number, arr:string[]) 
         {
@@ -132,7 +135,7 @@ class UnknownCodeSystem
             console.log(`${expiredCode} expired!`);
         }
 
-        this.expireControllers = tempList;
+        this.expireControllers = tempValidationList;
     }
 
 
