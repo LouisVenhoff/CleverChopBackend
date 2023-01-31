@@ -1,1 +1,9 @@
-GET http://localhost:3014/api/sendCode/0171343248432
+GET http://localhost:3014/api/sendCode/4063367249747
+
+###
+GET http://localhost:3014/api/admin/addtodb
+
+
+###
+
+GET http://localhost:3014/api/admin/validateUnknown/4063367249747

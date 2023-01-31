@@ -2,39 +2,63 @@ var mysql = require("mysql");
 import Product, { MinimalProduct } from "../static/Product";
 import Tables from "../../enums/tables";
 import EanApiController from "../openEan/eanApiController";
+import NetworkProvider from "../network/networkProvider";
+
+
 class DatabaseManager {
   host: string;
   username: string;
   password: string;
+  database:string;
   sqlConnection: any;
   eanSource: EanApiController = new EanApiController("400000000");
+  dbConAttempts:number = 0;
 
-  constructor(host: string, username: string, password: string) {
+  private connectionState = false;
+
+  constructor(host: string, username: string, password: string, database:string) {
     this.host = host;
     this.username = username;
     this.password = password;
+    this.database = database;
     this.connect();
   }
 
-  public connect() {
-    this.sqlConnection = mysql.createConnection({
+  public async connect() {
+    
+    this.dbConAttempts++;
+    
+    this.sqlConnection = await mysql.createConnection({
       host: this.host,
       user: this.username,
       password: this.password,
-      database: "heroku_554b26e8f85d455",
+      database: this.database,
     });
 
     this.sqlConnection.connect((err: any) => {
       if (!err) {
-        console.log("Connection successfully!");
+        console.log("Database Connection successfully!");
+        this.connectionState = true;
       } else {
-        console.log("Connection error!");
+        if(this.dbConAttempts < 100)
+        {
+           setTimeout(() => {this.connect();}, 1000)
+        }
+        else
+        {
+          console.log("Connection error!");
+        }
       }
     });
   }
 
   public disconnect() {
     this.sqlConnection.end();
+  }
+
+  public getConnectionState():boolean
+  {
+    return this.connectionState;
   }
 
   public async provideProduct(ean: string): Promise<MinimalProduct> {
@@ -57,13 +81,20 @@ class DatabaseManager {
       {
         try {
           await this.sqlConnection.query(
-            `SELECT Name, Detail, Code, Content, Pack, Description, Origin, Category.category as MainCat, Subcategory.Category as SubCat FROM Product
-                                                                      JOIN Origin ON Origin.id = Product.originId
-                                                                      JOIN category ON Category.id = Product.catId
-                                                                      JOIN subcategory ON Subcategory.id = Product.SubCatId
-                                                                      WHERE Product.id = "${productId}";`,
+            `SELECT Name, Detail, Code, Content, Pack, Description, Origin, category.category as MainCat, subcategory.category as SubCat FROM product
+                                                                      JOIN origin ON origin.id = product.originId
+                                                                      JOIN category ON category.id = product.catId
+                                                                      JOIN subcategory ON subcategory.id = product.SubCatId
+                                                                      WHERE product.id = ?;`,[productId],
             (error: any, results: any, fields: any) => {
-              console.log(results);
+              
+              if(error)
+              {
+                console.log(error.message);
+                reject();
+              }
+
+
               if (results.length === 0) {
                 console.log("Article Not Found!");
               }
@@ -100,16 +131,52 @@ class DatabaseManager {
   public async writeUnknownEan(ean:string):Promise<boolean>
   {
       return new Promise((resolve, reject) => {
-            this.sqlConnection.query(`INSERT INTO unknowncode (Code) VALUES (${ean})`);
+            this.sqlConnection.query(`INSERT INTO unknowncode (Code) VALUES (?)`,[ean]);
         });
   }
+
+  public async getUnknownCodeRows():Promise<any[]>
+  {
+      return new Promise(async (resolve, reject) => {
+        await this.sqlConnection.query(`SELECT code FROM unknowncode`, (error:any, results:any, fields:any) => {
+            if(!error)
+            {
+                resolve(results);
+            }
+            else
+            {
+                throw error;
+            }
+        });
+      });
+  }
+
+  public deleteUnknownCode(code:string)
+  {
+      this.sqlConnection.query(`DELETE FROM unknowncode WHERE code = ?`,[code]);
+  }
+
+
 
   private async findProduct(ean: string): Promise<number> {
     return new Promise(async (resolve, reject) => {
       this.sqlConnection.query(
-        `SELECT id FROM Product WHERE Code = '${ean}'`,
+        `SELECT id FROM product WHERE Code = ?`,[ean],
         async (error: any, results: any, fields: any) => {
-          if (results.length === 0) {
+          
+          if(error)
+          {
+            console.log("Error: " + error.message);
+            return;
+          }
+          let checkedRes:any[] = [];
+          
+          if(results !== undefined)
+          {
+             checkedRes = results;
+          }
+          
+          if (checkedRes.length === 0) {
             let Product: MinimalProduct = await this.eanSource.requestEan(ean);
             if(Product.error !== 0)
             {
@@ -121,7 +188,7 @@ class DatabaseManager {
               resolve(e);
             });
           } else {
-            resolve(results[0].id);
+            resolve(checkedRes[0].id);
           }
         }
       );
@@ -135,7 +202,8 @@ class DatabaseManager {
 
     await this.sqlConnection.query(
       `INSERT INTO product (Name, Detail, Code, Content, Pack, Description, OriginId, CatId, SubCatId)` +
-        `VALUES ('${prod.name}', '${prod.detail}', '${prod.code}', '${prod.contents}', '${prod.packageInfo}', '${prod.description}', '${originId}', '${mainCatId}', '${subCatId}')`
+        `VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [prod.name,prod.detail,prod.code,prod.contents,prod.packageInfo,prod.description,originId,mainCatId,subCatId]
     );
   }
 
@@ -147,7 +215,7 @@ class DatabaseManager {
       let dbConfig: any = this.getSecTableConfig(table);
 
       await this.sqlConnection.query(
-        `INSERT INTO ${dbConfig.tableName} (${dbConfig.catType}) VALUES ('${value}')`,
+        `INSERT INTO ${dbConfig.tableName} (${dbConfig.catType}) VALUES (?)`,[value],
         async (error: any, results: any, fields: any) => {
           if (error) {
             resolve(false);
@@ -166,7 +234,7 @@ class DatabaseManager {
 
     return new Promise(async (resolve, reject) => {
       await this.sqlConnection.query(
-        `SELECT id FROM ${dbConfig.tableName} WHERE ${dbConfig.catType} = '${value}'`,
+        `SELECT id FROM ${dbConfig.tableName} WHERE ${dbConfig.catType} = ?`,[value],
         (error: any, result: any, fields: any) => {
           if (result.length > 0) {
             resolve(parseInt(result[0].id));
