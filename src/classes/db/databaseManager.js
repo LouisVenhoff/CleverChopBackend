@@ -115,7 +115,7 @@ var DatabaseManager = /** @class */ (function () {
                                     _b.label = 2;
                                 case 2:
                                     _b.trys.push([2, 4, , 5]);
-                                    return [4 /*yield*/, this.sqlConnection.query("SELECT Name, Detail, Code, Content, Pack, Description, Origin, category.category as MainCat, subcategory.category as SubCat FROM product\n                                                                      JOIN origin ON origin.id = product.originId\n                                                                      JOIN category ON category.id = product.catId\n                                                                      JOIN subcategory ON subcategory.id = product.SubCatId\n                                                                      WHERE product.id = \"".concat(productId, "\";"), function (error, results, fields) {
+                                    return [4 /*yield*/, this.sqlConnection.query("SELECT Name, Detail, Code, Content, Pack, Description, Origin, category.category as MainCat, subcategory.category as SubCat FROM product\n                                                                      JOIN origin ON origin.id = product.originId\n                                                                      JOIN category ON category.id = product.catId\n                                                                      JOIN subcategory ON subcategory.id = product.SubCatId\n                                                                      WHERE product.id = ?;", [productId], function (error, results, fields) {
                                             if (error) {
                                                 console.log(error.message);
                                                 reject();
@@ -160,7 +160,7 @@ var DatabaseManager = /** @class */ (function () {
             var _this = this;
             return __generator(this, function (_a) {
                 return [2 /*return*/, new Promise(function (resolve, reject) {
-                        _this.sqlConnection.query("INSERT INTO unknowncode (Code) VALUES (".concat(ean, ")"));
+                        _this.sqlConnection.query("INSERT INTO unknowncode (Code) VALUES (?)", [ean]);
                     })];
             });
         });
@@ -190,7 +190,7 @@ var DatabaseManager = /** @class */ (function () {
         });
     };
     DatabaseManager.prototype.deleteUnknownCode = function (code) {
-        this.sqlConnection.query("DELETE FROM unknowncode WHERE code = ".concat(code));
+        this.sqlConnection.query("DELETE FROM unknowncode WHERE code = ?", [code]);
     };
     DatabaseManager.prototype.findProduct = function (ean) {
         return __awaiter(this, void 0, void 0, function () {
@@ -199,7 +199,7 @@ var DatabaseManager = /** @class */ (function () {
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var _this = this;
                         return __generator(this, function (_a) {
-                            this.sqlConnection.query("SELECT id FROM product WHERE Code = '".concat(ean, "'"), function (error, results, fields) { return __awaiter(_this, void 0, void 0, function () {
+                            this.sqlConnection.query("SELECT id FROM product WHERE Code = ?", [ean], function (error, results, fields) { return __awaiter(_this, void 0, void 0, function () {
                                 var checkedRes, Product_1;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
@@ -255,7 +255,7 @@ var DatabaseManager = /** @class */ (function () {
                     case 3:
                         originId = _a.sent();
                         return [4 /*yield*/, this.sqlConnection.query("INSERT INTO product (Name, Detail, Code, Content, Pack, Description, OriginId, CatId, SubCatId)" +
-                                "VALUES ('".concat(prod.name, "', '").concat(prod.detail, "', '").concat(prod.code, "', '").concat(prod.contents, "', '").concat(prod.packageInfo, "', '").concat(prod.description, "', '").concat(originId, "', '").concat(mainCatId, "', '").concat(subCatId, "')"))];
+                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [prod.name, prod.detail, prod.code, prod.contents, prod.packageInfo, prod.description, originId, mainCatId, subCatId])];
                     case 4:
                         _a.sent();
                         return [2 /*return*/];
@@ -275,7 +275,7 @@ var DatabaseManager = /** @class */ (function () {
                             switch (_a.label) {
                                 case 0:
                                     dbConfig = this.getSecTableConfig(table);
-                                    return [4 /*yield*/, this.sqlConnection.query("INSERT INTO ".concat(dbConfig.tableName, " (").concat(dbConfig.catType, ") VALUES ('").concat(value, "')"), function (error, results, fields) { return __awaiter(_this, void 0, void 0, function () {
+                                    return [4 /*yield*/, this.sqlConnection.query("INSERT INTO ".concat(dbConfig.tableName, " (").concat(dbConfig.catType, ") VALUES (?)"), [value], function (error, results, fields) { return __awaiter(_this, void 0, void 0, function () {
                                             return __generator(this, function (_a) {
                                                 if (error) {
                                                     resolve(false);
@@ -304,7 +304,7 @@ var DatabaseManager = /** @class */ (function () {
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         return __generator(this, function (_a) {
                             switch (_a.label) {
-                                case 0: return [4 /*yield*/, this.sqlConnection.query("SELECT id FROM ".concat(dbConfig.tableName, " WHERE ").concat(dbConfig.catType, " = '").concat(value, "'"), function (error, result, fields) {
+                                case 0: return [4 /*yield*/, this.sqlConnection.query("SELECT id FROM ".concat(dbConfig.tableName, " WHERE ").concat(dbConfig.catType, " = ?"), [value], function (error, result, fields) {
                                         if (result.length > 0) {
                                             resolve(parseInt(result[0].id));
                                         }

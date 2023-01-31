@@ -85,7 +85,7 @@ class DatabaseManager {
                                                                       JOIN origin ON origin.id = product.originId
                                                                       JOIN category ON category.id = product.catId
                                                                       JOIN subcategory ON subcategory.id = product.SubCatId
-                                                                      WHERE product.id = "${productId}";`,
+                                                                      WHERE product.id = ?;`,[productId],
             (error: any, results: any, fields: any) => {
               
               if(error)
@@ -131,7 +131,7 @@ class DatabaseManager {
   public async writeUnknownEan(ean:string):Promise<boolean>
   {
       return new Promise((resolve, reject) => {
-            this.sqlConnection.query(`INSERT INTO unknowncode (Code) VALUES (${ean})`);
+            this.sqlConnection.query(`INSERT INTO unknowncode (Code) VALUES (?)`,[ean]);
         });
   }
 
@@ -153,7 +153,7 @@ class DatabaseManager {
 
   public deleteUnknownCode(code:string)
   {
-      this.sqlConnection.query(`DELETE FROM unknowncode WHERE code = ${code}`);
+      this.sqlConnection.query(`DELETE FROM unknowncode WHERE code = ?`,[code]);
   }
 
 
@@ -161,7 +161,7 @@ class DatabaseManager {
   private async findProduct(ean: string): Promise<number> {
     return new Promise(async (resolve, reject) => {
       this.sqlConnection.query(
-        `SELECT id FROM product WHERE Code = '${ean}'`,
+        `SELECT id FROM product WHERE Code = ?`,[ean],
         async (error: any, results: any, fields: any) => {
           
           if(error)
@@ -202,7 +202,8 @@ class DatabaseManager {
 
     await this.sqlConnection.query(
       `INSERT INTO product (Name, Detail, Code, Content, Pack, Description, OriginId, CatId, SubCatId)` +
-        `VALUES ('${prod.name}', '${prod.detail}', '${prod.code}', '${prod.contents}', '${prod.packageInfo}', '${prod.description}', '${originId}', '${mainCatId}', '${subCatId}')`
+        `VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [prod.name,prod.detail,prod.code,prod.contents,prod.packageInfo,prod.description,originId,mainCatId,subCatId]
     );
   }
 
@@ -214,7 +215,7 @@ class DatabaseManager {
       let dbConfig: any = this.getSecTableConfig(table);
 
       await this.sqlConnection.query(
-        `INSERT INTO ${dbConfig.tableName} (${dbConfig.catType}) VALUES ('${value}')`,
+        `INSERT INTO ${dbConfig.tableName} (${dbConfig.catType}) VALUES (?)`,[value],
         async (error: any, results: any, fields: any) => {
           if (error) {
             resolve(false);
@@ -233,7 +234,7 @@ class DatabaseManager {
 
     return new Promise(async (resolve, reject) => {
       await this.sqlConnection.query(
-        `SELECT id FROM ${dbConfig.tableName} WHERE ${dbConfig.catType} = '${value}'`,
+        `SELECT id FROM ${dbConfig.tableName} WHERE ${dbConfig.catType} = ?`,[value],
         (error: any, result: any, fields: any) => {
           if (result.length > 0) {
             resolve(parseInt(result[0].id));
