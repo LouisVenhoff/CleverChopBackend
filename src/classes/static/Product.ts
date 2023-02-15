@@ -6,8 +6,8 @@ export type MinimalProduct = {
     manufacturer:string,
     mainCat:string,
     subCat:string,
-    contents:number,
-    packageInfo:number,
+    contents:number | null,
+    packageInfo:number | null,
     description:string,
     origin:string,
     code:string

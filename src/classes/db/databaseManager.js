@@ -254,6 +254,10 @@ var DatabaseManager = /** @class */ (function () {
                         return [4 /*yield*/, this.provideSecTable(prod.origin, tables_1["default"].ORIGIN)];
                     case 3:
                         originId = _a.sent();
+                        mainCatId = this.proveIsNotNaN(mainCatId);
+                        subCatId = this.proveIsNotNaN(subCatId);
+                        originId = this.proveIsNotNaN(originId);
+                        this.formatMinimalProductBytes(prod);
                         return [4 /*yield*/, this.sqlConnection.query("INSERT INTO product (Name, Detail, Code, Content, Pack, Description, OriginId, CatId, SubCatId)" +
                                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [prod.name, prod.detail, prod.code, prod.contents, prod.packageInfo, prod.description, originId, mainCatId, subCatId])];
                     case 4:
@@ -262,6 +266,21 @@ var DatabaseManager = /** @class */ (function () {
                 }
             });
         });
+    };
+    DatabaseManager.prototype.formatMinimalProductBytes = function (prod) {
+        prod.contents = this.proveIsNotNaN(prod.contents);
+        prod.packageInfo = this.proveIsNotNaN(prod.packageInfo);
+    };
+    DatabaseManager.prototype.proveIsNotNaN = function (nr) {
+        if (nr === null) {
+            return null;
+        }
+        else if (isNaN(nr)) {
+            return null;
+        }
+        else {
+            return nr;
+        }
     };
     DatabaseManager.prototype.addToSecTable = function (value, table) {
         return __awaiter(this, void 0, void 0, function () {
