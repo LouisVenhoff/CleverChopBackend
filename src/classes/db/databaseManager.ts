@@ -196,15 +196,44 @@ class DatabaseManager {
   }
 
   private async addProduct(prod: MinimalProduct) {
-    let mainCatId: number = await this.provideSecTable(prod.mainCat, Tables.CATEGORY);
-    let subCatId: number = await this.provideSecTable(prod.subCat, Tables.SUBCATEGORY);
-    let originId: number = await this.provideSecTable(prod.origin,Tables.ORIGIN);
+    let mainCatId: number | null = await this.provideSecTable(prod.mainCat, Tables.CATEGORY);
+    let subCatId: number | null = await this.provideSecTable(prod.subCat, Tables.SUBCATEGORY);
+    let originId: number | null = await this.provideSecTable(prod.origin,Tables.ORIGIN);
+
+    mainCatId = this.proveIsNotNaN(mainCatId);
+    subCatId = this.proveIsNotNaN(subCatId);
+    originId = this.proveIsNotNaN(originId);
+
+    this.formatMinimalProductBytes(prod);
+    
 
     await this.sqlConnection.query(
       `INSERT INTO product (Name, Detail, Code, Content, Pack, Description, OriginId, CatId, SubCatId)` +
         `VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [prod.name,prod.detail,prod.code,prod.contents,prod.packageInfo,prod.description,originId,mainCatId,subCatId]
     );
+  }
+
+  private formatMinimalProductBytes(prod:MinimalProduct)
+  {
+      prod.contents = this.proveIsNotNaN(prod.contents);
+      prod.packageInfo = this.proveIsNotNaN(prod.packageInfo);
+  }
+
+  private proveIsNotNaN(nr:number | null):number | null
+  {
+      if(nr === null)
+      {
+        return null;
+      }
+      else if(isNaN(nr))
+      {
+        return null;
+      }
+      else
+      {
+        return nr;
+      }
   }
 
   private async addToSecTable(value: string, table: Tables): Promise<boolean> {
