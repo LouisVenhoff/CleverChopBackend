@@ -49,20 +49,26 @@ var EanApiController = /** @class */ (function () {
             return __generator(this, function (_a) {
                 queryString = "http://opengtindb.org/?ean=".concat(ean, "&cmd=query&queryid=").concat(this._userId);
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                        var result, outObj, _a;
-                        return __generator(this, function (_b) {
-                            switch (_b.label) {
+                        var result, outObj, Err_1;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
                                 case 0:
-                                    _b.trys.push([0, 2, , 3]);
-                                    return [4 /*yield*/, axios_1["default"].get(queryString)];
+                                    _a.trys.push([0, 2, , 3]);
+                                    return [4 /*yield*/, axios_1["default"].request({
+                                            method: 'GET',
+                                            url: queryString,
+                                            responseType: 'arraybuffer',
+                                            responseEncoding: 'binary'
+                                        })];
                                 case 1:
-                                    result = _b.sent();
-                                    outObj = new Product_1["default"](result.data);
+                                    result = _a.sent();
+                                    outObj = new Product_1["default"](result.data.toString("latin1"));
                                     outObj.code = ean;
                                     resolve(outObj.reduceObj());
                                     return [3 /*break*/, 3];
                                 case 2:
-                                    _a = _b.sent();
+                                    Err_1 = _a.sent();
+                                    console.log(Err_1.message);
                                     reject(null);
                                     return [3 /*break*/, 3];
                                 case 3: return [2 /*return*/];

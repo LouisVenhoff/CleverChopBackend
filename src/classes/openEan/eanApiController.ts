@@ -2,6 +2,7 @@ import axios from "axios";
 import Product from "../static/Product";
 import { MinimalProduct } from "../static/Product";
 
+
 class EanApiController
 { 
     private _userId:string;
@@ -20,14 +21,21 @@ class EanApiController
 
         try
         {
-            let result:any = await axios.get(queryString);
-            let outObj:Product = new Product(result.data);
-            
-            outObj.code = ean;
-            resolve(outObj.reduceObj());
+            let result:any = await axios.request({
+                method: 'GET',
+                url: queryString,
+                responseType: 'arraybuffer',
+                responseEncoding: 'binary'
+            });
+           
+             let outObj:Product = new Product(result.data.toString("latin1"));
+     
+             outObj.code = ean;
+             resolve(outObj.reduceObj());
         }
-        catch
+        catch(Err:any)
         {
+            console.log(Err.message);
             reject(null);
         }
         
