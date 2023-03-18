@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var eanApiController_1 = require("./src/classes/openEan/eanApiController");
+var webScraper_1 = require("./src/classes/eanSource/webScraper");
 var databaseManager_1 = require("./src/classes/db/databaseManager");
 var unknownCodeSystem_1 = require("./src/classes/unknownCodeSystem/unknownCodeSystem");
 var cors = require("cors");
@@ -47,7 +47,7 @@ var port = 3014;
 var dbMng = new databaseManager_1["default"]("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724", "heroku_554b26e8f85d455");
 var unknownSys = new unknownCodeSystem_1["default"](dbMng, true);
 app.use(cors());
-var eanSource = new eanApiController_1["default"]("400000000");
+var eanSource = new webScraper_1["default"]();
 app.get("/", function (req, res) {
     console.log("Working");
 });

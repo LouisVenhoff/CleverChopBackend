@@ -1,8 +1,10 @@
 var mysql = require("mysql");
 import Product, { MinimalProduct } from "../static/Product";
 import Tables from "../../enums/tables";
-import EanApiController from "../openEan/eanApiController";
+import EanApiController from "../eanSource/eanApiController";
+import InfoSource from "../eanSource/infoSource";
 import NetworkProvider from "../network/networkProvider";
+import WebScraper from "../eanSource/webScraper";
 
 
 class DatabaseManager {
@@ -11,7 +13,8 @@ class DatabaseManager {
   password: string;
   database:string;
   sqlConnection: any;
-  eanSource: EanApiController = new EanApiController("400000000");
+  //eanSource: InfoSource = new EanApiController("400000000");
+  eanSource:InfoSource = new WebScraper();
   dbConAttempts:number = 0;
 
   private connectionState = false;

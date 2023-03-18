@@ -1,7 +1,12 @@
-import EanApiController from "./src/classes/openEan/eanApiController";
+import EanApiController from "./src/classes/eanSource/eanApiController";
+import WebScraper from "./src/classes/eanSource/webScraper";
 import { MinimalProduct } from "./src/classes/static/Product";
 import DatabaseManager from "./src/classes/db/databaseManager";
 import UnknownCodeSystem from "./src/classes/unknownCodeSystem/unknownCodeSystem";
+import InfoSource from "./src/classes/eanSource/infoSource";
+
+
+
 var cors = require("cors");
 
 const express = require("express");
@@ -9,14 +14,14 @@ const express = require("express");
 const app = express();
 const port = 3014;
 
-const dbMng:DatabaseManager = new DatabaseManager("localhost", "system", "Iwaaz2001g!", "cleverchopdb");
-//const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724", "heroku_554b26e8f85d455");
+//const dbMng:DatabaseManager = new DatabaseManager("localhost", "system", "Iwaaz2001g!", "cleverchopdb");
+const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724", "heroku_554b26e8f85d455");
 const unknownSys:UnknownCodeSystem = new UnknownCodeSystem(dbMng, true);
 
 app.use(cors());
 
 
-const eanSource:EanApiController = new EanApiController("400000000");
+const eanSource:InfoSource = new WebScraper();
 
 
 app.get("/", (req:any, res:any) => {

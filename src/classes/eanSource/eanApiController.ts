@@ -1,14 +1,15 @@
 import axios from "axios";
 import Product from "../static/Product";
 import { MinimalProduct } from "../static/Product";
+import InfoSource from "./infoSource";
 
-
-class EanApiController
+class EanApiController extends InfoSource
 { 
     private _userId:string;
 
     constructor(_userId:string)
     {
+        super();
         this._userId = _userId
     }
 

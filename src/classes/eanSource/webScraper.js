@@ -1,4 +1,19 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -36,48 +51,56 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
+var infoSource_1 = require("./infoSource");
 var axios_1 = require("axios");
-var Product_1 = require("../static/Product");
-var EanApiController = /** @class */ (function () {
-    function EanApiController(_userId) {
-        this._userId = _userId;
+var cheerio = require("cheerio");
+var WebScraper = /** @class */ (function (_super) {
+    __extends(WebScraper, _super);
+    function WebScraper() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.queryUri = "https://de.openfoodfacts.org/produkt/";
+        return _this;
     }
-    EanApiController.prototype.requestEan = function (ean) {
+    WebScraper.prototype.requestEan = function (ean) {
         return __awaiter(this, void 0, void 0, function () {
-            var queryString;
+            var productQuery;
             var _this = this;
             return __generator(this, function (_a) {
-                queryString = "http://opengtindb.org/?ean=".concat(ean, "&cmd=query&queryid=").concat(this._userId);
+                productQuery = this.queryUri + ean;
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                        var result, outObj, Err_1;
+                        var resultHtml, result, ex_1, resultHtmlStr;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
                                     _a.trys.push([0, 2, , 3]);
                                     return [4 /*yield*/, axios_1["default"].request({
                                             method: 'GET',
-                                            url: queryString,
+                                            url: productQuery,
                                             responseType: 'arraybuffer',
                                             responseEncoding: 'binary'
                                         })];
                                 case 1:
                                     result = _a.sent();
-                                    outObj = new Product_1["default"](result.data.toString("latin1"));
-                                    outObj.code = ean;
-                                    resolve(outObj.reduceObj());
+                                    resultHtml = result.data;
                                     return [3 /*break*/, 3];
                                 case 2:
-                                    Err_1 = _a.sent();
-                                    console.log(Err_1.message);
-                                    reject(null);
-                                    return [3 /*break*/, 3];
-                                case 3: return [2 /*return*/];
+                                    ex_1 = _a.sent();
+                                    console.error(ex_1.message);
+                                    throw ("Error whil accessing Product Source!");
+                                case 3:
+                                    resultHtmlStr = resultHtml.toString("latin1");
+                                    console.log(this.generateProductString(resultHtml));
+                                    return [2 /*return*/];
                             }
                         });
                     }); })];
             });
         });
     };
-    return EanApiController;
-}());
-exports["default"] = EanApiController;
+    WebScraper.prototype.generateProductString = function (html) {
+        var $ = cheerio.load(html);
+        return $('.title-1').text();
+    };
+    return WebScraper;
+}(infoSource_1["default"]));
+exports["default"] = WebScraper;

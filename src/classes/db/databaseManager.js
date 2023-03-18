@@ -38,10 +38,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var mysql = require("mysql");
 var tables_1 = require("../../enums/tables");
-var eanApiController_1 = require("../openEan/eanApiController");
+var webScraper_1 = require("../eanSource/webScraper");
 var DatabaseManager = /** @class */ (function () {
     function DatabaseManager(host, username, password, database) {
-        this.eanSource = new eanApiController_1["default"]("400000000");
+        //eanSource: InfoSource = new EanApiController("400000000");
+        this.eanSource = new webScraper_1["default"]();
         this.dbConAttempts = 0;
         this.connectionState = false;
         this.host = host;
