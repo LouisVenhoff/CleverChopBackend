@@ -89,7 +89,7 @@ var WebScraper = /** @class */ (function (_super) {
                                     throw ("Error whil accessing Product Source!");
                                 case 3:
                                     resultHtmlStr = resultHtml.toString("latin1");
-                                    console.log(this.generateProductString(resultHtml));
+                                    console.log(this.generateMinimalProduct(resultHtml));
                                     return [2 /*return*/];
                             }
                         });
@@ -97,9 +97,40 @@ var WebScraper = /** @class */ (function (_super) {
             });
         });
     };
-    WebScraper.prototype.generateProductString = function (html) {
+    WebScraper.prototype.generateMinimalProduct = function (html) {
         var $ = cheerio.load(html);
-        return $('.title-1').text();
+        var tempObj = {
+            error: 0,
+            name: "",
+            detail: "",
+            manufacturer: "",
+            mainCat: "",
+            subCat: "",
+            contents: 0,
+            packageInfo: 0,
+            description: "",
+            origin: "",
+            code: ""
+        };
+        if (!this.checkProductProvided($)) {
+            tempObj.error = 1;
+            return tempObj;
+        }
+        tempObj.name = $('.title-1').text();
+        tempObj.detail = "";
+        //console.log($("#field_quantity_value").text());   Gewicht/Anzahl
+        //console.log($("#field_packaging_value").first().text());   Verpackung
+        //console.log($("#field_brands_value").first().text());     Hersteller
+        $("#field_categories_value").children().each(function (index, child) { console.log($(child).text()); });
+        return tempObj;
+    };
+    WebScraper.prototype.checkProductProvided = function (htmlData) {
+        if (htmlData(".if-empty-dnone").text() === "Error") {
+            return false;
+        }
+        else {
+            return true;
+        }
     };
     return WebScraper;
 }(infoSource_1["default"]));

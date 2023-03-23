@@ -78,6 +78,16 @@ class WebScraper extends InfoSource
 
         tempObj.name = $('.title-1').text();
         tempObj.detail = ""
+
+        //console.log($("#field_quantity_value").text());   Gewicht/Anzahl
+        
+        //console.log($("#field_packaging_value").first().text());   Verpackung
+
+       
+        //console.log($("#field_brands_value").first().text());     Hersteller
+
+        //$("#field_categories_value").children().each(function(index:number, child:any) {console.log($(child).text())}); Kategorien
+
         
         return tempObj;
     }
@@ -86,7 +96,7 @@ class WebScraper extends InfoSource
 
     private checkProductProvided(htmlData:any):boolean
     {
-        if(htmlData("if-empty-dnone").text() === "Error")
+        if(htmlData(".if-empty-dnone").text() === "Error")
         {
             return false;
         }
