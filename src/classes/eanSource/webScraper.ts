@@ -41,7 +41,7 @@ class WebScraper extends InfoSource
 
                 let resultHtmlStr:string = resultHtml.toString("latin1");
 
-                console.log(this.generateProductString(resultHtml));
+                console.log(this.generateMinimalProduct(resultHtml));
 
 
         });
@@ -49,7 +49,7 @@ class WebScraper extends InfoSource
 
 
 
-    private generateProductString(html:string):string
+    private generateMinimalProduct(html:string):MinimalProduct
     {
         
         const $:any = cheerio.load(html);
@@ -68,16 +68,35 @@ class WebScraper extends InfoSource
             code:"",
         }
 
+        if(!this.checkProductProvided($))
+        {
+            tempObj.error = 1;
+            return tempObj;
+        }
+
+
+
         tempObj.name = $('.title-1').text();
         tempObj.detail = ""
         
-        
-        
+        return tempObj;
+    }
 
 
-        return "";
+
+    private checkProductProvided(htmlData:any):boolean
+    {
+        if(htmlData("if-empty-dnone").text() === "Error")
+        {
+            return false;
+        }
+        else
+        {
+             return true;
+        }
         
         
+       
     }
 
 
