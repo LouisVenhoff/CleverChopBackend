@@ -54,6 +54,20 @@ class WebScraper extends InfoSource
         
         const $:any = cheerio.load(html);
 
+        let weight:string;
+        let packing:string;
+        let manufacturer:string;
+        let category:string[];
+        let badArgs:string[];
+        let goodArgs:string[];
+        let commonInfo:string[];
+        let nutriScore:string;
+        let ecoScore:string;
+        
+        
+        
+        
+        
         let tempObj:MinimalProduct =  {
             error:0,
             name:"",
@@ -79,18 +93,40 @@ class WebScraper extends InfoSource
         tempObj.name = $('.title-1').text();
         tempObj.detail = ""
 
-        //console.log($("#field_quantity_value").text());   Gewicht/Anzahl
+        // console.log($("#field_quantity_value").text());   //Gewicht/Anzahl
         
-        //console.log($("#field_packaging_value").first().text());   Verpackung
+        // console.log($("#field_packaging_value").first().text());   //Verpackung
 
        
-        //console.log($("#field_brands_value").first().text());     Hersteller
+        // console.log($("#field_brands_value").first().text());     //Hersteller
 
-        //$("#field_categories_value").children().each(function(index:number, child:any) {console.log($(child).text())}); Kategorien
+        // $("#field_categories_value").children().each(function(index:number, child:any) {console.log($(child).text())}); //Kategorien
 
+         //$(".evaluation_bad_title").each(function(index:number, child:any) {console.log($(child).text())}); //Schlechte argumente
+
+        //$(".evaluation_good_title").each(function(index:number, child:any) {console.log($(child).text())});   //Gute argumente
+
+         //$(".evaluation__title").each(function(index:number, child:any) {console.log($(child).text())}); //Allgemeine Informationen:
         
+        //NutriScore Informationen
+
+        // $(".grade_a_title").each(function(index:number, child:any) {console.log($(child).text())}); 
+        // $(".grade_b_title").each(function(index:number, child:any) {console.log($(child).text())}); 
+        // $(".grade_c_title").each(function(index:number, child:any) {console.log($(child).text())}); 
+        // $(".grade_d_title").each(function(index:number, child:any) {console.log("Note D")}); 
+        // $(".grade_e_title").each(function(index:number, child:any) {console.log("Note E")}); 
+
+        //$(".allergen").each(function(index:number, child:any){console.log($(child).text())});   //Allergene
+
+
         return tempObj;
     }
+
+    private loadWeight($:any)
+    {
+
+    }
+
 
 
 
@@ -106,7 +142,6 @@ class WebScraper extends InfoSource
         }
         
         
-       
     }
 
 

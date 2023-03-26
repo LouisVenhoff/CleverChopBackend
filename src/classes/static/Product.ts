@@ -2,14 +2,15 @@
 export type MinimalProduct = {
     error:number,
     name:string,
-    detail:string,
+    weight:string,
     manufacturer:string,
-    mainCat:string,
-    subCat:string,
-    contents:number | null,
-    packageInfo:number | null,
-    description:string,
-    origin:string,
+    category:string[],
+    allergen:string[],
+    badArgs:string[],
+    goodArgs:string[],
+    commonInfo:string[],
+    nutriScore:string,
+    ecoScore:string,
     code:string
 }
 
@@ -17,14 +18,16 @@ class Product
 {
     error:number = 0;
     name:string = "";
-    detail:string = "";
+    weight:string = "";
     manufacturer:string = "";
-    mainCat:string = "";
-    subCat:string = "";
-    contents:number = 0;
-    packageInfo:number = 0;
-    description:string = "";
-    origin:string = "";
+    category:string[] = [];
+    allergen:string[] = [];
+    badArgs:string[] = [];
+    goodArgs:string[] = [];
+    commonInfo:string[] = [];
+    packing:string = "";
+    nutriScore:string = "";
+    ecoScore:string = "";
     public code:string = "";
    
 
@@ -66,39 +69,10 @@ class Product
             case "name":
                 this.name = processValue[1];
                 break;
-            case "detailname":
-                this.detail = processValue[1];
-                break;
-            case "vendor":
+            case "manufacturer":
                 this.manufacturer = processValue[1];
-                break;
-            case "maincat":
-                this.mainCat = processValue[1];
-                break;
-            case "subcat":
-                this.subCat = processValue[1];
-                break;
-            case "contents":
-                this.contents = parseInt(processValue[1]);
-                break;
-            case "pack":
-                this.packageInfo = parseInt(processValue[1]);
-                break;
-            case "descr":
-                this.description = processValue[1];
-                break;
-            case "origin":
-                this.origin = processValue[1]
-                break;
-           
+                break;           
         }
-
-        if(this.name == "")
-        {
-            this.name = this.detail;
-        }
-
-
     }
 
 
@@ -108,20 +82,20 @@ class Product
     public reduceObj():MinimalProduct
     {
            let outObj:MinimalProduct =  {
-                error:this.error,
-                name:this.name,
-                detail:this.detail,
-                manufacturer:this.manufacturer,
-                mainCat:this.mainCat,
-                subCat:this.subCat,
-                contents:this.contents,
-                packageInfo:this.packageInfo,
-                description:this.description,
-                origin:this.origin,
-                code:this.code,
+               error:this.error,
+               name:this.name,
+               weight:this.weight,
+               manufacturer:this.manufacturer,
+               category: this.category,
+               allergen: this.allergen,
+               badArgs: this.badArgs,
+               goodArgs: this.goodArgs,
+               commonInfo: this.commonInfo,
+               nutriScore: this.nutriScore,
+               ecoScore: this.ecoScore,
+               code: this.code,
             }
         
-
             return outObj;
     }
 
