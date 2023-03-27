@@ -4,6 +4,7 @@ export type MinimalProduct = {
     name:string,
     weight:string,
     manufacturer:string,
+    packing: string,
     category:string[],
     allergen:string[],
     badArgs:string[],
@@ -20,12 +21,12 @@ class Product
     name:string = "";
     weight:string = "";
     manufacturer:string = "";
+    packing:string = "";
     category:string[] = [];
     allergen:string[] = [];
     badArgs:string[] = [];
     goodArgs:string[] = [];
     commonInfo:string[] = [];
-    packing:string = "";
     nutriScore:string = "";
     ecoScore:string = "";
     public code:string = "";
@@ -86,6 +87,7 @@ class Product
                name:this.name,
                weight:this.weight,
                manufacturer:this.manufacturer,
+               packing: this.packing,
                category: this.category,
                allergen: this.allergen,
                badArgs: this.badArgs,

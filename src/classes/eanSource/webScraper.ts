@@ -23,16 +23,16 @@ class WebScraper extends InfoSource {
         resultHtml = result.data;
       } catch (ex: any) {
         console.error(ex.message);
-        throw "Error whil accessing Product Source!";
+        throw "Error while accessing Product Source!";
       }
 
       let resultHtmlStr: string = resultHtml.toString("latin1");
 
-      console.log(this.generateMinimalProduct(resultHtml));
+      console.log(this.generateMinimalProduct(resultHtmlStr, ean));
     });
   }
 
-  private generateMinimalProduct(html: string): MinimalProduct {
+  private generateMinimalProduct(html: string, ean:string): MinimalProduct {
     const $: any = cheerio.load(html);
 
     let weight: string;
@@ -47,16 +47,18 @@ class WebScraper extends InfoSource {
 
     let tempObj: MinimalProduct = {
       error: 0,
-      name: "",
-      detail: "",
+      name:  "",
+      weight: "",
       manufacturer: "",
-      mainCat: "",
-      subCat: "",
-      contents: 0,
-      packageInfo: 0,
-      description: "",
-      origin: "",
-      code: "",
+      packing: "",
+      category: [],
+      allergen: [],
+      badArgs: [],
+      goodArgs: [],
+      commonInfo:[],
+      nutriScore: "",
+      ecoScore: "",
+      code: ean
     };
 
     if (!this.checkProductProvided($)) {
@@ -64,34 +66,27 @@ class WebScraper extends InfoSource {
       return tempObj;
     }
 
-    tempObj.name = $(".title-1").text();
-
-    // console.log($("#field_quantity_value").text());   //Gewicht/Anzahl
-
-    // console.log($("#field_packaging_value").first().text());   //Verpackung
-
-    // console.log($("#field_brands_value").first().text());     //Hersteller
-
-    // $("#field_categories_value").children().each(function(index:number, child:any) {console.log($(child).text())}); //Kategorien
-
-    //$(".evaluation_bad_title").each(function(index:number, child:any) {console.log($(child).text())}); //Schlechte argumente
-
-    //$(".evaluation_good_title").each(function(index:number, child:any) {console.log($(child).text())});   //Gute argumente
-
-    //$(".evaluation__title").each(function(index:number, child:any) {console.log($(child).text())}); //Allgemeine Informationen:
-
-    //NutriScore Informationen
-
-    // $(".grade_a_title").each(function(index:number, child:any) {console.log($(child).text())});
-    // $(".grade_b_title").each(function(index:number, child:any) {console.log($(child).text())});
-    // $(".grade_c_title").each(function(index:number, child:any) {console.log($(child).text())});
-    // $(".grade_d_title").each(function(index:number, child:any) {console.log("Note D")});
-    // $(".grade_e_title").each(function(index:number, child:any) {console.log("Note E")});
-
-    //$(".allergen").each(function(index:number, child:any){console.log($(child).text())});   //Allergene
+    tempObj.name = this.loadName($);
+    tempObj.weight = this.loadWeight($);
+    tempObj.manufacturer = this.loadManufacturer($);
+    tempObj.packing = this.loadPacking($);
+    tempObj.category = this.loadCategorys($);
+    tempObj.allergen = this.loadAllergenes($);
+    tempObj.badArgs = this.loadBadArguments($);
+    tempObj.goodArgs = this.loadGoodArguments($);
+    tempObj.commonInfo = this.loadCommonInfo($);
+    
+    this.applyScores($, tempObj);
 
     return tempObj;
   }
+
+
+  private loadName($:any )
+  {
+      return $(".title-1").text();
+  }
+
 
   private loadWeight($: any): string {
     return $("#field_quantity_value").text(); //Gewicht/Anzahl
@@ -166,6 +161,7 @@ class WebScraper extends InfoSource {
     
   }
 
+  
   private isEcoScore(input:string):boolean
   {
         let ecoRegex:any = RegExp("Eco*");
@@ -186,6 +182,11 @@ class WebScraper extends InfoSource {
     return this.loadArrInfo($, "#field_categories_value");
   }
 
+  private loadAllergenes($:any):string[]
+  {
+    return this.loadArrInfo($, ".allergen");
+  }
+
   private loadGoodArguments($: any): string[] {
     return this.loadArrInfo($, ".evaluation_good_title");
   }
@@ -197,6 +198,7 @@ class WebScraper extends InfoSource {
   private loadCommonInfo($: any): string[] {
     return this.loadArrInfo($, ".evaluation__title");
   }
+
 
   private loadArrInfo($: any, cssLink: string): string[] {
     let temp: string[] = [];
