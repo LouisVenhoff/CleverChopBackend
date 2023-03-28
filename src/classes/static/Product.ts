@@ -30,11 +30,24 @@ class Product
     nutriScore:string = "";
     ecoScore:string = "";
     public code:string = "";
-   
+    minProduct:MinimalProduct;
 
-    constructor(apiString:string)
+    constructor(product:MinimalProduct)
     {
-        this.convertApiString(apiString);   
+        this.minProduct = product;
+        this.error = product.error;
+        this.name = product.name;
+        this.weight = product.weight;
+        this.manufacturer = product.manufacturer;
+        this.packing = product.packing;
+        this.category = product.category;
+        this.allergen = product.allergen;
+        this.badArgs = product.badArgs;
+        this.goodArgs = product.goodArgs;
+        this.commonInfo = product.commonInfo;
+        this.nutriScore = product.nutriScore;
+        this.ecoScore = product.ecoScore;
+        this.code = product.code;  
     }
 
     // public setCode(code:string)
@@ -43,62 +56,9 @@ class Product
     // }
 
 
-
-    private convertApiString(input:string)
-    {
-        let lineArr:string[] = input.split("\n");
-
-        for(let i:number = 0; i < lineArr.length; i++)
-        {
-            this.fillObjData(lineArr[i]);
-        }
-    }
-
-    private fillObjData(input:string)
-    {
-        if(!input.includes("="))
-        {
-            return;
-        }
-
-        let processValue:string[] = input.split("=");
-        switch(processValue[0])
-        {
-            case "error":
-                this.error = parseInt(processValue[1]);
-                break;
-            case "name":
-                this.name = processValue[1];
-                break;
-            case "manufacturer":
-                this.manufacturer = processValue[1];
-                break;           
-        }
-    }
-
-
-
-  
-
     public reduceObj():MinimalProduct
     {
-           let outObj:MinimalProduct =  {
-               error:this.error,
-               name:this.name,
-               weight:this.weight,
-               manufacturer:this.manufacturer,
-               packing: this.packing,
-               category: this.category,
-               allergen: this.allergen,
-               badArgs: this.badArgs,
-               goodArgs: this.goodArgs,
-               commonInfo: this.commonInfo,
-               nutriScore: this.nutriScore,
-               ecoScore: this.ecoScore,
-               code: this.code,
-            }
-        
-            return outObj;
+           return this.minProduct;
     }
 
 }

@@ -74,10 +74,10 @@ var WebScraper = /** @class */ (function (_super) {
                                 case 0:
                                     _a.trys.push([0, 2, , 3]);
                                     return [4 /*yield*/, axios_1["default"].request({
-                                            method: 'GET',
+                                            method: "GET",
                                             url: productQuery,
-                                            responseType: 'arraybuffer',
-                                            responseEncoding: 'binary'
+                                            responseType: "arraybuffer",
+                                            responseEncoding: "binary"
                                         })];
                                 case 1:
                                     result = _a.sent();
@@ -86,10 +86,11 @@ var WebScraper = /** @class */ (function (_super) {
                                 case 2:
                                     ex_1 = _a.sent();
                                     console.error(ex_1.message);
-                                    throw ("Error whil accessing Product Source!");
+                                    throw "Error while accessing Product Source!";
                                 case 3:
                                     resultHtmlStr = resultHtml.toString("latin1");
-                                    console.log(this.generateMinimalProduct(resultHtml));
+                                    //resolve(this.generateMinimalProduct(resultHtmlStr, ean));
+                                    console.log(this.generateMinimalProduct(resultHtmlStr, ean));
                                     return [2 /*return*/];
                             }
                         });
@@ -97,42 +98,140 @@ var WebScraper = /** @class */ (function (_super) {
             });
         });
     };
-    WebScraper.prototype.generateMinimalProduct = function (html) {
+    WebScraper.prototype.generateMinimalProduct = function (html, ean) {
         var $ = cheerio.load(html);
+        var weight;
+        var packing;
+        var manufacturer;
+        var category;
+        var badArgs;
+        var goodArgs;
+        var commonInfo;
+        var nutriScore;
+        var ecoScore;
         var tempObj = {
             error: 0,
             name: "",
-            detail: "",
+            weight: "",
             manufacturer: "",
-            mainCat: "",
-            subCat: "",
-            contents: 0,
-            packageInfo: 0,
-            description: "",
-            origin: "",
-            code: ""
+            packing: "",
+            category: [],
+            allergen: [],
+            badArgs: [],
+            goodArgs: [],
+            commonInfo: [],
+            nutriScore: "",
+            ecoScore: "",
+            code: ean
         };
         if (!this.checkProductProvided($)) {
             tempObj.error = 1;
             return tempObj;
         }
-        tempObj.name = $('.title-1').text();
-        tempObj.detail = "";
-        // console.log($("#field_quantity_value").text());   //Gewicht/Anzahl
-        // console.log($("#field_packaging_value").first().text());   //Verpackung
-        // console.log($("#field_brands_value").first().text());     //Hersteller
-        // $("#field_categories_value").children().each(function(index:number, child:any) {console.log($(child).text())}); //Kategorien
-        //$(".evaluation_bad_title").each(function(index:number, child:any) {console.log($(child).text())}); //Schlechte argumente
-        //$(".evaluation_good_title").each(function(index:number, child:any) {console.log($(child).text())});   //Gute argumente
-        //$(".evaluation__title").each(function(index:number, child:any) {console.log($(child).text())}); //Allgemeine Informationen:
-        //NutriScore Informationen
-        $(".grade_a_title").each(function (index, child) { console.log($(child).text()); });
-        $(".grade_b_title").each(function (index, child) { console.log($(child).text()); });
-        // $(".grade_c_title").each(function(index:number, child:any) {console.log($(child).text())}); 
-        // $(".grade_d_title").each(function(index:number, child:any) {console.log("Note D")}); 
-        // $(".grade_e_title").each(function(index:number, child:any) {console.log("Note E")}); 
-        //$(".allergen").each(function(index:number, child:any){console.log($(child).text())});   //Allergene
+        tempObj.name = this.loadName($);
+        tempObj.weight = this.loadWeight($);
+        tempObj.manufacturer = this.loadManufacturer($);
+        tempObj.packing = this.loadPacking($);
+        tempObj.category = this.loadCategorys($);
+        tempObj.allergen = this.loadAllergenes($);
+        tempObj.badArgs = this.loadBadArguments($);
+        tempObj.goodArgs = this.loadGoodArguments($);
+        tempObj.commonInfo = this.loadCommonInfo($);
+        this.applyScores($, tempObj);
         return tempObj;
+    };
+    WebScraper.prototype.loadName = function ($) {
+        return $(".title-1").text();
+    };
+    WebScraper.prototype.loadWeight = function ($) {
+        return $("#field_quantity_value").text(); //Gewicht/Anzahl
+    };
+    WebScraper.prototype.loadPacking = function ($) {
+        return $("#field_packaging_value").first().text();
+    };
+    WebScraper.prototype.loadManufacturer = function ($) {
+        return $("#field_brands_value").first().text();
+    };
+    WebScraper.prototype.applyScores = function ($, prod) {
+        var _this = this;
+        var ecoScore = "";
+        var nutriScore = "";
+        $(".grade_a_title").each(function (index, child) {
+            if (_this.isEcoScore($(child).text())) {
+                ecoScore = "A";
+            }
+            else {
+                nutriScore = "A";
+            }
+        });
+        $(".grade_b_title").each(function (index, child) {
+            if (_this.isEcoScore($(child).text())) {
+                ecoScore = "B";
+            }
+            else {
+                nutriScore = "B";
+            }
+        });
+        $(".grade_c_title").each(function (index, child) {
+            if (_this.isEcoScore($(child).text())) {
+                ecoScore = "C";
+            }
+            else {
+                nutriScore = "C";
+            }
+        });
+        $(".grade_d_title").each(function (index, child) {
+            if (_this.isEcoScore($(child).text())) {
+                ecoScore = "D";
+            }
+            else {
+                nutriScore = "D";
+            }
+        });
+        $(".grade_e_title").each(function (index, child) {
+            if (_this.isEcoScore($(child).text())) {
+                ecoScore = "E";
+            }
+            else {
+                nutriScore = "E";
+            }
+        });
+        prod.ecoScore = ecoScore;
+        prod.nutriScore = nutriScore;
+    };
+    WebScraper.prototype.isEcoScore = function (input) {
+        var ecoRegex = RegExp("Eco*");
+        var result = ecoRegex.exec(input);
+        if (result === null) {
+            return false;
+        }
+        else {
+            return true;
+        }
+    };
+    WebScraper.prototype.loadCategorys = function ($) {
+        return this.loadArrInfo($, "#field_categories_value");
+    };
+    WebScraper.prototype.loadAllergenes = function ($) {
+        return this.loadArrInfo($, ".allergen");
+    };
+    WebScraper.prototype.loadGoodArguments = function ($) {
+        return this.loadArrInfo($, ".evaluation_good_title");
+    };
+    WebScraper.prototype.loadBadArguments = function ($) {
+        return this.loadArrInfo($, ".evaluation_bad_title");
+    };
+    WebScraper.prototype.loadCommonInfo = function ($) {
+        return this.loadArrInfo($, ".evaluation__title");
+    };
+    WebScraper.prototype.loadArrInfo = function ($, cssLink) {
+        var temp = [];
+        $(cssLink)
+            .children()
+            .each(function (index, child) {
+            temp.push($(child).text());
+        });
+        return temp;
     };
     WebScraper.prototype.checkProductProvided = function (htmlData) {
         if (htmlData(".if-empty-dnone").text() === "Error") {

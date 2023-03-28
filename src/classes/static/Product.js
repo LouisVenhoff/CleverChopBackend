@@ -4,14 +4,16 @@ var Product = /** @class */ (function () {
     function Product(apiString) {
         this.error = 0;
         this.name = "";
-        this.detail = "";
+        this.weight = "";
         this.manufacturer = "";
-        this.mainCat = "";
-        this.subCat = "";
-        this.contents = 0;
-        this.packageInfo = 0;
-        this.description = "";
-        this.origin = "";
+        this.packing = "";
+        this.category = [];
+        this.allergen = [];
+        this.badArgs = [];
+        this.goodArgs = [];
+        this.commonInfo = [];
+        this.nutriScore = "";
+        this.ecoScore = "";
         this.code = "";
         this.convertApiString(apiString);
     }
@@ -37,47 +39,25 @@ var Product = /** @class */ (function () {
             case "name":
                 this.name = processValue[1];
                 break;
-            case "detailname":
-                this.detail = processValue[1];
-                break;
-            case "vendor":
+            case "manufacturer":
                 this.manufacturer = processValue[1];
                 break;
-            case "maincat":
-                this.mainCat = processValue[1];
-                break;
-            case "subcat":
-                this.subCat = processValue[1];
-                break;
-            case "contents":
-                this.contents = parseInt(processValue[1]);
-                break;
-            case "pack":
-                this.packageInfo = parseInt(processValue[1]);
-                break;
-            case "descr":
-                this.description = processValue[1];
-                break;
-            case "origin":
-                this.origin = processValue[1];
-                break;
-        }
-        if (this.name == "") {
-            this.name = this.detail;
         }
     };
     Product.prototype.reduceObj = function () {
         var outObj = {
             error: this.error,
             name: this.name,
-            detail: this.detail,
+            weight: this.weight,
             manufacturer: this.manufacturer,
-            mainCat: this.mainCat,
-            subCat: this.subCat,
-            contents: this.contents,
-            packageInfo: this.packageInfo,
-            description: this.description,
-            origin: this.origin,
+            packing: this.packing,
+            category: this.category,
+            allergen: this.allergen,
+            badArgs: this.badArgs,
+            goodArgs: this.goodArgs,
+            commonInfo: this.commonInfo,
+            nutriScore: this.nutriScore,
+            ecoScore: this.ecoScore,
             code: this.code
         };
         return outObj;
