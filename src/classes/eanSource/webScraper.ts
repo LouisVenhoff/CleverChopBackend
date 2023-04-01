@@ -28,8 +28,8 @@ class WebScraper extends InfoSource {
 
       let resultHtmlStr: string = resultHtml.toString("latin1");
 
-      //resolve(this.generateMinimalProduct(resultHtmlStr, ean));
-      console.log(this.generateMinimalProduct(resultHtmlStr, ean));
+      resolve(this.generateMinimalProduct(resultHtmlStr, ean));
+      //console.log(this.generateMinimalProduct(resultHtmlStr, ean));
     });
   }
 
