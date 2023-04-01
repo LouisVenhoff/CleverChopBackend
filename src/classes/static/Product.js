@@ -1,7 +1,7 @@
 "use strict";
 exports.__esModule = true;
 var Product = /** @class */ (function () {
-    function Product(apiString) {
+    function Product(product) {
         this.error = 0;
         this.name = "";
         this.weight = "";
@@ -15,52 +15,27 @@ var Product = /** @class */ (function () {
         this.nutriScore = "";
         this.ecoScore = "";
         this.code = "";
-        this.convertApiString(apiString);
+        this.minProduct = product;
+        this.error = product.error;
+        this.name = product.name;
+        this.weight = product.weight;
+        this.manufacturer = product.manufacturer;
+        this.packing = product.packing;
+        this.category = product.category;
+        this.allergen = product.allergen;
+        this.badArgs = product.badArgs;
+        this.goodArgs = product.goodArgs;
+        this.commonInfo = product.commonInfo;
+        this.nutriScore = product.nutriScore;
+        this.ecoScore = product.ecoScore;
+        this.code = product.code;
     }
     // public setCode(code:string)
     // {
     //     this.code = code;
     // }
-    Product.prototype.convertApiString = function (input) {
-        var lineArr = input.split("\n");
-        for (var i = 0; i < lineArr.length; i++) {
-            this.fillObjData(lineArr[i]);
-        }
-    };
-    Product.prototype.fillObjData = function (input) {
-        if (!input.includes("=")) {
-            return;
-        }
-        var processValue = input.split("=");
-        switch (processValue[0]) {
-            case "error":
-                this.error = parseInt(processValue[1]);
-                break;
-            case "name":
-                this.name = processValue[1];
-                break;
-            case "manufacturer":
-                this.manufacturer = processValue[1];
-                break;
-        }
-    };
     Product.prototype.reduceObj = function () {
-        var outObj = {
-            error: this.error,
-            name: this.name,
-            weight: this.weight,
-            manufacturer: this.manufacturer,
-            packing: this.packing,
-            category: this.category,
-            allergen: this.allergen,
-            badArgs: this.badArgs,
-            goodArgs: this.goodArgs,
-            commonInfo: this.commonInfo,
-            nutriScore: this.nutriScore,
-            ecoScore: this.ecoScore,
-            code: this.code
-        };
-        return outObj;
+        return this.minProduct;
     };
     return Product;
 }());

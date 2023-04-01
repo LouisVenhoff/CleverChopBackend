@@ -1,11 +1,24 @@
 enum Tables
 {
     CATEGORY,
-    SUBCATEGORY,
-    ORIGIN,
+    MANUFACTURER,
+    PACKING,
+    ALLERGEN,
+    ECOSCORE,
+    NUTRISCORE,
     PRODUCT,
-    USAGE,
-    UNKNOWNCODE
+    ARGUMENTS,
 }
+
+
+enum HelpTables
+{
+    ProductCategory,
+    ProductArgument,
+    ProductAllergen,
+}
+
+
+export {HelpTables};
 
 export default Tables;

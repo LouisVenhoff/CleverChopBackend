@@ -95,103 +95,10 @@ var DatabaseManager = /** @class */ (function () {
     };
     DatabaseManager.prototype.provideProduct = function (ean) {
         return __awaiter(this, void 0, void 0, function () {
-            var _this = this;
             return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                        var errorCode, productId, _a;
-                        return __generator(this, function (_b) {
-                            switch (_b.label) {
-                                case 0:
-                                    errorCode = 0;
-                                    productId = 0;
-                                    return [4 /*yield*/, this.findProduct(ean)
-                                            .then(function (e) {
-                                            productId = e;
-                                        })["catch"](function (e) {
-                                            errorCode = e;
-                                        })];
-                                case 1:
-                                    _b.sent();
-                                    if (!(errorCode === 0)) return [3 /*break*/, 6];
-                                    _b.label = 2;
-                                case 2:
-                                    _b.trys.push([2, 4, , 5]);
-                                    return [4 /*yield*/, this.sqlConnection.query("SELECT Name, Detail, Code, Content, Pack, Description, Origin, category.category as MainCat, subcategory.category as SubCat FROM product\n                                                                      JOIN origin ON origin.id = product.originId\n                                                                      JOIN category ON category.id = product.catId\n                                                                      JOIN subcategory ON subcategory.id = product.SubCatId\n                                                                      WHERE product.id = ?;", [productId], function (error, results, fields) {
-                                            if (error) {
-                                                console.log(error.message);
-                                                reject();
-                                            }
-                                            if (results.length === 0) {
-                                                console.log("Article Not Found!");
-                                            }
-                                            var loadedItem = {
-                                                error: 0,
-                                                name: results[0].Name,
-                                                detail: results[0].Detail,
-                                                code: results[0].Code,
-                                                contents: results[0].Content,
-                                                packageInfo: results[0],
-                                                description: results[0].Description,
-                                                origin: results[0].Origin,
-                                                mainCat: results[0].MainCat,
-                                                subCat: results[0].SubCat,
-                                                manufacturer: ""
-                                            };
-                                            resolve(loadedItem);
-                                        })];
-                                case 3:
-                                    _b.sent();
-                                    return [3 /*break*/, 5];
-                                case 4:
-                                    _a = _b.sent();
-                                    return [3 /*break*/, 5];
-                                case 5: return [3 /*break*/, 7];
-                                case 6:
-                                    resolve(this.generateErrorObj(errorCode));
-                                    _b.label = 7;
-                                case 7: return [2 /*return*/];
-                            }
-                        });
-                    }); })];
+                throw ("Not implemented yet");
             });
         });
-    };
-    DatabaseManager.prototype.writeUnknownEan = function (ean) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _this = this;
-            return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve, reject) {
-                        _this.sqlConnection.query("INSERT INTO unknowncode (Code) VALUES (?)", [ean]);
-                    })];
-            });
-        });
-    };
-    DatabaseManager.prototype.getUnknownCodeRows = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var _this = this;
-            return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4 /*yield*/, this.sqlConnection.query("SELECT code FROM unknowncode", function (error, results, fields) {
-                                        if (!error) {
-                                            resolve(results);
-                                        }
-                                        else {
-                                            throw error;
-                                        }
-                                    })];
-                                case 1:
-                                    _a.sent();
-                                    return [2 /*return*/];
-                            }
-                        });
-                    }); })];
-            });
-        });
-    };
-    DatabaseManager.prototype.deleteUnknownCode = function (code) {
-        this.sqlConnection.query("DELETE FROM unknowncode WHERE code = ?", [code]);
     };
     DatabaseManager.prototype.findProduct = function (ean) {
         return __awaiter(this, void 0, void 0, function () {
@@ -243,34 +150,49 @@ var DatabaseManager = /** @class */ (function () {
     };
     DatabaseManager.prototype.addProduct = function (prod) {
         return __awaiter(this, void 0, void 0, function () {
-            var mainCatId, subCatId, originId;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.provideSecTable(prod.mainCat, tables_1["default"].CATEGORY)];
-                    case 1:
-                        mainCatId = _a.sent();
-                        return [4 /*yield*/, this.provideSecTable(prod.subCat, tables_1["default"].SUBCATEGORY)];
-                    case 2:
-                        subCatId = _a.sent();
-                        return [4 /*yield*/, this.provideSecTable(prod.origin, tables_1["default"].ORIGIN)];
-                    case 3:
-                        originId = _a.sent();
-                        mainCatId = this.proveIsNotNaN(mainCatId);
-                        subCatId = this.proveIsNotNaN(subCatId);
-                        originId = this.proveIsNotNaN(originId);
-                        this.formatMinimalProductBytes(prod);
-                        return [4 /*yield*/, this.sqlConnection.query("INSERT INTO product (Name, Detail, Code, Content, Pack, Description, OriginId, CatId, SubCatId)" +
-                                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", [prod.name, prod.detail, prod.code, prod.contents, prod.packageInfo, prod.description, originId, mainCatId, subCatId])];
-                    case 4:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
+                return [2 /*return*/];
             });
         });
     };
-    DatabaseManager.prototype.formatMinimalProductBytes = function (prod) {
-        prod.contents = this.proveIsNotNaN(prod.contents);
-        prod.packageInfo = this.proveIsNotNaN(prod.packageInfo);
+    DatabaseManager.prototype.addToSubtable = function (tab, word) {
+        return __awaiter(this, void 0, void 0, function () {
+            var tableName, sqlQuery;
+            return __generator(this, function (_a) {
+                tableName = this.resolveTablesName(tab);
+                sqlQuery = "INSERT INTO ".concat(tableName, " VALUES (").concat(word, ");");
+                this.sqlConnection.query(sqlQuery);
+                return [2 /*return*/];
+            });
+        });
+    };
+    DatabaseManager.prototype.resolveTablesName = function (tab) {
+        switch (tab) {
+            case tables_1["default"].PRODUCT:
+                return "Product";
+                break;
+            case tables_1["default"].ALLERGEN:
+                return "Allergen";
+                break;
+            case tables_1["default"].CATEGORY:
+                return "Category";
+                break;
+            case tables_1["default"].ECOSCORE:
+                return "Score";
+                break;
+            case tables_1["default"].NUTRISCORE:
+                return "NutriScore";
+                break;
+            case tables_1["default"].PACKING:
+                return "Packing";
+                break;
+            case tables_1["default"].MANUFACTURER:
+                return "Manufacturer";
+                break;
+            default:
+                throw ("The input is not a Table!");
+                break;
+        }
     };
     DatabaseManager.prototype.proveIsNotNaN = function (nr) {
         if (nr === null) {
@@ -283,127 +205,22 @@ var DatabaseManager = /** @class */ (function () {
             return nr;
         }
     };
-    DatabaseManager.prototype.addToSecTable = function (value, table) {
-        return __awaiter(this, void 0, void 0, function () {
-            var catType, tableName;
-            var _this = this;
-            return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                        var dbConfig;
-                        var _this = this;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0:
-                                    dbConfig = this.getSecTableConfig(table);
-                                    return [4 /*yield*/, this.sqlConnection.query("INSERT INTO ".concat(dbConfig.tableName, " (").concat(dbConfig.catType, ") VALUES (?)"), [value], function (error, results, fields) { return __awaiter(_this, void 0, void 0, function () {
-                                            return __generator(this, function (_a) {
-                                                if (error) {
-                                                    resolve(false);
-                                                }
-                                                else {
-                                                    resolve(true);
-                                                }
-                                                return [2 /*return*/];
-                                            });
-                                        }); })];
-                                case 1:
-                                    _a.sent();
-                                    return [2 /*return*/];
-                            }
-                        });
-                    }); })];
-            });
-        });
-    };
-    DatabaseManager.prototype.checkSecTable = function (value, table) {
-        return __awaiter(this, void 0, void 0, function () {
-            var dbConfig;
-            var _this = this;
-            return __generator(this, function (_a) {
-                dbConfig = this.getSecTableConfig(table);
-                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0: return [4 /*yield*/, this.sqlConnection.query("SELECT id FROM ".concat(dbConfig.tableName, " WHERE ").concat(dbConfig.catType, " = ?"), [value], function (error, result, fields) {
-                                        if (result.length > 0) {
-                                            resolve(parseInt(result[0].id));
-                                        }
-                                        else {
-                                            resolve(0);
-                                        }
-                                    })];
-                                case 1:
-                                    _a.sent();
-                                    return [2 /*return*/];
-                            }
-                        });
-                    }); })];
-            });
-        });
-    };
-    DatabaseManager.prototype.provideSecTable = function (value, table) {
-        return __awaiter(this, void 0, void 0, function () {
-            var _this = this;
-            return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                        var secId, finalId, _a;
-                        return __generator(this, function (_b) {
-                            switch (_b.label) {
-                                case 0: return [4 /*yield*/, this.checkSecTable(value, table)];
-                                case 1:
-                                    secId = _b.sent();
-                                    if (!(secId === 0)) return [3 /*break*/, 4];
-                                    return [4 /*yield*/, this.addToSecTable(value, table)];
-                                case 2:
-                                    _b.sent();
-                                    _a = resolve;
-                                    return [4 /*yield*/, this.checkSecTable(value, table)];
-                                case 3:
-                                    _a.apply(void 0, [_b.sent()]);
-                                    return [3 /*break*/, 5];
-                                case 4:
-                                    resolve(secId);
-                                    _b.label = 5;
-                                case 5: return [2 /*return*/];
-                            }
-                        });
-                    }); })];
-            });
-        });
-    };
-    DatabaseManager.prototype.getSecTableConfig = function (table) {
-        var catType;
-        var tableName;
-        switch (table) {
-            case tables_1["default"].CATEGORY:
-                catType = "Category";
-                tableName = "category";
-                break;
-            case tables_1["default"].SUBCATEGORY:
-                catType = "Category";
-                tableName = "subcategory";
-                break;
-            case tables_1["default"].ORIGIN:
-                catType = "Origin";
-                tableName = "origin";
-                break;
-            default:
-                return null;
-        }
-        return { catType: catType, tableName: tableName };
-    };
     DatabaseManager.prototype.generateErrorObj = function (errorCode) {
-        return ({ error: errorCode,
-            name: "",
-            detail: "",
+        return ({
+            error: errorCode,
             code: "",
-            contents: 0,
-            packageInfo: 0,
-            description: "",
-            origin: "",
-            mainCat: "",
-            subCat: "",
-            manufacturer: "" });
+            name: "",
+            weight: "",
+            manufacturer: "",
+            packing: "",
+            category: [],
+            allergen: [],
+            badArgs: [],
+            goodArgs: [],
+            commonInfo: [],
+            nutriScore: "",
+            ecoScore: ""
+        });
     };
     return DatabaseManager;
 }());

@@ -38,14 +38,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var webScraper_1 = require("./src/classes/eanSource/webScraper");
 var databaseManager_1 = require("./src/classes/db/databaseManager");
-var unknownCodeSystem_1 = require("./src/classes/unknownCodeSystem/unknownCodeSystem");
 var cors = require("cors");
 var express = require("express");
 var app = express();
 var port = 3014;
 //const dbMng:DatabaseManager = new DatabaseManager("localhost", "system", "Iwaaz2001g!", "cleverchopdb");
 var dbMng = new databaseManager_1["default"]("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724", "heroku_554b26e8f85d455");
-var unknownSys = new unknownCodeSystem_1["default"](dbMng, true);
 app.use(cors());
 var eanSource = new webScraper_1["default"]();
 app.get("/", function (req, res) {
@@ -60,36 +58,7 @@ app.get("/api/sendCode/:code", function (req, res) { return __awaiter(void 0, vo
                 result = _a.sent();
                 console.log("Result: ");
                 console.log(result);
-                if (result.error === 1) {
-                    dbMng.writeUnknownEan(req.params.code);
-                }
                 res.send(JSON.stringify(result));
-                return [2 /*return*/];
-        }
-    });
-}); });
-app.get("/api/admin/addtodb", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var newCode, parsedObj;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, unknownSys.getCodeFromUnknownTable()];
-            case 1:
-                newCode = _a.sent();
-                parsedObj = { code: newCode };
-                res.send(JSON.stringify(parsedObj));
-                return [2 /*return*/];
-        }
-    });
-}); });
-app.get("/api/admin/validateUnknown/:code", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var validationState, validatedObj;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, unknownSys.validateCode(req.params.code)];
-            case 1:
-                validationState = _a.sent();
-                validatedObj = { validated: validationState };
-                res.send(JSON.stringify(validatedObj));
                 return [2 /*return*/];
         }
     });

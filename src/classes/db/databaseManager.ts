@@ -1,6 +1,6 @@
 var mysql = require("mysql");
 import Product, { MinimalProduct } from "../static/Product";
-import Tables from "../../enums/tables";
+import Tables, {HelpTables} from "../../enums/tables";
 import EanApiController from "../eanSource/eanApiController";
 import InfoSource from "../eanSource/infoSource";
 import NetworkProvider from "../network/networkProvider";
@@ -64,10 +64,31 @@ class DatabaseManager {
     return this.connectionState;
   }
 
+
+  private async doQuery(queryStr:string):Promise<any>
+  {
+      return new Promise(async(resolve, reject) => {
+
+          this.sqlConnection.query(queryStr, (err:any, result:any) => 
+          {
+              if(err)
+              {
+                reject(null);
+              }
+              else
+              {
+                  resolve(result);
+              }
+          });
+
+
+      });
+  }
+
   public async provideProduct(ean: string): Promise<MinimalProduct> 
   {
     
-    return new Promise(async (resolve, reject) => {resolve(null)}
+    throw("Not implemented yet");
   }
 
   
@@ -108,8 +129,181 @@ class DatabaseManager {
     });
   }
 
+
+
+
+
   private async addProduct(prod: MinimalProduct) {
-   
+      //TODO: Provide all secundary tables
+              //-Category
+              //-Allergen
+              //-Packing
+
+      //Category
+      this.provideMultipleSubtable(Tables.CATEGORY, prod.category);
+      //Allergen
+      this.provideMultipleSubtable(Tables.ALLERGEN, prod.allergen);
+      //Packing
+      let packingId:number = await this.provideSubtable(Tables.PACKING, prod.packing);
+      //Manufacturer
+      let manufacturerId:number = await this.provideSubtable(Tables.MANUFACTURER, prod.manufacturer);
+      //NutriScore
+      let nutriScoreId:number = await this.provideSubtable(Tables.NUTRISCORE, prod.nutriScore);
+      //EcoScore
+      let ecoScoreId:number = await this.provideSubtable(Tables.ECOSCORE, prod.ecoScore);
+
+      
+
+
+
+      
+  }
+
+  private async addToSubtable(tab:Tables, word:string)
+  {
+        let tableName:string = this.resolveTablesName(tab);
+        let sqlQuery:string = `INSERT INTO ${tableName} VALUES (${word});`
+        await this.sqlConnection.query(sqlQuery);
+  }
+
+  private async checkSubTable(tab:Tables, word:string):Promise<number>
+  {
+      let tableName:string = this.resolveTablesName(tab);
+      let sqlQuery:string = `SELECT id FROM ${tableName} WHERE name = ${word}`;
+
+      return new Promise(async(resolve, reject) => {
+
+          let result:string[] = await this.sqlConnection.query(sqlQuery);
+
+          if(result.length === 0)
+          {
+              resolve(parseInt(result[0]));
+          }
+          else
+          {
+              resolve(-1);
+          }
+      });
+
+  }
+
+  private async  provideMultipleSubtable(tab:Tables, word:string[])
+  {
+        for(let i = 0; i < word.length; i++)
+        {
+            await this.provideSubtable(tab, word[i]);
+        }
+  }
+
+  private async provideSubtable(tab:Tables, word:string):Promise<number>
+  {
+        let id:number = await this.checkSubTable(tab, word);
+
+        if(id === -1)
+        {
+           await this.addToSubtable(tab, word);
+           return this.provideSubtable(tab, word);
+        }
+        else
+        {
+            return id;
+        }
+  } 
+
+
+  private async addContableEntry(HelpTable:HelpTables, productId:string, elementId:string):Promise<number>
+  {
+      let tableName:string = this.resolveHelptableName(HelpTable);
+
+      let sqlQuery:string = `INSER INTO ${tableName} (productId, elementId) VALUES (${productId}, ${elementId});`;
+
+      return new Promise(async(resolve, reject) => {
+
+          await this.doQuery(sqlQuery);
+
+
+
+      });
+
+
+
+  }
+
+  private async getConnectionId(helpTable:HelpTables, productId:string, elementId:string):Promise<number>
+  {
+      let tableName = this.resolveHelptableName(helpTable);
+
+      let sqlQuery:string = `SELECT id FROM ${tableName} WHERE productId = ${productId} AND elementId = ${elementId};`;
+
+      return new Promise(async(resolve, reject) => {
+
+        let result:string[] = await this.doQuery(sqlQuery);
+        
+        if(result.length === 0)
+        {
+            resolve(-1);
+        }
+        else
+        {
+          resolve(parseInt(result[0]));
+        }
+
+      });
+  }
+
+
+
+
+  private resolveTablesName(tab:Tables):string
+  {
+      switch(tab)
+      {
+        case Tables.PRODUCT:
+            return "Product";
+          break;
+        case Tables.ALLERGEN:
+          return "Allergen";
+          break;
+        case Tables.CATEGORY:
+          return "Category";
+          break;
+        case Tables.ECOSCORE:
+          return "Score";
+          break;
+        case Tables.NUTRISCORE:
+          return "NutriScore";
+          break;
+        case Tables.PACKING:
+          return "Packing";
+          break;
+        case Tables.MANUFACTURER:
+          return "Manufacturer";
+          break;
+        default:
+            throw("The input is not a Table!");
+          break;
+      }
+  }
+
+
+  private resolveHelptableName(tab:HelpTables):string
+  {
+      switch(tab)
+      {
+        case HelpTables.ProductAllergen:
+          return "ProductAllergen"
+          break;
+        case HelpTables.ProductArgument:
+          return "ProductArgument";
+          break;
+        case HelpTables.ProductCategory:
+          return "ProductCategory";
+          break;
+        default:
+          throw("The input is not a HelpTable");
+
+      }
+        
   }
 
  
@@ -134,8 +328,21 @@ class DatabaseManager {
 
   private generateErrorObj(errorCode:number):MinimalProduct
   {
-      return({error: errorCode,
-             });
+      return({
+        error: errorCode,
+        code: "",
+        name: "",
+        weight: "",
+        manufacturer: "",
+        packing: "",
+        category: [],
+        allergen: [],
+        badArgs: [],
+        goodArgs: [],
+        commonInfo: [],
+        nutriScore: "",
+        ecoScore: "",
+      });
   }
 
 
