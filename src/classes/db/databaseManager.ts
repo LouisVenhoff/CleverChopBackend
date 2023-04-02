@@ -111,16 +111,8 @@ class DatabaseManager {
           }
           
           if (checkedRes.length === 0) {
-            let Product: MinimalProduct = await this.eanSource.requestEan(ean);
-            if(Product.error !== 0)
-            {
-                reject(Product.error);
-                return;
-            }
-            await this.addProduct(Product);
-            this.findProduct(ean).then((e: number) => {
-              resolve(e);
-            });
+              let currentProduct:MinimalProduct = await this.eanSource.requestEan(ean);
+              this.addProduct(currentProduct);
           } else {
             resolve(checkedRes[0].id);
           }
@@ -152,10 +144,11 @@ class DatabaseManager {
       //EcoScore
       let ecoScoreId:number = await this.provideSubtable(Tables.ECOSCORE, prod.ecoScore);
 
-      
+      await this.doQuery(`INSERT INTO Product (name, ean,  weight, manufacturer, packing, nutriScore, ecoScore) VALUES ("${prod.name}", "${prod.code}" ,"${prod.weight}, "${manufacturerId}", "${packingId}", "${nutriScoreId}", "${ecoScoreId}")`);
 
+      let productId:number = await this.findProduct(prod.code);
 
-
+      this.processConnectionArr(HelpTables.ProductCategory, productId, prod.category);
       
   }
 
@@ -211,22 +204,29 @@ class DatabaseManager {
   } 
 
 
-  private async addContableEntry(HelpTable:HelpTables, productId:string, elementId:string):Promise<number>
+  private async addContableEntry(helpTable:HelpTables, productId:number, elementId:string):Promise<number>
   {
-      let tableName:string = this.resolveHelptableName(HelpTable);
+      let tableName:string = this.resolveHelptableName(helpTable);
 
-      let sqlQuery:string = `INSER INTO ${tableName} (productId, elementId) VALUES (${productId}, ${elementId});`;
+      let sqlQuery:string = `INSERT INTO ${tableName} (productId, elementId) VALUES (${productId}, ${elementId});`;
+
+      let checkQuery:string = `SELECT id FROM ${tableName} WHERE productId = ${productId} AND elementId = ${elementId};`;
 
       return new Promise(async(resolve, reject) => {
 
-          await this.doQuery(sqlQuery);
+          await this.doQuery(sqlQuery); //Insert Query
+          let checkResult:string[] = await this.doQuery(checkQuery);
 
-
-
+          resolve(parseInt(checkResult[0]));
       });
+  }
 
-
-
+  private async processConnectionArr(helpTable:HelpTables, productId:number, elementIds:string[])
+  {
+      for(let i = 0; i < elementIds.length; i++)
+      {
+        await this.addContableEntry(helpTable, productId, elementIds[i]);
+      }
   }
 
   private async getConnectionId(helpTable:HelpTables, productId:string, elementId:string):Promise<number>

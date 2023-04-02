@@ -93,6 +93,26 @@ var DatabaseManager = /** @class */ (function () {
     DatabaseManager.prototype.getConnectionState = function () {
         return this.connectionState;
     };
+    DatabaseManager.prototype.doQuery = function (queryStr) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        return __generator(this, function (_a) {
+                            this.sqlConnection.query(queryStr, function (err, result) {
+                                if (err) {
+                                    reject(null);
+                                }
+                                else {
+                                    resolve(result);
+                                }
+                            });
+                            return [2 /*return*/];
+                        });
+                    }); })];
+            });
+        });
+    };
     DatabaseManager.prototype.provideProduct = function (ean) {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -150,8 +170,35 @@ var DatabaseManager = /** @class */ (function () {
     };
     DatabaseManager.prototype.addProduct = function (prod) {
         return __awaiter(this, void 0, void 0, function () {
+            var packingId, manufacturerId, nutriScoreId, ecoScoreId;
             return __generator(this, function (_a) {
-                return [2 /*return*/];
+                switch (_a.label) {
+                    case 0:
+                        //TODO: Provide all secundary tables
+                        //-Category
+                        //-Allergen
+                        //-Packing
+                        //Category
+                        this.provideMultipleSubtable(tables_1["default"].CATEGORY, prod.category);
+                        //Allergen
+                        this.provideMultipleSubtable(tables_1["default"].ALLERGEN, prod.allergen);
+                        return [4 /*yield*/, this.provideSubtable(tables_1["default"].PACKING, prod.packing)];
+                    case 1:
+                        packingId = _a.sent();
+                        return [4 /*yield*/, this.provideSubtable(tables_1["default"].MANUFACTURER, prod.manufacturer)];
+                    case 2:
+                        manufacturerId = _a.sent();
+                        return [4 /*yield*/, this.provideSubtable(tables_1["default"].NUTRISCORE, prod.nutriScore)];
+                    case 3:
+                        nutriScoreId = _a.sent();
+                        return [4 /*yield*/, this.provideSubtable(tables_1["default"].ECOSCORE, prod.ecoScore)];
+                    case 4:
+                        ecoScoreId = _a.sent();
+                        return [4 /*yield*/, this.doQuery("INSERT INTO Product (name, weight, manufacturer, packing, nutriScore, ecoScore) VALUES (\"".concat(prod.name, "\", \"").concat(prod.weight, ", \"").concat(manufacturerId, "\", \"").concat(packingId, "\", \"").concat(nutriScoreId, "\", \"").concat(ecoScoreId, "\")"))];
+                    case 5:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
             });
         });
     };
@@ -159,10 +206,157 @@ var DatabaseManager = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var tableName, sqlQuery;
             return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        tableName = this.resolveTablesName(tab);
+                        sqlQuery = "INSERT INTO ".concat(tableName, " VALUES (").concat(word, ");");
+                        return [4 /*yield*/, this.sqlConnection.query(sqlQuery)];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    DatabaseManager.prototype.checkSubTable = function (tab, word) {
+        return __awaiter(this, void 0, void 0, function () {
+            var tableName, sqlQuery;
+            var _this = this;
+            return __generator(this, function (_a) {
                 tableName = this.resolveTablesName(tab);
-                sqlQuery = "INSERT INTO ".concat(tableName, " VALUES (").concat(word, ");");
-                this.sqlConnection.query(sqlQuery);
-                return [2 /*return*/];
+                sqlQuery = "SELECT id FROM ".concat(tableName, " WHERE name = ").concat(word);
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var result;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, this.sqlConnection.query(sqlQuery)];
+                                case 1:
+                                    result = _a.sent();
+                                    if (result.length === 0) {
+                                        resolve(parseInt(result[0]));
+                                    }
+                                    else {
+                                        resolve(-1);
+                                    }
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); })];
+            });
+        });
+    };
+    DatabaseManager.prototype.provideMultipleSubtable = function (tab, word) {
+        return __awaiter(this, void 0, void 0, function () {
+            var i;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        i = 0;
+                        _a.label = 1;
+                    case 1:
+                        if (!(i < word.length)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, this.provideSubtable(tab, word[i])];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3:
+                        i++;
+                        return [3 /*break*/, 1];
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    DatabaseManager.prototype.provideSubtable = function (tab, word) {
+        return __awaiter(this, void 0, void 0, function () {
+            var id;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.checkSubTable(tab, word)];
+                    case 1:
+                        id = _a.sent();
+                        if (!(id === -1)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, this.addToSubtable(tab, word)];
+                    case 2:
+                        _a.sent();
+                        return [2 /*return*/, this.provideSubtable(tab, word)];
+                    case 3: return [2 /*return*/, id];
+                }
+            });
+        });
+    };
+    DatabaseManager.prototype.addContableEntry = function (helpTable, productId, elementId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var tableName, sqlQuery, checkQuery;
+            var _this = this;
+            return __generator(this, function (_a) {
+                tableName = this.resolveHelptableName(helpTable);
+                sqlQuery = "INSERT INTO ".concat(tableName, " (productId, elementId) VALUES (").concat(productId, ", ").concat(elementId, ");");
+                checkQuery = "SELECT id FROM ".concat(tableName, " WHERE productId = ").concat(productId, " AND elementId = ").concat(elementId, ";");
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var checkResult;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, this.doQuery(sqlQuery)];
+                                case 1:
+                                    _a.sent(); //Insert Query
+                                    return [4 /*yield*/, this.doQuery(checkQuery)];
+                                case 2:
+                                    checkResult = _a.sent();
+                                    resolve(parseInt(checkResult[0]));
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); })];
+            });
+        });
+    };
+    DatabaseManager.prototype.processConnectionArr = function (helpTable, productId, elementIds) {
+        return __awaiter(this, void 0, void 0, function () {
+            var i;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        i = 0;
+                        _a.label = 1;
+                    case 1:
+                        if (!(i < elementIds.length)) return [3 /*break*/, 4];
+                        return [4 /*yield*/, this.addContableEntry(helpTable, productId, elementIds[i])];
+                    case 2:
+                        _a.sent();
+                        _a.label = 3;
+                    case 3:
+                        i++;
+                        return [3 /*break*/, 1];
+                    case 4: return [2 /*return*/];
+                }
+            });
+        });
+    };
+    DatabaseManager.prototype.getConnectionId = function (helpTable, productId, elementId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var tableName, sqlQuery;
+            var _this = this;
+            return __generator(this, function (_a) {
+                tableName = this.resolveHelptableName(helpTable);
+                sqlQuery = "SELECT id FROM ".concat(tableName, " WHERE productId = ").concat(productId, " AND elementId = ").concat(elementId, ";");
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var result;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, this.doQuery(sqlQuery)];
+                                case 1:
+                                    result = _a.sent();
+                                    if (result.length === 0) {
+                                        resolve(-1);
+                                    }
+                                    else {
+                                        resolve(parseInt(result[0]));
+                                    }
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); })];
             });
         });
     };
@@ -192,6 +386,21 @@ var DatabaseManager = /** @class */ (function () {
             default:
                 throw ("The input is not a Table!");
                 break;
+        }
+    };
+    DatabaseManager.prototype.resolveHelptableName = function (tab) {
+        switch (tab) {
+            case tables_1.HelpTables.ProductAllergen:
+                return "ProductAllergen";
+                break;
+            case tables_1.HelpTables.ProductArgument:
+                return "ProductArgument";
+                break;
+            case tables_1.HelpTables.ProductCategory:
+                return "ProductCategory";
+                break;
+            default:
+                throw ("The input is not a HelpTable");
         }
     };
     DatabaseManager.prototype.proveIsNotNaN = function (nr) {
