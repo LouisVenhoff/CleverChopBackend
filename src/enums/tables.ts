@@ -8,6 +8,7 @@ enum Tables
     NUTRISCORE,
     PRODUCT,
     ARGUMENTS,
+    EFFECT,
 }
 
 

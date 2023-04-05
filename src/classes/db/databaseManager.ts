@@ -65,7 +65,7 @@ class DatabaseManager {
   }
 
 
-  private async doQuery(queryStr:string):Promise<any>
+  private async doQuery(queryStr:string):Promise<string[]>
   {
       return new Promise(async(resolve, reject) => {
 
@@ -148,7 +148,8 @@ class DatabaseManager {
 
       let productId:number = await this.findProduct(prod.code);
 
-      this.processConnectionArr(HelpTables.ProductCategory, productId, prod.category);
+      this.createConnectionArr(HelpTables.ProductCategory,Tables.CATEGORY, productId, prod.category);
+      this.createConnectionArr(HelpTables.ProductAllergen, Tables.ALLERGEN, productId, prod.allergen);
       
   }
 
@@ -203,12 +204,70 @@ class DatabaseManager {
         }
   } 
 
+  private async provideArgumentSubtable(effect:string, text:string):Promise<number>
+  {
+      let checkResult:number = await this.checkArgumentSubtable(text);
+      
 
-  private async addContableEntry(helpTable:HelpTables, productId:number, elementId:string):Promise<number>
+
+      return new Promise(async(resolve, reject) => {
+
+
+        if(checkResult != -1)
+        {
+          resolve(checkResult);
+        }
+        else
+        {
+          resolve(await this.addArgument(effect, text));
+        }
+
+
+      });
+
+  }
+
+  private async checkArgumentSubtable(text:string):Promise<number>
+  {
+      let sqlQuery:string = `SELECT id FROM Argument WHERE text = ${text}`;
+
+      return new Promise(async(resolve, reject) => {
+
+          let results:string[] = await this.doQuery(sqlQuery);
+
+          if(results.length == 0)
+          {
+            resolve(-1);
+          }
+          else
+          {
+            resolve(parseInt(results[0]));
+          }
+      });
+  }
+
+  private async addArgument(effect:string, argument:string):Promise<number>
+  {
+      let effectId:number = await this.provideSubtable(Tables.EFFECT, effect);
+
+      let sqlQuery:string = `INSERT INTO Argument (text, effectId) VALUES ("${argument}","${effect}")`;
+
+      return new Promise(async (resolve, reject) => 
+      {
+          await this.doQuery(sqlQuery);
+          resolve(await this.checkArgumentSubtable(argument));
+      });
+
+
+      
+  }
+
+
+  private async addContableEntry(helpTable:HelpTables, productId:number, elementId:number):Promise<number>
   {
       let tableName:string = this.resolveHelptableName(helpTable);
 
-      let sqlQuery:string = `INSERT INTO ${tableName} (productId, elementId) VALUES (${productId}, ${elementId});`;
+      let sqlQuery:string = `INSERT INTO ${tableName} (productId, elementId) VALUES ("${productId}", "${elementId}");`;
 
       let checkQuery:string = `SELECT id FROM ${tableName} WHERE productId = ${productId} AND elementId = ${elementId};`;
 
@@ -221,11 +280,11 @@ class DatabaseManager {
       });
   }
 
-  private async processConnectionArr(helpTable:HelpTables, productId:number, elementIds:string[])
+  private async createConnectionArr(helpTable:HelpTables, subTable:Tables, productId:number, elements:string[])
   {
-      for(let i = 0; i < elementIds.length; i++)
+      for(let i = 0; i < elements.length; i++)
       {
-        await this.addContableEntry(helpTable, productId, elementIds[i]);
+        await this.addContableEntry(helpTable, productId, await this.provideSubtable(subTable, elements[i]));
       }
   }
 
@@ -248,6 +307,24 @@ class DatabaseManager {
           resolve(parseInt(result[0]));
         }
 
+      });
+  }
+
+  private async getAllConnectionIds(helpTabs:HelpTables, productId:number):Promise<number[]>
+  {
+      
+      let sqlQuery:string = `SELECT id FROM ${this.resolveHelptableName(helpTabs)} WHERE productId = ${productId}`;
+    
+      return new Promise(async(resolve, reject) => {
+
+        let results:string[] = await this.doQuery(sqlQuery);
+
+        let resultNumbers:number[] = [];
+        
+        for(let i = 0; i < results.length; i++)
+        {
+            resultNumbers.push(parseInt(results[i]));
+        }
       });
   }
 
@@ -278,6 +355,9 @@ class DatabaseManager {
           break;
         case Tables.MANUFACTURER:
           return "Manufacturer";
+          break;
+        case Tables.EFFECT:
+          return "Effect";
           break;
         default:
             throw("The input is not a Table!");
