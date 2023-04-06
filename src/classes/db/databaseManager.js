@@ -115,8 +115,67 @@ var DatabaseManager = /** @class */ (function () {
     };
     DatabaseManager.prototype.provideProduct = function (ean) {
         return __awaiter(this, void 0, void 0, function () {
+            var sqlQuery;
+            var _this = this;
             return __generator(this, function (_a) {
-                throw ("Not implemented yet");
+                console.log("Started");
+                sqlQuery = "SELECT product.name, code, weight, manufacturer.name as manufacturer, packing.name as packing, nutriScore.name as nutriScore, ecoScore.name as ecoScore \n    FROM Product\n    JOIN manufacturer ON manufacturer.id = manufacturer \n    JOIN packing ON packing.id = packing\n    JOIN nutriScore ON nutriScore.id = nutriScore\n    JOIN ecoScore ON ecoScore.id = ecoScore";
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var results, commonArgs, badArgs, goodArgs, allergens, categorys, outElement, newProduct;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, this.doQuery(sqlQuery)];
+                                case 1:
+                                    results = _a.sent();
+                                    if (!(results.length != 0)) return [3 /*break*/, 7];
+                                    return [4 /*yield*/, this.getArguments("common", results[0].id)];
+                                case 2:
+                                    commonArgs = _a.sent();
+                                    return [4 /*yield*/, this.getArguments("bad", results[0].id)];
+                                case 3:
+                                    badArgs = _a.sent();
+                                    return [4 /*yield*/, this.getArguments("good", results[0].id)];
+                                case 4:
+                                    goodArgs = _a.sent();
+                                    return [4 /*yield*/, this.getAllergens(results[0].id)];
+                                case 5:
+                                    allergens = _a.sent();
+                                    return [4 /*yield*/, this.getCategorys(results[0].id)];
+                                case 6:
+                                    categorys = _a.sent();
+                                    outElement = {
+                                        error: 0,
+                                        code: results[0].code,
+                                        name: results[0].name,
+                                        weight: results[0].weight,
+                                        manufacturer: results[0].manufacturer,
+                                        packing: results[0].packing,
+                                        category: [],
+                                        allergen: [],
+                                        badArgs: [],
+                                        goodArgs: [],
+                                        commonInfo: [],
+                                        nutriScore: results[0].nutriScore,
+                                        ecoScore: results[0].ecoScore
+                                    };
+                                    return [3 /*break*/, 10];
+                                case 7:
+                                    console.log("Got here!");
+                                    return [4 /*yield*/, this.eanSource.requestEan(ean)];
+                                case 8:
+                                    newProduct = _a.sent();
+                                    console.log("Product Loaded:");
+                                    console.log(newProduct);
+                                    return [4 /*yield*/, this.addProduct(newProduct)];
+                                case 9:
+                                    _a.sent();
+                                    console.log("Product added!");
+                                    resolve(newProduct);
+                                    _a.label = 10;
+                                case 10: return [2 /*return*/];
+                            }
+                        });
+                    }); })];
             });
         });
     };
@@ -128,7 +187,7 @@ var DatabaseManager = /** @class */ (function () {
                         var _this = this;
                         return __generator(this, function (_a) {
                             this.sqlConnection.query("SELECT id FROM product WHERE Code = ?", [ean], function (error, results, fields) { return __awaiter(_this, void 0, void 0, function () {
-                                var checkedRes, Product_1;
+                                var checkedRes, currentProduct;
                                 return __generator(this, function (_a) {
                                     switch (_a.label) {
                                         case 0:
@@ -140,25 +199,16 @@ var DatabaseManager = /** @class */ (function () {
                                             if (results !== undefined) {
                                                 checkedRes = results;
                                             }
-                                            if (!(checkedRes.length === 0)) return [3 /*break*/, 3];
+                                            if (!(checkedRes.length === 0)) return [3 /*break*/, 2];
                                             return [4 /*yield*/, this.eanSource.requestEan(ean)];
                                         case 1:
-                                            Product_1 = _a.sent();
-                                            if (Product_1.error !== 0) {
-                                                reject(Product_1.error);
-                                                return [2 /*return*/];
-                                            }
-                                            return [4 /*yield*/, this.addProduct(Product_1)];
+                                            currentProduct = _a.sent();
+                                            this.addProduct(currentProduct);
+                                            return [3 /*break*/, 3];
                                         case 2:
-                                            _a.sent();
-                                            this.findProduct(ean).then(function (e) {
-                                                resolve(e);
-                                            });
-                                            return [3 /*break*/, 4];
-                                        case 3:
                                             resolve(checkedRes[0].id);
-                                            _a.label = 4;
-                                        case 4: return [2 /*return*/];
+                                            _a.label = 3;
+                                        case 3: return [2 /*return*/];
                                     }
                                 });
                             }); });
@@ -170,7 +220,7 @@ var DatabaseManager = /** @class */ (function () {
     };
     DatabaseManager.prototype.addProduct = function (prod) {
         return __awaiter(this, void 0, void 0, function () {
-            var packingId, manufacturerId, nutriScoreId, ecoScoreId;
+            var allArgs, packingId, manufacturerId, nutriScoreId, ecoScoreId, productId;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -182,6 +232,11 @@ var DatabaseManager = /** @class */ (function () {
                         this.provideMultipleSubtable(tables_1["default"].CATEGORY, prod.category);
                         //Allergen
                         this.provideMultipleSubtable(tables_1["default"].ALLERGEN, prod.allergen);
+                        //Arguments
+                        this.provideMultipleArguments("average", prod.commonInfo);
+                        this.provideMultipleArguments("bad", prod.badArgs);
+                        this.provideMultipleArguments("good", prod.goodArgs);
+                        allArgs = prod.commonInfo.concat(prod.badArgs, prod.goodArgs);
                         return [4 /*yield*/, this.provideSubtable(tables_1["default"].PACKING, prod.packing)];
                     case 1:
                         packingId = _a.sent();
@@ -194,9 +249,15 @@ var DatabaseManager = /** @class */ (function () {
                         return [4 /*yield*/, this.provideSubtable(tables_1["default"].ECOSCORE, prod.ecoScore)];
                     case 4:
                         ecoScoreId = _a.sent();
-                        return [4 /*yield*/, this.doQuery("INSERT INTO Product (name, weight, manufacturer, packing, nutriScore, ecoScore) VALUES (\"".concat(prod.name, "\", \"").concat(prod.weight, ", \"").concat(manufacturerId, "\", \"").concat(packingId, "\", \"").concat(nutriScoreId, "\", \"").concat(ecoScoreId, "\")"))];
+                        return [4 /*yield*/, this.doQuery("INSERT INTO Product (name, ean,  weight, manufacturer, packing, nutriScore, ecoScore) VALUES (\"".concat(prod.name, "\", \"").concat(prod.code, "\" ,\"").concat(prod.weight, ", \"").concat(manufacturerId, "\", \"").concat(packingId, "\", \"").concat(nutriScoreId, "\", \"").concat(ecoScoreId, "\")"))];
                     case 5:
                         _a.sent();
+                        return [4 /*yield*/, this.findProduct(prod.code)];
+                    case 6:
+                        productId = _a.sent();
+                        this.createConnectionArr(tables_1.HelpTables.ProductCategory, tables_1["default"].CATEGORY, productId, prod.category);
+                        this.createConnectionArr(tables_1.HelpTables.ProductAllergen, tables_1["default"].ALLERGEN, productId, prod.allergen);
+                        this.createConnectionArr(tables_1.HelpTables.ProductArgument, tables_1["default"].ARGUMENTS, productId, allArgs);
                         return [2 /*return*/];
                 }
             });
@@ -209,7 +270,7 @@ var DatabaseManager = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         tableName = this.resolveTablesName(tab);
-                        sqlQuery = "INSERT INTO ".concat(tableName, " VALUES (").concat(word, ");");
+                        sqlQuery = "INSERT INTO ".concat(tableName, " VALUES (\"").concat(word, "\");");
                         return [4 /*yield*/, this.sqlConnection.query(sqlQuery)];
                     case 1:
                         _a.sent();
@@ -285,13 +346,110 @@ var DatabaseManager = /** @class */ (function () {
             });
         });
     };
+    DatabaseManager.prototype.provideMultipleArguments = function (effect, text) {
+        return __awaiter(this, void 0, void 0, function () {
+            var i;
+            return __generator(this, function (_a) {
+                for (i = 0; i < text.length; i++) {
+                    this.provideArgumentSubtable(effect, text[i]);
+                }
+                return [2 /*return*/];
+            });
+        });
+    };
+    DatabaseManager.prototype.provideArgumentSubtable = function (effect, text) {
+        return __awaiter(this, void 0, void 0, function () {
+            var checkResult;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.checkArgumentSubtable(text)];
+                    case 1:
+                        checkResult = _a.sent();
+                        return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                                var _a;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
+                                        case 0:
+                                            if (!(checkResult != -1)) return [3 /*break*/, 1];
+                                            resolve(checkResult);
+                                            return [3 /*break*/, 3];
+                                        case 1:
+                                            _a = resolve;
+                                            return [4 /*yield*/, this.addArgument(effect, text)];
+                                        case 2:
+                                            _a.apply(void 0, [_b.sent()]);
+                                            _b.label = 3;
+                                        case 3: return [2 /*return*/];
+                                    }
+                                });
+                            }); })];
+                }
+            });
+        });
+    };
+    DatabaseManager.prototype.checkArgumentSubtable = function (text) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sqlQuery;
+            var _this = this;
+            return __generator(this, function (_a) {
+                sqlQuery = "SELECT id FROM Argument WHERE text = ".concat(text);
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var results;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, this.doQuery(sqlQuery)];
+                                case 1:
+                                    results = _a.sent();
+                                    if (results.length == 0) {
+                                        resolve(-1);
+                                    }
+                                    else {
+                                        resolve(parseInt(results[0]));
+                                    }
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); })];
+            });
+        });
+    };
+    DatabaseManager.prototype.addArgument = function (effect, argument) {
+        return __awaiter(this, void 0, void 0, function () {
+            var effectId, sqlQuery;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.provideSubtable(tables_1["default"].EFFECT, effect)];
+                    case 1:
+                        effectId = _a.sent();
+                        sqlQuery = "INSERT INTO Argument (text, effectId) VALUES (\"".concat(argument, "\",\"").concat(effect, "\")");
+                        return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                                var _a;
+                                return __generator(this, function (_b) {
+                                    switch (_b.label) {
+                                        case 0: return [4 /*yield*/, this.doQuery(sqlQuery)];
+                                        case 1:
+                                            _b.sent();
+                                            _a = resolve;
+                                            return [4 /*yield*/, this.checkArgumentSubtable(argument)];
+                                        case 2:
+                                            _a.apply(void 0, [_b.sent()]);
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); })];
+                }
+            });
+        });
+    };
     DatabaseManager.prototype.addContableEntry = function (helpTable, productId, elementId) {
         return __awaiter(this, void 0, void 0, function () {
             var tableName, sqlQuery, checkQuery;
             var _this = this;
             return __generator(this, function (_a) {
                 tableName = this.resolveHelptableName(helpTable);
-                sqlQuery = "INSERT INTO ".concat(tableName, " (productId, elementId) VALUES (").concat(productId, ", ").concat(elementId, ");");
+                sqlQuery = "INSERT INTO ".concat(tableName, " (productId, elementId) VALUES (\"").concat(productId, "\", \"").concat(elementId, "\");");
                 checkQuery = "SELECT id FROM ".concat(tableName, " WHERE productId = ").concat(productId, " AND elementId = ").concat(elementId, ";");
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var checkResult;
@@ -311,24 +469,27 @@ var DatabaseManager = /** @class */ (function () {
             });
         });
     };
-    DatabaseManager.prototype.processConnectionArr = function (helpTable, productId, elementIds) {
+    DatabaseManager.prototype.createConnectionArr = function (helpTable, subTable, productId, elements) {
         return __awaiter(this, void 0, void 0, function () {
-            var i;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
+            var i, _a, _b;
+            return __generator(this, function (_c) {
+                switch (_c.label) {
                     case 0:
                         i = 0;
-                        _a.label = 1;
+                        _c.label = 1;
                     case 1:
-                        if (!(i < elementIds.length)) return [3 /*break*/, 4];
-                        return [4 /*yield*/, this.addContableEntry(helpTable, productId, elementIds[i])];
-                    case 2:
-                        _a.sent();
-                        _a.label = 3;
+                        if (!(i < elements.length)) return [3 /*break*/, 5];
+                        _a = this.addContableEntry;
+                        _b = [helpTable, productId];
+                        return [4 /*yield*/, this.provideSubtable(subTable, elements[i])];
+                    case 2: return [4 /*yield*/, _a.apply(this, _b.concat([_c.sent()]))];
                     case 3:
+                        _c.sent();
+                        _c.label = 4;
+                    case 4:
                         i++;
                         return [3 /*break*/, 1];
-                    case 4: return [2 /*return*/];
+                    case 5: return [2 /*return*/];
                 }
             });
         });
@@ -360,6 +521,30 @@ var DatabaseManager = /** @class */ (function () {
             });
         });
     };
+    DatabaseManager.prototype.getAllConnectionIds = function (helpTabs, productId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sqlQuery;
+            var _this = this;
+            return __generator(this, function (_a) {
+                sqlQuery = "SELECT id FROM ".concat(this.resolveHelptableName(helpTabs), " WHERE productId = ").concat(productId);
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var results, resultNumbers, i;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, this.doQuery(sqlQuery)];
+                                case 1:
+                                    results = _a.sent();
+                                    resultNumbers = [];
+                                    for (i = 0; i < results.length; i++) {
+                                        resultNumbers.push(parseInt(results[i]));
+                                    }
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); })];
+            });
+        });
+    };
     DatabaseManager.prototype.resolveTablesName = function (tab) {
         switch (tab) {
             case tables_1["default"].PRODUCT:
@@ -382,6 +567,9 @@ var DatabaseManager = /** @class */ (function () {
                 break;
             case tables_1["default"].MANUFACTURER:
                 return "Manufacturer";
+                break;
+            case tables_1["default"].EFFECT:
+                return "Effect";
                 break;
             default:
                 throw ("The input is not a Table!");
@@ -429,6 +617,86 @@ var DatabaseManager = /** @class */ (function () {
             commonInfo: [],
             nutriScore: "",
             ecoScore: ""
+        });
+    };
+    DatabaseManager.prototype.getArguments = function (effect, productId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sqlQuery;
+            var _this = this;
+            return __generator(this, function (_a) {
+                sqlQuery = "SELECT argument.text \n    FROM argument\n    JOIN ProductArgument ON argument.id = ProductArgument.elementid\n    JOIN Product ON productId = Product.id\n    JOIN Effect ON Argument.effectId = Effect.id\n    WHERE Effect.name = \"".concat(effect, "\"\n    AND Product.id = ").concat(productId, ";");
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var outArr, results, i;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    outArr = [];
+                                    return [4 /*yield*/, this.doQuery(sqlQuery)];
+                                case 1:
+                                    results = _a.sent();
+                                    if (results.length == 0) {
+                                        resolve(outArr);
+                                    }
+                                    for (i = 0; i < results.length; i++) {
+                                        outArr.push(results[i].text);
+                                    }
+                                    resolve(outArr);
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); })];
+            });
+        });
+    };
+    DatabaseManager.prototype.getAllergens = function (productId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sqlQuery;
+            var _this = this;
+            return __generator(this, function (_a) {
+                sqlQuery = "SELECT allergen.name\n      FROM allergen\n      JOIN ProductAllergen ON allergen.id = ProductAllergen.elementId\n      JOIN Product ON Product.id = ProductAllergen.productId\n      WHERE Product.id = ".concat(productId, ";");
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var allergens, results, i;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    allergens = [];
+                                    return [4 /*yield*/, this.doQuery(sqlQuery)];
+                                case 1:
+                                    results = _a.sent();
+                                    for (i = 0; i < results.length; i++) {
+                                        allergens.push(results[i]);
+                                    }
+                                    resolve(allergens);
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); })];
+            });
+        });
+    };
+    DatabaseManager.prototype.getCategorys = function (productId) {
+        return __awaiter(this, void 0, void 0, function () {
+            var sqlQuery;
+            var _this = this;
+            return __generator(this, function (_a) {
+                sqlQuery = "SELECT Category.name \n    FROM Category\n    JOIN ProductCategory ON Category.id = ProductCategory.elementId\n    JOIN Product ON Product.id = productCategory.productId\n    WHERE Product.id = ".concat(productId, ";");
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var categorys, results, i;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    categorys = [];
+                                    return [4 /*yield*/, this.doQuery(sqlQuery)];
+                                case 1:
+                                    results = _a.sent();
+                                    for (i = 0; i < results.length; i++) {
+                                        categorys.push(results[i].name);
+                                    }
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); })];
+            });
         });
     };
     return DatabaseManager;

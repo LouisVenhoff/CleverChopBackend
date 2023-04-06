@@ -7,6 +7,7 @@ class WebScraper extends InfoSource {
   private queryUri: string = "https://de.openfoodfacts.org/produkt/";
 
   public async requestEan(ean: string): Promise<MinimalProduct> {
+    
     let productQuery: string = this.queryUri + ean;
 
     return new Promise<MinimalProduct>(async (resolve, reject) => {

@@ -14,8 +14,8 @@ const app = express();
 const port = 3014;
 
 //const dbMng:DatabaseManager = new DatabaseManager("localhost", "system", "Iwaaz2001g!", "cleverchopdb");
-const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724", "heroku_554b26e8f85d455");
-
+//const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724", "heroku_554b26e8f85d455");
+const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b712eb9ae277d5", "865f45a8", "heroku_9e52a98d5b35c1a");
 
 app.use(cors());
 

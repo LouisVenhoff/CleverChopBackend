@@ -11,6 +11,7 @@ var Tables;
     Tables[Tables["NUTRISCORE"] = 5] = "NUTRISCORE";
     Tables[Tables["PRODUCT"] = 6] = "PRODUCT";
     Tables[Tables["ARGUMENTS"] = 7] = "ARGUMENTS";
+    Tables[Tables["EFFECT"] = 8] = "EFFECT";
 })(Tables || (Tables = {}));
 var HelpTables;
 (function (HelpTables) {
