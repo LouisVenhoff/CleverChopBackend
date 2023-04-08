@@ -73,7 +73,7 @@ class DatabaseManager {
           {
               if(err)
               {
-                reject(null);
+                reject(err);
               }
               else
               {
@@ -87,8 +87,8 @@ class DatabaseManager {
 
   public async provideProduct(ean: string): Promise<MinimalProduct> 
   {
-    console.log("Started");
-    let sqlQuery:string = `SELECT product.name, code, weight, manufacturer.name as manufacturer, packing.name as packing, nutriScore.name as nutriScore, ecoScore.name as ecoScore 
+  
+    let sqlQuery:string = `SELECT product.id as id, product.name, code, weight, manufacturer.name as manufacturer, packing.name as packing, nutriScore.name as nutriScore, ecoScore.name as ecoScore 
     FROM Product
     JOIN manufacturer ON manufacturer.id = manufacturer 
     JOIN packing ON packing.id = packing
@@ -98,16 +98,16 @@ class DatabaseManager {
     return new Promise(async(resolve, reject) => 
     {
       let results:any[] = await this.doQuery(sqlQuery);
-      
+     
       if(results.length != 0)
       {
           
           let commonArgs:string[] = await this.getArguments("common", results[0].id);
-          
           let badArgs:string[] = await this.getArguments("bad", results[0].id);
           let goodArgs:string[] = await this.getArguments("good", results[0].id);
           let allergens:string[] = await this.getAllergens(results[0].id);
           let categorys:string[] = await this.getCategorys(results[0].id);
+
 
           let outElement:MinimalProduct = 
           {
@@ -117,14 +117,16 @@ class DatabaseManager {
             weight: results[0].weight,
             manufacturer: results[0].manufacturer,
             packing: results[0].packing,
-            category: [],
-            allergen: [],
-            badArgs: [],
-            goodArgs: [],
-            commonInfo: [],
+            category: categorys,
+            allergen: allergens,
+            badArgs: badArgs,
+            goodArgs: goodArgs,
+            commonInfo: commonArgs,
             nutriScore: results[0].nutriScore,
             ecoScore: results[0].ecoScore,
           }
+
+          console.log(outElement);
       }
       else
       {
@@ -198,7 +200,7 @@ class DatabaseManager {
       await this.doQuery(`INSERT INTO Product (name, ean,  weight, manufacturer, packing, nutriScore, ecoScore) VALUES ("${prod.name}", "${prod.code}" ,"${prod.weight}, "${manufacturerId}", "${packingId}", "${nutriScoreId}", "${ecoScoreId}")`);
 
       let productId:number = await this.findProduct(prod.code);
-
+      
       this.createConnectionArr(HelpTables.ProductCategory,Tables.CATEGORY, productId, prod.category);
       this.createConnectionArr(HelpTables.ProductAllergen, Tables.ALLERGEN, productId, prod.allergen);
       this.createConnectionArr(HelpTables.ProductArgument, Tables.ARGUMENTS, productId, allArgs);
@@ -207,22 +209,21 @@ class DatabaseManager {
   private async addToSubtable(tab:Tables, word:string)
   {
         let tableName:string = this.resolveTablesName(tab);
-        let sqlQuery:string = `INSERT INTO ${tableName} VALUES ("${word}");`
+        let sqlQuery:string = `INSERT INTO ${tableName} (name) VALUES ("${word}");`
         await this.sqlConnection.query(sqlQuery);
   }
 
   private async checkSubTable(tab:Tables, word:string):Promise<number>
   {
       let tableName:string = this.resolveTablesName(tab);
-      let sqlQuery:string = `SELECT id FROM ${tableName} WHERE name = ${word}`;
-
+      let sqlQuery:string = `SELECT id FROM ${tableName} WHERE name = "${word}";`;
+     
       return new Promise(async(resolve, reject) => {
 
-          let result:string[] = await this.sqlConnection.query(sqlQuery);
-
-          if(result.length === 0)
+          let result:any[] = await this.doQuery(sqlQuery);
+          if(result.length !== 0)
           {
-              resolve(parseInt(result[0]));
+              resolve(parseInt(result[0].id));
           }
           else
           {
@@ -243,7 +244,6 @@ class DatabaseManager {
   private async provideSubtable(tab:Tables, word:string):Promise<number>
   {
         let id:number = await this.checkSubTable(tab, word);
-
         if(id === -1)
         {
            await this.addToSubtable(tab, word);
@@ -405,7 +405,7 @@ class DatabaseManager {
           return "Category";
           break;
         case Tables.ECOSCORE:
-          return "Score";
+          return "EcoScore";
           break;
         case Tables.NUTRISCORE:
           return "NutriScore";
@@ -488,7 +488,6 @@ class DatabaseManager {
 
   private async getArguments(effect:string, productId:string):Promise<string[]>
   {
-
     let sqlQuery:string = `SELECT argument.text 
     FROM argument
     JOIN ProductArgument ON argument.id = ProductArgument.elementid
@@ -502,7 +501,7 @@ class DatabaseManager {
         let outArr:string[] = [];
         
         let results:any[] = await this.doQuery(sqlQuery);
-
+  
         if(results.length == 0)
         {
           resolve(outArr);
@@ -560,6 +559,8 @@ class DatabaseManager {
       {
           categorys.push(results[i].name);
       }
+
+      resolve(categorys);
 
     });
   }

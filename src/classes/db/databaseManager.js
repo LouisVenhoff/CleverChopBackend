@@ -101,7 +101,7 @@ var DatabaseManager = /** @class */ (function () {
                         return __generator(this, function (_a) {
                             this.sqlConnection.query(queryStr, function (err, result) {
                                 if (err) {
-                                    reject(null);
+                                    reject(err);
                                 }
                                 else {
                                     resolve(result);
@@ -118,8 +118,7 @@ var DatabaseManager = /** @class */ (function () {
             var sqlQuery;
             var _this = this;
             return __generator(this, function (_a) {
-                console.log("Started");
-                sqlQuery = "SELECT product.name, code, weight, manufacturer.name as manufacturer, packing.name as packing, nutriScore.name as nutriScore, ecoScore.name as ecoScore \n    FROM Product\n    JOIN manufacturer ON manufacturer.id = manufacturer \n    JOIN packing ON packing.id = packing\n    JOIN nutriScore ON nutriScore.id = nutriScore\n    JOIN ecoScore ON ecoScore.id = ecoScore";
+                sqlQuery = "SELECT product.id as id, product.name, code, weight, manufacturer.name as manufacturer, packing.name as packing, nutriScore.name as nutriScore, ecoScore.name as ecoScore \n    FROM Product\n    JOIN manufacturer ON manufacturer.id = manufacturer \n    JOIN packing ON packing.id = packing\n    JOIN nutriScore ON nutriScore.id = nutriScore\n    JOIN ecoScore ON ecoScore.id = ecoScore";
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var results, commonArgs, badArgs, goodArgs, allergens, categorys, outElement, newProduct;
                         return __generator(this, function (_a) {
@@ -150,26 +149,22 @@ var DatabaseManager = /** @class */ (function () {
                                         weight: results[0].weight,
                                         manufacturer: results[0].manufacturer,
                                         packing: results[0].packing,
-                                        category: [],
-                                        allergen: [],
-                                        badArgs: [],
-                                        goodArgs: [],
-                                        commonInfo: [],
+                                        category: categorys,
+                                        allergen: allergens,
+                                        badArgs: badArgs,
+                                        goodArgs: goodArgs,
+                                        commonInfo: commonArgs,
                                         nutriScore: results[0].nutriScore,
                                         ecoScore: results[0].ecoScore
                                     };
+                                    console.log(outElement);
                                     return [3 /*break*/, 10];
-                                case 7:
-                                    console.log("Got here!");
-                                    return [4 /*yield*/, this.eanSource.requestEan(ean)];
+                                case 7: return [4 /*yield*/, this.eanSource.requestEan(ean)];
                                 case 8:
                                     newProduct = _a.sent();
-                                    console.log("Product Loaded:");
-                                    console.log(newProduct);
                                     return [4 /*yield*/, this.addProduct(newProduct)];
                                 case 9:
                                     _a.sent();
-                                    console.log("Product added!");
                                     resolve(newProduct);
                                     _a.label = 10;
                                 case 10: return [2 /*return*/];
@@ -270,7 +265,7 @@ var DatabaseManager = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         tableName = this.resolveTablesName(tab);
-                        sqlQuery = "INSERT INTO ".concat(tableName, " VALUES (\"").concat(word, "\");");
+                        sqlQuery = "INSERT INTO ".concat(tableName, " (name) VALUES (\"").concat(word, "\");");
                         return [4 /*yield*/, this.sqlConnection.query(sqlQuery)];
                     case 1:
                         _a.sent();
@@ -285,16 +280,16 @@ var DatabaseManager = /** @class */ (function () {
             var _this = this;
             return __generator(this, function (_a) {
                 tableName = this.resolveTablesName(tab);
-                sqlQuery = "SELECT id FROM ".concat(tableName, " WHERE name = ").concat(word);
+                sqlQuery = "SELECT id FROM ".concat(tableName, " WHERE name = \"").concat(word, "\";");
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var result;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
-                                case 0: return [4 /*yield*/, this.sqlConnection.query(sqlQuery)];
+                                case 0: return [4 /*yield*/, this.doQuery(sqlQuery)];
                                 case 1:
                                     result = _a.sent();
-                                    if (result.length === 0) {
-                                        resolve(parseInt(result[0]));
+                                    if (result.length !== 0) {
+                                        resolve(parseInt(result[0].id));
                                     }
                                     else {
                                         resolve(-1);
@@ -557,7 +552,7 @@ var DatabaseManager = /** @class */ (function () {
                 return "Category";
                 break;
             case tables_1["default"].ECOSCORE:
-                return "Score";
+                return "EcoScore";
                 break;
             case tables_1["default"].NUTRISCORE:
                 return "NutriScore";
@@ -692,6 +687,7 @@ var DatabaseManager = /** @class */ (function () {
                                     for (i = 0; i < results.length; i++) {
                                         categorys.push(results[i].name);
                                     }
+                                    resolve(categorys);
                                     return [2 /*return*/];
                             }
                         });
