@@ -118,7 +118,7 @@ var DatabaseManager = /** @class */ (function () {
             var sqlQuery;
             var _this = this;
             return __generator(this, function (_a) {
-                sqlQuery = "SELECT product.id as id, product.name, code, weight, manufacturer.name as manufacturer, packing.name as packing, nutriScore.name as nutriScore, ecoScore.name as ecoScore \n    FROM Product\n    JOIN manufacturer ON manufacturer.id = manufacturer \n    JOIN packing ON packing.id = packing\n    JOIN nutriScore ON nutriScore.id = nutriScore\n    JOIN ecoScore ON ecoScore.id = ecoScore";
+                sqlQuery = "SELECT product.id as id, product.name, code, weight, manufacturer.name as manufacturer, packing.name as packing, nutriScore.name as nutriScore, ecoScore.name as ecoScore \n    FROM Product\n    JOIN manufacturer ON manufacturer.id = manufacturer \n    JOIN packing ON packing.id = packing\n    JOIN nutriScore ON nutriScore.id = nutriScore\n    JOIN ecoScore ON ecoScore.id = ecoScore\n    WHERE code = ".concat(ean);
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var results, commonArgs, badArgs, goodArgs, allergens, categorys, outElement, newProduct;
                         return __generator(this, function (_a) {
@@ -244,15 +244,21 @@ var DatabaseManager = /** @class */ (function () {
                         return [4 /*yield*/, this.provideSubtable(tables_1["default"].ECOSCORE, prod.ecoScore)];
                     case 4:
                         ecoScoreId = _a.sent();
-                        return [4 /*yield*/, this.doQuery("INSERT INTO Product (name, ean,  weight, manufacturer, packing, nutriScore, ecoScore) VALUES (\"".concat(prod.name, "\", \"").concat(prod.code, "\" ,\"").concat(prod.weight, ", \"").concat(manufacturerId, "\", \"").concat(packingId, "\", \"").concat(nutriScoreId, "\", \"").concat(ecoScoreId, "\")"))];
+                        return [4 /*yield*/, this.doQuery("INSERT INTO Product (name, code,  weight, manufacturer, packing, nutriScore, ecoScore) VALUES (\"".concat(prod.name, "\", \"").concat(prod.code, "\" ,\"").concat(prod.weight, "\", ").concat(manufacturerId, ", ").concat(packingId, ", ").concat(nutriScoreId, ", ").concat(ecoScoreId, ");"))];
                     case 5:
                         _a.sent();
                         return [4 /*yield*/, this.findProduct(prod.code)];
                     case 6:
                         productId = _a.sent();
-                        this.createConnectionArr(tables_1.HelpTables.ProductCategory, tables_1["default"].CATEGORY, productId, prod.category);
-                        this.createConnectionArr(tables_1.HelpTables.ProductAllergen, tables_1["default"].ALLERGEN, productId, prod.allergen);
-                        this.createConnectionArr(tables_1.HelpTables.ProductArgument, tables_1["default"].ARGUMENTS, productId, allArgs);
+                        return [4 /*yield*/, this.createConnectionArr(tables_1.HelpTables.ProductCategory, tables_1["default"].CATEGORY, productId, prod.category)];
+                    case 7:
+                        _a.sent();
+                        return [4 /*yield*/, this.createConnectionArr(tables_1.HelpTables.ProductAllergen, tables_1["default"].ALLERGEN, productId, prod.allergen)];
+                    case 8:
+                        _a.sent();
+                        return [4 /*yield*/, this.createConnectionArr(tables_1.HelpTables.ProductArgument, tables_1["default"].ARGUMENTS, productId, allArgs)];
+                    case 9:
+                        _a.sent();
                         return [2 /*return*/];
                 }
             });

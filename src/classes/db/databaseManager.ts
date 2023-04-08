@@ -93,7 +93,8 @@ class DatabaseManager {
     JOIN manufacturer ON manufacturer.id = manufacturer 
     JOIN packing ON packing.id = packing
     JOIN nutriScore ON nutriScore.id = nutriScore
-    JOIN ecoScore ON ecoScore.id = ecoScore`;
+    JOIN ecoScore ON ecoScore.id = ecoScore
+    WHERE code = ${ean}`;
 
     return new Promise(async(resolve, reject) => 
     {
@@ -197,13 +198,13 @@ class DatabaseManager {
       //EcoScore
       let ecoScoreId:number = await this.provideSubtable(Tables.ECOSCORE, prod.ecoScore);
 
-      await this.doQuery(`INSERT INTO Product (name, ean,  weight, manufacturer, packing, nutriScore, ecoScore) VALUES ("${prod.name}", "${prod.code}" ,"${prod.weight}, "${manufacturerId}", "${packingId}", "${nutriScoreId}", "${ecoScoreId}")`);
+      await this.doQuery(`INSERT INTO Product (name, code,  weight, manufacturer, packing, nutriScore, ecoScore) VALUES ("${prod.name}", "${prod.code}" ,"${prod.weight}", ${manufacturerId}, ${packingId}, ${nutriScoreId}, ${ecoScoreId});`);
 
       let productId:number = await this.findProduct(prod.code);
       
-      this.createConnectionArr(HelpTables.ProductCategory,Tables.CATEGORY, productId, prod.category);
-      this.createConnectionArr(HelpTables.ProductAllergen, Tables.ALLERGEN, productId, prod.allergen);
-      this.createConnectionArr(HelpTables.ProductArgument, Tables.ARGUMENTS, productId, allArgs);
+      await this.createConnectionArr(HelpTables.ProductCategory,Tables.CATEGORY, productId, prod.category);
+      await this.createConnectionArr(HelpTables.ProductAllergen, Tables.ALLERGEN, productId, prod.allergen);
+      await this.createConnectionArr(HelpTables.ProductArgument, Tables.ARGUMENTS, productId, allArgs);
   }
 
   private async addToSubtable(tab:Tables, word:string)
