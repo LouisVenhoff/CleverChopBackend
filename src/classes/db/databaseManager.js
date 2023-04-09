@@ -250,6 +250,7 @@ var DatabaseManager = /** @class */ (function () {
                         return [4 /*yield*/, this.findProduct(prod.code)];
                     case 6:
                         productId = _a.sent();
+                        console.log(prod.allergen);
                         return [4 /*yield*/, this.createConnectionArr(tables_1.HelpTables.ProductCategory, tables_1["default"].CATEGORY, productId, prod.category)];
                     case 7:
                         _a.sent();
@@ -394,7 +395,7 @@ var DatabaseManager = /** @class */ (function () {
             var sqlQuery;
             var _this = this;
             return __generator(this, function (_a) {
-                sqlQuery = "SELECT id FROM Argument WHERE text = ".concat(text);
+                sqlQuery = "SELECT id FROM Argument WHERE text = \"".concat(text, "\"");
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var results;
                         return __generator(this, function (_a) {

@@ -202,6 +202,9 @@ class DatabaseManager {
 
       let productId:number = await this.findProduct(prod.code);
       
+     console.log(prod.allergen);
+      
+      
       await this.createConnectionArr(HelpTables.ProductCategory,Tables.CATEGORY, productId, prod.category);
       await this.createConnectionArr(HelpTables.ProductAllergen, Tables.ALLERGEN, productId, prod.allergen);
       await this.createConnectionArr(HelpTables.ProductArgument, Tables.ARGUMENTS, productId, allArgs);
@@ -290,7 +293,7 @@ class DatabaseManager {
 
   private async checkArgumentSubtable(text:string):Promise<number>
   {
-      let sqlQuery:string = `SELECT id FROM Argument WHERE text = ${text}`;
+      let sqlQuery:string = `SELECT id FROM Argument WHERE text = "${text}"`;
 
       return new Promise(async(resolve, reject) => {
 
