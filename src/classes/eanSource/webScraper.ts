@@ -181,7 +181,8 @@ class WebScraper extends InfoSource {
   }
 
   private loadCategorys($: any): string[] {
-    return this.loadArrInfo($, "#field_categories_value");
+    return this.loadArrInfoWithChild($, "#field_categories_value");
+  
   }
 
   private loadAllergenes($:any):string[]
@@ -202,7 +203,7 @@ class WebScraper extends InfoSource {
   }
 
 
-  private loadArrInfo($: any, cssLink: string): string[] {
+  private loadArrInfoWithChild($: any, cssLink: string): string[] {
     let temp: string[] = [];
 
     $(cssLink)
@@ -212,6 +213,18 @@ class WebScraper extends InfoSource {
       });
 
     return temp;
+  }
+
+  private loadArrInfo($:any, cssLink:string):string[]
+  {
+      let temp:string[] = [];
+
+      $(cssLink)
+      .each(function (index:number, child:any) {
+        temp.push($(child).text());
+      })
+
+      return temp;
   }
 
   private checkProductProvided(htmlData: any): boolean {

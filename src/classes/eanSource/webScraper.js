@@ -209,7 +209,7 @@ var WebScraper = /** @class */ (function (_super) {
         }
     };
     WebScraper.prototype.loadCategorys = function ($) {
-        return this.loadArrInfo($, "#field_categories_value");
+        return this.loadArrInfoWithChild($, "#field_categories_value");
     };
     WebScraper.prototype.loadAllergenes = function ($) {
         return this.loadArrInfo($, ".allergen");
@@ -223,10 +223,18 @@ var WebScraper = /** @class */ (function (_super) {
     WebScraper.prototype.loadCommonInfo = function ($) {
         return this.loadArrInfo($, ".evaluation__title");
     };
-    WebScraper.prototype.loadArrInfo = function ($, cssLink) {
+    WebScraper.prototype.loadArrInfoWithChild = function ($, cssLink) {
         var temp = [];
         $(cssLink)
             .children()
+            .each(function (index, child) {
+            temp.push($(child).text());
+        });
+        return temp;
+    };
+    WebScraper.prototype.loadArrInfo = function ($, cssLink) {
+        var temp = [];
+        $(cssLink)
             .each(function (index, child) {
             temp.push($(child).text());
         });
