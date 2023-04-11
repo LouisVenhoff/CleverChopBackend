@@ -39,6 +39,7 @@ exports.__esModule = true;
 var mysql = require("mysql");
 var tables_1 = require("../../enums/tables");
 var webScraper_1 = require("../eanSource/webScraper");
+var strhelper_1 = require("../helpers/strhelper");
 var DatabaseManager = /** @class */ (function () {
     function DatabaseManager(host, username, password, database) {
         //eanSource: InfoSource = new EanApiController("400000000");
@@ -287,7 +288,7 @@ var DatabaseManager = /** @class */ (function () {
             var _this = this;
             return __generator(this, function (_a) {
                 tableName = this.resolveTablesName(tab);
-                sqlQuery = "SELECT id FROM ".concat(tableName, " WHERE name = \"").concat(word, "\";");
+                sqlQuery = "SELECT id FROM ".concat(tableName, " WHERE name = \"").concat(strhelper_1["default"].cleanString(word), "\";");
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var result;
                         return __generator(this, function (_a) {
@@ -395,7 +396,7 @@ var DatabaseManager = /** @class */ (function () {
             var sqlQuery;
             var _this = this;
             return __generator(this, function (_a) {
-                sqlQuery = "SELECT id FROM Argument WHERE text = \"".concat(text, "\"");
+                sqlQuery = "SELECT id FROM Argument WHERE text = \"".concat(strhelper_1["default"].cleanString(text), "\"");
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var results;
                         return __generator(this, function (_a) {
@@ -418,14 +419,15 @@ var DatabaseManager = /** @class */ (function () {
     };
     DatabaseManager.prototype.addArgument = function (effect, argument) {
         return __awaiter(this, void 0, void 0, function () {
-            var effectId, sqlQuery;
+            var effectId, cleanedArgument, sqlQuery;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.provideSubtable(tables_1["default"].EFFECT, effect)];
                     case 1:
                         effectId = _a.sent();
-                        sqlQuery = "INSERT INTO Argument (text, effectId) VALUES (\"".concat(argument, "\",\"").concat(effect, "\")");
+                        cleanedArgument = strhelper_1["default"].cleanString(argument);
+                        sqlQuery = "INSERT INTO Argument (text, effectId) VALUES (\"".concat(cleanedArgument, "\",\"").concat(effectId, "\")");
                         return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                                 var _a;
                                 return __generator(this, function (_b) {
@@ -573,6 +575,8 @@ var DatabaseManager = /** @class */ (function () {
             case tables_1["default"].EFFECT:
                 return "Effect";
                 break;
+            case tables_1["default"].ARGUMENTS:
+                return "Arguments";
             default:
                 throw ("The input is not a Table!");
                 break;

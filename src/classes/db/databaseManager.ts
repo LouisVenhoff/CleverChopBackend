@@ -5,6 +5,7 @@ import EanApiController from "../eanSource/eanApiController";
 import InfoSource from "../eanSource/infoSource";
 import NetworkProvider from "../network/networkProvider";
 import WebScraper from "../eanSource/webScraper";
+import StrHelper from "../helpers/strhelper";
 
 
 class DatabaseManager {
@@ -220,7 +221,7 @@ class DatabaseManager {
   private async checkSubTable(tab:Tables, word:string):Promise<number>
   {
       let tableName:string = this.resolveTablesName(tab);
-      let sqlQuery:string = `SELECT id FROM ${tableName} WHERE name = "${word}";`;
+      let sqlQuery:string = `SELECT id FROM ${tableName} WHERE name = "${StrHelper.cleanString(word)}";`;
      
       return new Promise(async(resolve, reject) => {
 
@@ -270,12 +271,9 @@ class DatabaseManager {
 
   private async provideArgumentSubtable(effect:string, text:string):Promise<number>
   {
-      let checkResult:number = await this.checkArgumentSubtable(text);
-      
-
-
       return new Promise(async(resolve, reject) => {
 
+        let checkResult:number = await this.checkArgumentSubtable(text);
 
         if(checkResult != -1)
         {
@@ -293,7 +291,7 @@ class DatabaseManager {
 
   private async checkArgumentSubtable(text:string):Promise<number>
   {
-      let sqlQuery:string = `SELECT id FROM Argument WHERE text = "${text}"`;
+      let sqlQuery:string = `SELECT id FROM Argument WHERE text = "${StrHelper.cleanString(text)}"`;
 
       return new Promise(async(resolve, reject) => {
 
@@ -314,7 +312,10 @@ class DatabaseManager {
   {
       let effectId:number = await this.provideSubtable(Tables.EFFECT, effect);
 
-      let sqlQuery:string = `INSERT INTO Argument (text, effectId) VALUES ("${argument}","${effect}")`;
+      let cleanedArgument:string = StrHelper.cleanString(argument);
+
+
+      let sqlQuery:string = `INSERT INTO Argument (text, effectId) VALUES ("${cleanedArgument}","${effectId}")`;
 
       return new Promise(async (resolve, reject) => 
       {
@@ -423,6 +424,8 @@ class DatabaseManager {
         case Tables.EFFECT:
           return "Effect";
           break;
+        case Tables.ARGUMENTS:
+          return "Arguments";
         default:
             throw("The input is not a Table!");
           break;
