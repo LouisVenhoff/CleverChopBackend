@@ -127,12 +127,15 @@ class DatabaseManager {
             nutriScore: results[0].nutriScore,
             ecoScore: results[0].ecoScore,
           }
-
-          console.log(outElement);
+          resolve(outElement);
       }
       else
       {
         let newProduct:MinimalProduct = await this.eanSource.requestEan(ean);
+        
+        
+        
+        
         await this.addProduct(newProduct);
         resolve(newProduct);
       }
@@ -203,9 +206,7 @@ class DatabaseManager {
 
       let productId:number = await this.findProduct(prod.code);
       
-     console.log(prod.allergen);
-      
-      
+    
       await this.createConnectionArr(HelpTables.ProductCategory,Tables.CATEGORY, productId, prod.category);
       await this.createConnectionArr(HelpTables.ProductAllergen, Tables.ALLERGEN, productId, prod.allergen);
       await this.createConnectionArr(HelpTables.ProductArgument, Tables.ARGUMENTS, productId, allArgs);
@@ -221,7 +222,15 @@ class DatabaseManager {
   private async checkSubTable(tab:Tables, word:string):Promise<number>
   {
       let tableName:string = this.resolveTablesName(tab);
-      let sqlQuery:string = `SELECT id FROM ${tableName} WHERE name = "${StrHelper.cleanString(word)}";`;
+      let columnName:string = "name";
+      
+      if(tab == Tables.ARGUMENTS)
+      {
+        columnName = "text";
+      }
+      
+      
+      let sqlQuery:string = `SELECT id FROM ${tableName} WHERE ${columnName} = "${StrHelper.cleanString(word)}";`;
      
       return new Promise(async(resolve, reject) => {
 
@@ -425,7 +434,7 @@ class DatabaseManager {
           return "Effect";
           break;
         case Tables.ARGUMENTS:
-          return "Arguments";
+          return "Argument";
         default:
             throw("The input is not a Table!");
           break;

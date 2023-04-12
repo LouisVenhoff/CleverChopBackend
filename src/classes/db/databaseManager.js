@@ -158,7 +158,7 @@ var DatabaseManager = /** @class */ (function () {
                                         nutriScore: results[0].nutriScore,
                                         ecoScore: results[0].ecoScore
                                     };
-                                    console.log(outElement);
+                                    resolve(outElement);
                                     return [3 /*break*/, 10];
                                 case 7: return [4 /*yield*/, this.eanSource.requestEan(ean)];
                                 case 8:
@@ -284,11 +284,15 @@ var DatabaseManager = /** @class */ (function () {
     };
     DatabaseManager.prototype.checkSubTable = function (tab, word) {
         return __awaiter(this, void 0, void 0, function () {
-            var tableName, sqlQuery;
+            var tableName, columnName, sqlQuery;
             var _this = this;
             return __generator(this, function (_a) {
                 tableName = this.resolveTablesName(tab);
-                sqlQuery = "SELECT id FROM ".concat(tableName, " WHERE name = \"").concat(strhelper_1["default"].cleanString(word), "\";");
+                columnName = "name";
+                if (tab == tables_1["default"].ARGUMENTS) {
+                    columnName = "text";
+                }
+                sqlQuery = "SELECT id FROM ".concat(tableName, " WHERE ").concat(columnName, " = \"").concat(strhelper_1["default"].cleanString(word), "\";");
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var result;
                         return __generator(this, function (_a) {
@@ -362,32 +366,28 @@ var DatabaseManager = /** @class */ (function () {
     };
     DatabaseManager.prototype.provideArgumentSubtable = function (effect, text) {
         return __awaiter(this, void 0, void 0, function () {
-            var checkResult;
             var _this = this;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.checkArgumentSubtable(text)];
-                    case 1:
-                        checkResult = _a.sent();
-                        return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                                var _a;
-                                return __generator(this, function (_b) {
-                                    switch (_b.label) {
-                                        case 0:
-                                            if (!(checkResult != -1)) return [3 /*break*/, 1];
-                                            resolve(checkResult);
-                                            return [3 /*break*/, 3];
-                                        case 1:
-                                            _a = resolve;
-                                            return [4 /*yield*/, this.addArgument(effect, text)];
-                                        case 2:
-                                            _a.apply(void 0, [_b.sent()]);
-                                            _b.label = 3;
-                                        case 3: return [2 /*return*/];
-                                    }
-                                });
-                            }); })];
-                }
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var checkResult, _a;
+                        return __generator(this, function (_b) {
+                            switch (_b.label) {
+                                case 0: return [4 /*yield*/, this.checkArgumentSubtable(text)];
+                                case 1:
+                                    checkResult = _b.sent();
+                                    if (!(checkResult != -1)) return [3 /*break*/, 2];
+                                    resolve(checkResult);
+                                    return [3 /*break*/, 4];
+                                case 2:
+                                    _a = resolve;
+                                    return [4 /*yield*/, this.addArgument(effect, text)];
+                                case 3:
+                                    _a.apply(void 0, [_b.sent()]);
+                                    _b.label = 4;
+                                case 4: return [2 /*return*/];
+                            }
+                        });
+                    }); })];
             });
         });
     };
@@ -576,7 +576,7 @@ var DatabaseManager = /** @class */ (function () {
                 return "Effect";
                 break;
             case tables_1["default"].ARGUMENTS:
-                return "Arguments";
+                return "Argument";
             default:
                 throw ("The input is not a Table!");
                 break;

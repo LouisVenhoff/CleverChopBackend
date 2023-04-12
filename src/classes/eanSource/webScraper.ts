@@ -1,6 +1,7 @@
 import { MinimalProduct } from "../static/Product";
 import InfoSource from "./infoSource";
 import axios from "axios";
+import StrHelper from "../helpers/strhelper";
 const cheerio = require("cheerio");
 
 class WebScraper extends InfoSource {
