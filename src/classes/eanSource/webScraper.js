@@ -125,6 +125,7 @@ var WebScraper = /** @class */ (function (_super) {
         };
         if (!this.checkProductProvided($)) {
             tempObj.error = 1;
+            console.log("Product not provided");
             return tempObj;
         }
         tempObj.name = this.loadName($);
@@ -241,7 +242,8 @@ var WebScraper = /** @class */ (function (_super) {
         return temp;
     };
     WebScraper.prototype.checkProductProvided = function (htmlData) {
-        if (htmlData(".if-empty-dnone").text() === "Error") {
+        console.log("Checktext:");
+        if (htmlData(".if-empty-dnone").text() === "Fehler") {
             return false;
         }
         else {

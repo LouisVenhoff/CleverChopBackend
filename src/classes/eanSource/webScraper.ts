@@ -66,6 +66,7 @@ class WebScraper extends InfoSource {
 
     if (!this.checkProductProvided($)) {
       tempObj.error = 1;
+      console.log("Product not provided");
       return tempObj;
     }
 
@@ -229,7 +230,8 @@ class WebScraper extends InfoSource {
   }
 
   private checkProductProvided(htmlData: any): boolean {
-    if (htmlData(".if-empty-dnone").text() === "Error") {
+    console.log("Checktext:");
+    if (htmlData(".if-empty-dnone").text() === "Fehler") {
       return false;
     } else {
       return true;

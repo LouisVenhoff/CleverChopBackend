@@ -14,7 +14,7 @@ class DatabaseManager {
   password: string;
   database:string;
   sqlConnection: any;
-  //eanSource: InfoSource = new EanApiController("400000000");
+  altEanSource: InfoSource = new EanApiController("400000000");
   eanSource:InfoSource = new WebScraper();
   dbConAttempts:number = 0;
 
@@ -133,8 +133,10 @@ class DatabaseManager {
       {
         let newProduct:MinimalProduct = await this.eanSource.requestEan(ean);
         
-        
-        
+        if(newProduct.error === 1)
+        {
+            newProduct = await this.altEanSource.requestEan(ean);
+        }
         
         await this.addProduct(newProduct);
         resolve(newProduct);

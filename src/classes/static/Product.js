@@ -17,18 +17,18 @@ var Product = /** @class */ (function () {
         this.code = "";
         this.minProduct = product;
         this.error = product.error;
-        this.name = product.name;
-        this.weight = product.weight;
-        this.manufacturer = product.manufacturer;
-        this.packing = product.packing;
-        this.category = product.category;
-        this.allergen = product.allergen;
-        this.badArgs = product.badArgs;
-        this.goodArgs = product.goodArgs;
-        this.commonInfo = product.commonInfo;
-        this.nutriScore = product.nutriScore;
-        this.ecoScore = product.ecoScore;
-        this.code = product.code;
+        this.writeArgsSafe(this.name, product.name);
+        this.writeArgsSafe(this.weight, product.weight);
+        this.writeArgsSafe(this.manufacturer, product.manufacturer);
+        this.writeArgsSafe(this.packing, product.packing);
+        this.writeArgsSafe(this.category, product.category);
+        this.writeArgsSafe(this.allergen, product.allergen);
+        this.writeArgsSafe(this.badArgs, product.badArgs);
+        this.writeArgsSafe(this.goodArgs, product.goodArgs);
+        this.writeArgsSafe(this.commonInfo, product.commonInfo);
+        this.writeArgsSafe(this.nutriScore, product.nutriScore);
+        this.writeArgsSafe(this.ecoScore, product.ecoScore);
+        this.writeArgsSafe(this.code, product.code);
     }
     // public setCode(code:string)
     // {
@@ -36,6 +36,11 @@ var Product = /** @class */ (function () {
     // }
     Product.prototype.reduceObj = function () {
         return this.minProduct;
+    };
+    Product.prototype.writeArgsSafe = function (arg, input) {
+        if (input !== undefined) {
+            arg = input;
+        }
     };
     return Product;
 }());

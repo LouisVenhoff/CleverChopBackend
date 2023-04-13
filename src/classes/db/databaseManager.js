@@ -38,11 +38,12 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var mysql = require("mysql");
 var tables_1 = require("../../enums/tables");
+var eanApiController_1 = require("../eanSource/eanApiController");
 var webScraper_1 = require("../eanSource/webScraper");
 var strhelper_1 = require("../helpers/strhelper");
 var DatabaseManager = /** @class */ (function () {
     function DatabaseManager(host, username, password, database) {
-        //eanSource: InfoSource = new EanApiController("400000000");
+        this.altEanSource = new eanApiController_1["default"]("400000000");
         this.eanSource = new webScraper_1["default"]();
         this.dbConAttempts = 0;
         this.connectionState = false;
@@ -159,16 +160,21 @@ var DatabaseManager = /** @class */ (function () {
                                         ecoScore: results[0].ecoScore
                                     };
                                     resolve(outElement);
-                                    return [3 /*break*/, 10];
+                                    return [3 /*break*/, 12];
                                 case 7: return [4 /*yield*/, this.eanSource.requestEan(ean)];
                                 case 8:
                                     newProduct = _a.sent();
-                                    return [4 /*yield*/, this.addProduct(newProduct)];
+                                    if (!(newProduct.error === 1)) return [3 /*break*/, 10];
+                                    return [4 /*yield*/, this.altEanSource.requestEan(ean)];
                                 case 9:
+                                    newProduct = _a.sent();
+                                    _a.label = 10;
+                                case 10: return [4 /*yield*/, this.addProduct(newProduct)];
+                                case 11:
                                     _a.sent();
                                     resolve(newProduct);
-                                    _a.label = 10;
-                                case 10: return [2 /*return*/];
+                                    _a.label = 12;
+                                case 12: return [2 /*return*/];
                             }
                         });
                     }); })];
@@ -251,7 +257,6 @@ var DatabaseManager = /** @class */ (function () {
                         return [4 /*yield*/, this.findProduct(prod.code)];
                     case 6:
                         productId = _a.sent();
-                        console.log(prod.allergen);
                         return [4 /*yield*/, this.createConnectionArr(tables_1.HelpTables.ProductCategory, tables_1["default"].CATEGORY, productId, prod.category)];
                     case 7:
                         _a.sent();

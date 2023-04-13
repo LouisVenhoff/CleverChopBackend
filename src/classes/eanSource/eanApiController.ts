@@ -30,7 +30,8 @@ class EanApiController extends InfoSource
             });
            
              let outObj:Product = new Product(result.data.toString("latin1"));
-     
+             console.log("OutObjName:");
+             console.log(outObj.reduceObj().name);
              outObj.code = ean;
              resolve(outObj.reduceObj());
         }
