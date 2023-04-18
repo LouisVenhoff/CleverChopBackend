@@ -132,11 +132,13 @@ class DatabaseManager {
       else
       {
         let newProduct:MinimalProduct = await this.eanSource.requestEan(ean);
-        
-        if(newProduct.error === 1)
+       
+        if(newProduct.error >= 0)
         {
             newProduct = await this.altEanSource.requestEan(ean);
+            
         }
+       
         
         await this.addProduct(newProduct);
         resolve(newProduct);
@@ -185,7 +187,7 @@ class DatabaseManager {
               //-Category
               //-Allergen
               //-Packing
-
+      
       //Category
       this.provideMultipleSubtable(Tables.CATEGORY, prod.category);
       //Allergen
@@ -194,24 +196,54 @@ class DatabaseManager {
       this.provideMultipleArguments("average", prod.commonInfo);
       this.provideMultipleArguments("bad", prod.badArgs);
       this.provideMultipleArguments("good", prod.goodArgs);
-      let allArgs:string[] = prod.commonInfo.concat(prod.badArgs, prod.goodArgs);
+      
+      this.checkArgumentArr(prod.commonInfo);
+      this.checkArgumentArr(prod.badArgs);
+      this.checkArgumentArr(prod.goodArgs);
+
+
+        let emptyArr:string[] = [];
+      
+        // let allArgs:string[] = emptyArr.concat(prod.badArgs, prod.goodArgs, prod.commonInfo);
+        // console.log(allArgs);
+        let allArgs:string[] = [];
+      
       //Packing
-      let packingId:number = await this.provideSubtable(Tables.PACKING, prod.packing);
+      let packingId:number|null = await this.provideSubtable(Tables.PACKING, prod.packing);
+      
       //Manufacturer
-      let manufacturerId:number = await this.provideSubtable(Tables.MANUFACTURER, prod.manufacturer);
+      let manufacturerId:number|null = await this.provideSubtable(Tables.MANUFACTURER, prod.manufacturer);
       //NutriScore
-      let nutriScoreId:number = await this.provideSubtable(Tables.NUTRISCORE, prod.nutriScore);
+      let nutriScoreId:number|null = await this.provideSubtable(Tables.NUTRISCORE, prod.nutriScore);
       //EcoScore
-      let ecoScoreId:number = await this.provideSubtable(Tables.ECOSCORE, prod.ecoScore);
-
+      let ecoScoreId:number|null = await this.provideSubtable(Tables.ECOSCORE, prod.ecoScore);
+     
       await this.doQuery(`INSERT INTO Product (name, code,  weight, manufacturer, packing, nutriScore, ecoScore) VALUES ("${prod.name}", "${prod.code}" ,"${prod.weight}", ${manufacturerId}, ${packingId}, ${nutriScoreId}, ${ecoScoreId});`);
-
+      
       let productId:number = await this.findProduct(prod.code);
       
+      if(prod.category.length !== 0){
+        await this.createConnectionArr(HelpTables.ProductCategory,Tables.CATEGORY, productId, prod.category);
+      }
+
+      if(prod.allergen.length !== 0){
+        await this.createConnectionArr(HelpTables.ProductAllergen, Tables.ALLERGEN, productId, prod.allergen);
+      }
+
+      if(allArgs.length !== 0)
+      {
+        await this.createConnectionArr(HelpTables.ProductArgument, Tables.ARGUMENTS, productId, allArgs);
+      }
+      
+  }
+
+  private checkArgumentArr(processStr:string[]){
+
+    if(processStr === undefined){
+     
+      processStr = [];
+    }
     
-      await this.createConnectionArr(HelpTables.ProductCategory,Tables.CATEGORY, productId, prod.category);
-      await this.createConnectionArr(HelpTables.ProductAllergen, Tables.ALLERGEN, productId, prod.allergen);
-      await this.createConnectionArr(HelpTables.ProductArgument, Tables.ARGUMENTS, productId, allArgs);
   }
 
   private async addToSubtable(tab:Tables, word:string)
@@ -251,29 +283,63 @@ class DatabaseManager {
 
   private async  provideMultipleSubtable(tab:Tables, word:string[])
   {
+        if(word === undefined){
+          return;
+        }
+
+        if(word.length === 0)
+        {
+            return;
+        }
+  
         for(let i = 0; i < word.length; i++)
         {
             await this.provideSubtable(tab, word[i]);
         }
   }
 
-  private async provideSubtable(tab:Tables, word:string):Promise<number>
+  private async provideSubtable(tab:Tables, word:string):Promise<number | null>
   {
-        let id:number = await this.checkSubTable(tab, word);
-        if(id === -1)
-        {
-           await this.addToSubtable(tab, word);
-           return this.provideSubtable(tab, word);
-        }
-        else
-        {
-            return id;
-        }
+       
+    return new Promise(async(resolve, reject) => {
+
+      if(word === "" || word === undefined)
+      {
+         
+          resolve(null);
+          return;
+      }
+
+      let id:number = await this.checkSubTable(tab, word);
+      if(id === -1)
+      {
+         await this.addToSubtable(tab, word);
+         resolve(await this.provideSubtable(tab, word));
+      }
+      else
+      {
+          resolve(id);
+      }
+
+
+    });
+
+
+    
+        
   } 
 
 
   private async provideMultipleArguments(effect:string, text:string[])
   {
+      if(text === undefined){
+        return;
+      }
+
+      if(text.length === 0){
+        return;
+      }
+
       for(let i = 0; i < text.length; i++)
       {
           this.provideArgumentSubtable(effect, text[i]);
@@ -321,9 +387,9 @@ class DatabaseManager {
 
   private async addArgument(effect:string, argument:string):Promise<number>
   {
-      let effectId:number = await this.provideSubtable(Tables.EFFECT, effect);
+      let effectId:number|null = await this.provideSubtable(Tables.EFFECT, effect);
 
-      let cleanedArgument:string = StrHelper.cleanString(argument);
+      let cleanedArgument:string | null  = StrHelper.cleanString(argument);
 
 
       let sqlQuery:string = `INSERT INTO Argument (text, effectId) VALUES ("${cleanedArgument}","${effectId}")`;
@@ -360,7 +426,13 @@ class DatabaseManager {
   {
       for(let i = 0; i < elements.length; i++)
       {
-        await this.addContableEntry(helpTable, productId, await this.provideSubtable(subTable, elements[i]));
+        
+        let elementId:number|null = await this.provideSubtable(subTable, elements[i]);
+        
+        if(elementId === null){
+          continue;
+        }
+        await this.addContableEntry(helpTable, productId, elementId);
       }
   }
 

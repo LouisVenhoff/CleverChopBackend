@@ -15,12 +15,11 @@ const port = 3014;
 
 //const dbMng:DatabaseManager = new DatabaseManager("localhost", "system", "Iwaaz2001g!", "cleverchopdb");
 //const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724", "heroku_554b26e8f85d455");
-const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b712eb9ae277d5", "865f45a8", "heroku_9e52a98d5b35c1a");
+//const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b712eb9ae277d5", "865f45a8", "heroku_9e52a98d5b35c1a");
+const dbMng:DatabaseManager = new DatabaseManager("localhost", "root", "", "cleverchopdb");
+
 
 app.use(cors());
-
-
-const eanSource:InfoSource = new WebScraper();
 
 
 app.get("/", (req:any, res:any) => {
@@ -42,3 +41,7 @@ app.listen(port, () => {
     console.log("Listening on Port " + port);
     
 })
+
+//Schatzi war hier und louis gehört nur mir !!
+
+// You are my boyfriend forever i love you so much.<3<3

@@ -29,9 +29,11 @@ class EanApiController extends InfoSource
                 responseEncoding: 'binary'
             });
            
+
+            //TODO: Result.data.toString("latin1") muss in ein MinimalProduct Konvertiert werden!
+
+
              let outObj:Product = new Product(result.data.toString("latin1"));
-             console.log("OutObjName:");
-             console.log(outObj.reduceObj().name);
              outObj.code = ean;
              resolve(outObj.reduceObj());
         }

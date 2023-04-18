@@ -4,8 +4,13 @@ var StrHelper = /** @class */ (function () {
     function StrHelper() {
     }
     StrHelper.cleanString = function (input) {
-        var output = input.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '').replace(/\\+/g, '');
-        return output;
+        try {
+            var output = input.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, '').replace(/\\+/g, '');
+            return output;
+        }
+        catch (_a) {
+            return null;
+        }
     };
     return StrHelper;
 }());
