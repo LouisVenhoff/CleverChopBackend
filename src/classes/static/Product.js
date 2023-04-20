@@ -34,6 +34,24 @@ var Product = /** @class */ (function () {
     // {
     //     this.code = code;
     // }
+    Product.getEmptyMinimalProduct = function () {
+        var outProd = {
+            error: 0,
+            name: "",
+            weight: "",
+            manufacturer: "",
+            packing: "",
+            category: [],
+            allergen: [],
+            badArgs: [],
+            goodArgs: [],
+            commonInfo: [],
+            nutriScore: "",
+            ecoScore: "",
+            code: ""
+        };
+        return outProd;
+    };
     Product.prototype.reduceObj = function () {
         return this.minProduct;
     };

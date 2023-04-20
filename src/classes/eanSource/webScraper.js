@@ -144,18 +144,32 @@ var WebScraper = /** @class */ (function (_super) {
         return $(".title-1").text();
     };
     WebScraper.prototype.loadWeight = function ($) {
-        return $("#field_quantity_value").text(); //Gewicht/Anzahl
+        var weight = $("#field_quantity_value").text(); //Gewicht/Anzahl
+        weight = this.checkProperty(weight);
+        return weight;
     };
     WebScraper.prototype.loadPacking = function ($) {
-        return $("#field_packaging_value").first().text();
+        var packing = $("#field_packaging_value").first().text();
+        packing = this.checkProperty(packing);
+        return packing;
     };
     WebScraper.prototype.loadManufacturer = function ($) {
-        return $("#field_brands_value").first().text();
+        var manufacturer = $("#field_brands_value").first().text();
+        manufacturer = this.checkProperty(manufacturer);
+        return manufacturer;
+    };
+    WebScraper.prototype.checkProperty = function (input) {
+        if (input !== undefined) {
+            if (input !== "") {
+                return input;
+            }
+        }
+        return ("Keine Informationen");
     };
     WebScraper.prototype.applyScores = function ($, prod) {
         var _this = this;
-        var ecoScore = "";
-        var nutriScore = "";
+        var ecoScore = "X";
+        var nutriScore = "X";
         $(".grade_a_title").each(function (index, child) {
             if (_this.isEcoScore($(child).text())) {
                 ecoScore = "A";

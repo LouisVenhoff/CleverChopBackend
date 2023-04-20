@@ -31,7 +31,7 @@ class WebScraper extends InfoSource {
       let resultHtmlStr: string = resultHtml.toString("latin1");
 
       resolve(this.generateMinimalProduct(resultHtmlStr, ean));
-      //console.log(this.generateMinimalProduct(resultHtmlStr, ean));
+      
     });
   }
 
@@ -66,7 +66,6 @@ class WebScraper extends InfoSource {
 
     if (!this.checkProductProvided($)) {
       tempObj.error = 1;
-      console.log("Product not provided");
       return tempObj;
     }
 
@@ -93,22 +92,46 @@ class WebScraper extends InfoSource {
 
 
   private loadWeight($: any): string {
-    return $("#field_quantity_value").text(); //Gewicht/Anzahl
+    let weight:string = $("#field_quantity_value").text(); //Gewicht/Anzahl
+
+    weight = this.checkProperty(weight);
+
+    return weight;
   }
 
   private loadPacking($: any): string {
-    return $("#field_packaging_value").first().text();
+    let packing:string =  $("#field_packaging_value").first().text();
+
+    packing = this.checkProperty(packing);
+    
+    return packing;
   }
 
   private loadManufacturer($: any): string {
-    return $("#field_brands_value").first().text();
+    let manufacturer:string =  $("#field_brands_value").first().text();
+
+   manufacturer = this.checkProperty(manufacturer);
+
+    return manufacturer;
+  }
+
+
+  private checkProperty(input:string):string{
+
+    if(input !== undefined){
+        if(input !== ""){
+            return input;
+        }
+    }
+      
+      return("Keine Informationen");
   }
 
   private applyScores($: any, prod:MinimalProduct) 
   {
     
-    let ecoScore:string = "";
-    let nutriScore:string =  "";
+    let ecoScore:string = "X";
+    let nutriScore:string =  "X";
     $(".grade_a_title").each((index: number, child: any) => {
         if(this.isEcoScore($(child).text()))
         {
@@ -159,6 +182,9 @@ class WebScraper extends InfoSource {
             nutriScore="E";
         }
     });
+
+    
+
 
     prod.ecoScore = ecoScore;
     prod.nutriScore = nutriScore;
@@ -230,7 +256,6 @@ class WebScraper extends InfoSource {
   }
 
   private checkProductProvided(htmlData: any): boolean {
-    console.log("Checktext:");
     if (htmlData(".if-empty-dnone").text() === "Fehler") {
       return false;
     } else {
