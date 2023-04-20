@@ -1,4 +1,5 @@
 import axios from "axios";
+import StrHelper from "../helpers/strhelper";
 import Product from "../static/Product";
 import { MinimalProduct } from "../static/Product";
 import InfoSource from "./infoSource";
@@ -33,7 +34,7 @@ class EanApiController extends InfoSource
             //TODO: Result.data.toString("latin1") muss in ein MinimalProduct Konvertiert werden!
 
 
-             let outObj:Product = new Product(this.rawToMinProduct(result.data.toString("latin1")));
+             let outObj:Product = new Product(this.rawToMinProduct(result.data.toString("latin1"), ean));
              outObj.code = ean;
              resolve(outObj.reduceObj());
         }
@@ -49,15 +50,25 @@ class EanApiController extends InfoSource
  }
  
  
-    private rawToMinProduct(rawString:string):MinimalProduct
+    private rawToMinProduct(rawString:string, ean:string):MinimalProduct
     {
-        let outProd = Product.getEmptyMinimalProduct();
-        
-        let rawInfo:string[] = rawString.split("=");
-        let nameIndex:number = rawInfo.indexOf("name");
-        outProd.name = rawInfo[nameIndex + 1];
+        let outProd = Product.getEmptyMinimalProduct();    //Der Produktname wird aus dem String gefiltert und einem neuen leeren Minimalprodukt zugewiesen
+        outProd.code = ean;
+        let cleanedInfo = rawString.split("\n");
+
+        for(let i = 0; i < cleanedInfo.length; i++){
+            
+            let infoPair:string[] = cleanedInfo[i].split("=");
+            if(infoPair[0] === "name"){
+                outProd.name = infoPair[1];
+                break;
+            }
+
+
+        }
 
         return outProd;
+
     }
 
 

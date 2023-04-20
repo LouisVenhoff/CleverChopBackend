@@ -81,9 +81,7 @@ var EanApiController = /** @class */ (function (_super) {
                                         })];
                                 case 1:
                                     result = _a.sent();
-                                    outObj = new Product_1["default"](result.data.toString("latin1"));
-                                    console.log("OutObjName:");
-                                    console.log(outObj.reduceObj().name);
+                                    outObj = new Product_1["default"](this.rawToMinProduct(result.data.toString("latin1"), ean));
                                     outObj.code = ean;
                                     resolve(outObj.reduceObj());
                                     return [3 /*break*/, 3];
@@ -98,6 +96,19 @@ var EanApiController = /** @class */ (function (_super) {
                     }); })];
             });
         });
+    };
+    EanApiController.prototype.rawToMinProduct = function (rawString, ean) {
+        var outProd = Product_1["default"].getEmptyMinimalProduct(); //Der Produktname wird aus dem String gefiltert und einem neuen leeren Minimalprodukt zugewiesen
+        outProd.code = ean;
+        var cleanedInfo = rawString.split("\n");
+        for (var i = 0; i < cleanedInfo.length; i++) {
+            var infoPair = cleanedInfo[i].split("=");
+            if (infoPair[0] === "name") {
+                outProd.name = infoPair[1];
+                break;
+            }
+        }
+        return outProd;
     };
     return EanApiController;
 }(infoSource_1["default"]));
