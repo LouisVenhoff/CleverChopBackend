@@ -33,7 +33,7 @@ class EanApiController extends InfoSource
             //TODO: Result.data.toString("latin1") muss in ein MinimalProduct Konvertiert werden!
 
 
-             let outObj:Product = new Product(result.data.toString("latin1"));
+             let outObj:Product = new Product(this.rawToMinProduct(result.data.toString("latin1")));
              outObj.code = ean;
              resolve(outObj.reduceObj());
         }
@@ -49,11 +49,19 @@ class EanApiController extends InfoSource
  }
  
  
-//  public get userId()
-//  {
-//     return this._userId;
-//  }
+    private rawToMinProduct(rawString:string):MinimalProduct
+    {
+        let outProd = Product.getEmptyMinimalProduct();
+        
+        let rawInfo:string[] = rawString.split("=");
+        let nameIndex:number = rawInfo.indexOf("name");
+        outProd.name = rawInfo[nameIndex + 1];
 
+        return outProd;
+    }
+
+
+    
 
 
 }

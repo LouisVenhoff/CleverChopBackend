@@ -55,6 +55,28 @@ class Product
     //     this.code = code;
     // }
 
+    public static getEmptyMinimalProduct():MinimalProduct
+    {
+        let outProd:MinimalProduct = {
+            error: 0,
+            name: "",
+            weight: "",
+            manufacturer: "",
+            packing: "",
+            category: [],
+            allergen: [],
+            badArgs: [],
+            goodArgs: [],
+            commonInfo: [],
+            nutriScore: "",
+            ecoScore: "",
+            code: ""
+        }
+
+        return outProd;
+    }
+
+
 
     public reduceObj():MinimalProduct
     {
