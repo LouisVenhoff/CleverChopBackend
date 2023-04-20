@@ -133,7 +133,7 @@ class DatabaseManager {
       {
         let newProduct:MinimalProduct = await this.eanSource.requestEan(ean);
        
-        if(newProduct.error >= 0)
+        if(newProduct.error > 0)
         {
             newProduct = await this.altEanSource.requestEan(ean);
             
@@ -189,6 +189,7 @@ class DatabaseManager {
               //-Packing
       
       //Category
+
       this.provideMultipleSubtable(Tables.CATEGORY, prod.category);
       //Allergen
       this.provideMultipleSubtable(Tables.ALLERGEN, prod.allergen);
@@ -201,16 +202,12 @@ class DatabaseManager {
       this.checkArgumentArr(prod.badArgs);
       this.checkArgumentArr(prod.goodArgs);
 
-
-        let emptyArr:string[] = [];
-      
         // let allArgs:string[] = emptyArr.concat(prod.badArgs, prod.goodArgs, prod.commonInfo);
         // console.log(allArgs);
-        let allArgs:string[] = [];
+      let allArgs:string[] = [];
       
       //Packing
       let packingId:number|null = await this.provideSubtable(Tables.PACKING, prod.packing);
-      
       //Manufacturer
       let manufacturerId:number|null = await this.provideSubtable(Tables.MANUFACTURER, prod.manufacturer);
       //NutriScore

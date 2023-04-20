@@ -160,28 +160,21 @@ var DatabaseManager = /** @class */ (function () {
                                         ecoScore: results[0].ecoScore
                                     };
                                     resolve(outElement);
-                                    return [3 /*break*/, 13];
+                                    return [3 /*break*/, 12];
                                 case 7: return [4 /*yield*/, this.eanSource.requestEan(ean)];
                                 case 8:
                                     newProduct = _a.sent();
-                                    console.log("Error:");
-                                    console.log(newProduct.error);
-                                    if (!(newProduct.error >= 0)) return [3 /*break*/, 10];
+                                    if (!(newProduct.error > 0)) return [3 /*break*/, 10];
                                     return [4 /*yield*/, this.altEanSource.requestEan(ean)];
                                 case 9:
                                     newProduct = _a.sent();
-                                    console.log("Jetzt kommt das Alternative Frische Produkt:");
-                                    console.log(typeof (newProduct));
-                                    return [3 /*break*/, 11];
-                                case 10:
-                                    console.log("Produkt gefunden!");
-                                    _a.label = 11;
-                                case 11: return [4 /*yield*/, this.addProduct(newProduct)];
-                                case 12:
+                                    _a.label = 10;
+                                case 10: return [4 /*yield*/, this.addProduct(newProduct)];
+                                case 11:
                                     _a.sent();
                                     resolve(newProduct);
-                                    _a.label = 13;
-                                case 13: return [2 /*return*/];
+                                    _a.label = 12;
+                                case 12: return [2 /*return*/];
                             }
                         });
                     }); })];
@@ -212,8 +205,6 @@ var DatabaseManager = /** @class */ (function () {
                                             return [4 /*yield*/, this.eanSource.requestEan(ean)];
                                         case 1:
                                             currentProduct = _a.sent();
-                                            console.log("Jetzt kommt ein frisches Produkt:");
-                                            console.log(currentProduct);
                                             this.addProduct(currentProduct);
                                             return [3 /*break*/, 3];
                                         case 2:
@@ -231,7 +222,7 @@ var DatabaseManager = /** @class */ (function () {
     };
     DatabaseManager.prototype.addProduct = function (prod) {
         return __awaiter(this, void 0, void 0, function () {
-            var emptyArr, allArgs, packingId, manufacturerId, nutriScoreId, ecoScoreId, productId;
+            var allArgs, packingId, manufacturerId, nutriScoreId, ecoScoreId, productId;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -250,7 +241,6 @@ var DatabaseManager = /** @class */ (function () {
                         this.checkArgumentArr(prod.commonInfo);
                         this.checkArgumentArr(prod.badArgs);
                         this.checkArgumentArr(prod.goodArgs);
-                        emptyArr = [];
                         allArgs = [];
                         return [4 /*yield*/, this.provideSubtable(tables_1["default"].PACKING, prod.packing)];
                     case 1:
@@ -264,12 +254,9 @@ var DatabaseManager = /** @class */ (function () {
                         return [4 /*yield*/, this.provideSubtable(tables_1["default"].ECOSCORE, prod.ecoScore)];
                     case 4:
                         ecoScoreId = _a.sent();
-                        console.log("Got before Query");
-                        console.log(prod.name);
                         return [4 /*yield*/, this.doQuery("INSERT INTO Product (name, code,  weight, manufacturer, packing, nutriScore, ecoScore) VALUES (\"".concat(prod.name, "\", \"").concat(prod.code, "\" ,\"").concat(prod.weight, "\", ").concat(manufacturerId, ", ").concat(packingId, ", ").concat(nutriScoreId, ", ").concat(ecoScoreId, ");"))];
                     case 5:
                         _a.sent();
-                        console.log("Got HEre!");
                         return [4 /*yield*/, this.findProduct(prod.code)];
                     case 6:
                         productId = _a.sent();
@@ -297,7 +284,6 @@ var DatabaseManager = /** @class */ (function () {
     };
     DatabaseManager.prototype.checkArgumentArr = function (processStr) {
         if (processStr === undefined) {
-            console.log("Arr is undefined!");
             processStr = [];
         }
     };
@@ -380,14 +366,12 @@ var DatabaseManager = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
-                console.log("Got into provideSubtable" + word);
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var id, _a;
                         return __generator(this, function (_b) {
                             switch (_b.label) {
                                 case 0:
                                     if (word === "" || word === undefined) {
-                                        console.log("Resolving null");
                                         resolve(null);
                                         return [2 /*return*/];
                                     }
