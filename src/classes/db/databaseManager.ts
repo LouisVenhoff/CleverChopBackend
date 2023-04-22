@@ -110,6 +110,7 @@ class DatabaseManager {
           let allergens:string[] = await this.getAllergens(results[0].id);
           let categorys:string[] = await this.getCategorys(results[0].id);
 
+          console.log(allergens);
 
           let outElement:MinimalProduct = 
           {
@@ -190,13 +191,13 @@ class DatabaseManager {
       
       //Category
 
-      this.provideMultipleSubtable(Tables.CATEGORY, prod.category);
+      await this.provideMultipleSubtable(Tables.CATEGORY, prod.category);
       //Allergen
-      this.provideMultipleSubtable(Tables.ALLERGEN, prod.allergen);
+      await this.provideMultipleSubtable(Tables.ALLERGEN, prod.allergen);
       //Arguments
-      this.provideMultipleArguments("average", prod.commonInfo);
-      this.provideMultipleArguments("bad", prod.badArgs);
-      this.provideMultipleArguments("good", prod.goodArgs);
+      await this.provideMultipleArguments("average", prod.commonInfo);
+      await this.provideMultipleArguments("bad", prod.badArgs);
+      await this.provideMultipleArguments("good", prod.goodArgs);
       
       this.checkArgumentArr(prod.commonInfo);
       this.checkArgumentArr(prod.badArgs);
@@ -621,7 +622,7 @@ class DatabaseManager {
 
         for(let i = 0; i < results.length; i++)
         {
-          allergens.push(results[i]);
+          allergens.push(results[i].name);
         }
 
         resolve(allergens);

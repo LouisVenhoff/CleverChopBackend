@@ -144,6 +144,7 @@ var DatabaseManager = /** @class */ (function () {
                                     return [4 /*yield*/, this.getCategorys(results[0].id)];
                                 case 6:
                                     categorys = _a.sent();
+                                    console.log(allergens);
                                     outElement = {
                                         error: 0,
                                         code: results[0].code,
@@ -225,59 +226,76 @@ var DatabaseManager = /** @class */ (function () {
             var allArgs, packingId, manufacturerId, nutriScoreId, ecoScoreId, productId;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
+                    case 0: 
+                    //TODO: Provide all secundary tables
+                    //-Category
+                    //-Allergen
+                    //-Packing
+                    //Category
+                    return [4 /*yield*/, this.provideMultipleSubtable(tables_1["default"].CATEGORY, prod.category)];
+                    case 1:
                         //TODO: Provide all secundary tables
                         //-Category
                         //-Allergen
                         //-Packing
                         //Category
-                        this.provideMultipleSubtable(tables_1["default"].CATEGORY, prod.category);
+                        _a.sent();
                         //Allergen
-                        this.provideMultipleSubtable(tables_1["default"].ALLERGEN, prod.allergen);
+                        return [4 /*yield*/, this.provideMultipleSubtable(tables_1["default"].ALLERGEN, prod.allergen)];
+                    case 2:
+                        //Allergen
+                        _a.sent();
                         //Arguments
-                        this.provideMultipleArguments("average", prod.commonInfo);
-                        this.provideMultipleArguments("bad", prod.badArgs);
-                        this.provideMultipleArguments("good", prod.goodArgs);
+                        return [4 /*yield*/, this.provideMultipleArguments("average", prod.commonInfo)];
+                    case 3:
+                        //Arguments
+                        _a.sent();
+                        return [4 /*yield*/, this.provideMultipleArguments("bad", prod.badArgs)];
+                    case 4:
+                        _a.sent();
+                        return [4 /*yield*/, this.provideMultipleArguments("good", prod.goodArgs)];
+                    case 5:
+                        _a.sent();
                         this.checkArgumentArr(prod.commonInfo);
                         this.checkArgumentArr(prod.badArgs);
                         this.checkArgumentArr(prod.goodArgs);
                         allArgs = [];
                         return [4 /*yield*/, this.provideSubtable(tables_1["default"].PACKING, prod.packing)];
-                    case 1:
+                    case 6:
                         packingId = _a.sent();
                         return [4 /*yield*/, this.provideSubtable(tables_1["default"].MANUFACTURER, prod.manufacturer)];
-                    case 2:
+                    case 7:
                         manufacturerId = _a.sent();
                         return [4 /*yield*/, this.provideSubtable(tables_1["default"].NUTRISCORE, prod.nutriScore)];
-                    case 3:
+                    case 8:
                         nutriScoreId = _a.sent();
                         return [4 /*yield*/, this.provideSubtable(tables_1["default"].ECOSCORE, prod.ecoScore)];
-                    case 4:
+                    case 9:
                         ecoScoreId = _a.sent();
                         return [4 /*yield*/, this.doQuery("INSERT INTO Product (name, code,  weight, manufacturer, packing, nutriScore, ecoScore) VALUES (\"".concat(prod.name, "\", \"").concat(prod.code, "\" ,\"").concat(prod.weight, "\", ").concat(manufacturerId, ", ").concat(packingId, ", ").concat(nutriScoreId, ", ").concat(ecoScoreId, ");"))];
-                    case 5:
+                    case 10:
                         _a.sent();
                         return [4 /*yield*/, this.findProduct(prod.code)];
-                    case 6:
-                        productId = _a.sent();
-                        if (!(prod.category.length !== 0)) return [3 /*break*/, 8];
-                        return [4 /*yield*/, this.createConnectionArr(tables_1.HelpTables.ProductCategory, tables_1["default"].CATEGORY, productId, prod.category)];
-                    case 7:
-                        _a.sent();
-                        _a.label = 8;
-                    case 8:
-                        if (!(prod.allergen.length !== 0)) return [3 /*break*/, 10];
-                        return [4 /*yield*/, this.createConnectionArr(tables_1.HelpTables.ProductAllergen, tables_1["default"].ALLERGEN, productId, prod.allergen)];
-                    case 9:
-                        _a.sent();
-                        _a.label = 10;
-                    case 10:
-                        if (!(allArgs.length !== 0)) return [3 /*break*/, 12];
-                        return [4 /*yield*/, this.createConnectionArr(tables_1.HelpTables.ProductArgument, tables_1["default"].ARGUMENTS, productId, allArgs)];
                     case 11:
+                        productId = _a.sent();
+                        if (!(prod.category.length !== 0)) return [3 /*break*/, 13];
+                        return [4 /*yield*/, this.createConnectionArr(tables_1.HelpTables.ProductCategory, tables_1["default"].CATEGORY, productId, prod.category)];
+                    case 12:
                         _a.sent();
-                        _a.label = 12;
-                    case 12: return [2 /*return*/];
+                        _a.label = 13;
+                    case 13:
+                        if (!(prod.allergen.length !== 0)) return [3 /*break*/, 15];
+                        return [4 /*yield*/, this.createConnectionArr(tables_1.HelpTables.ProductAllergen, tables_1["default"].ALLERGEN, productId, prod.allergen)];
+                    case 14:
+                        _a.sent();
+                        _a.label = 15;
+                    case 15:
+                        if (!(allArgs.length !== 0)) return [3 /*break*/, 17];
+                        return [4 /*yield*/, this.createConnectionArr(tables_1.HelpTables.ProductArgument, tables_1["default"].ARGUMENTS, productId, allArgs)];
+                    case 16:
+                        _a.sent();
+                        _a.label = 17;
+                    case 17: return [2 /*return*/];
                 }
             });
         });
@@ -723,7 +741,7 @@ var DatabaseManager = /** @class */ (function () {
                                 case 1:
                                     results = _a.sent();
                                     for (i = 0; i < results.length; i++) {
-                                        allergens.push(results[i]);
+                                        allergens.push(results[i].name);
                                     }
                                     resolve(allergens);
                                     return [2 /*return*/];

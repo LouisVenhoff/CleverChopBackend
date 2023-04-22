@@ -29,8 +29,7 @@ app.get("/", (req:any, res:any) => {
 app.get("/api/sendCode/:code", async (req:any, res:any) => {
     
     let result:MinimalProduct = await dbMng.provideProduct(req.params.code);
-    console.log("Result: ");
-    console.log(result);
+    
     
 
     res.send(JSON.stringify(result));
