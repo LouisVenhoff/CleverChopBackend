@@ -28,7 +28,7 @@ class WebScraper extends InfoSource {
         throw "Error while accessing Product Source!";
       }
 
-      let resultHtmlStr: string = resultHtml.toString("latin1");
+      let resultHtmlStr: string = resultHtml.toString("utf8");
 
       resolve(this.generateMinimalProduct(resultHtmlStr, ean));
       

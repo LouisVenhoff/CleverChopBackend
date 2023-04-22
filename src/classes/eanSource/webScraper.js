@@ -88,7 +88,7 @@ var WebScraper = /** @class */ (function (_super) {
                                     console.error(ex_1.message);
                                     throw "Error while accessing Product Source!";
                                 case 3:
-                                    resultHtmlStr = resultHtml.toString("latin1");
+                                    resultHtmlStr = resultHtml.toString("utf8");
                                     resolve(this.generateMinimalProduct(resultHtmlStr, ean));
                                     return [2 /*return*/];
                             }
@@ -125,7 +125,6 @@ var WebScraper = /** @class */ (function (_super) {
         };
         if (!this.checkProductProvided($)) {
             tempObj.error = 1;
-            console.log("Product not provided");
             return tempObj;
         }
         tempObj.name = this.loadName($);
@@ -256,7 +255,6 @@ var WebScraper = /** @class */ (function (_super) {
         return temp;
     };
     WebScraper.prototype.checkProductProvided = function (htmlData) {
-        console.log("Checktext:");
         if (htmlData(".if-empty-dnone").text() === "Fehler") {
             return false;
         }
