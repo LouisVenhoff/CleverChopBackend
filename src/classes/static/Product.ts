@@ -2,14 +2,16 @@
 export type MinimalProduct = {
     error:number,
     name:string,
-    detail:string,
+    weight:string,
     manufacturer:string,
-    mainCat:string,
-    subCat:string,
-    contents:number | null,
-    packageInfo:number | null,
-    description:string,
-    origin:string,
+    packing: string,
+    category:string[],
+    allergen:string[],
+    badArgs:string[],
+    goodArgs:string[],
+    commonInfo:string[],
+    nutriScore:string,
+    ecoScore:string,
     code:string
 }
 
@@ -17,20 +19,35 @@ class Product
 {
     error:number = 0;
     name:string = "";
-    detail:string = "";
+    weight:string = "";
     manufacturer:string = "";
-    mainCat:string = "";
-    subCat:string = "";
-    contents:number = 0;
-    packageInfo:number = 0;
-    description:string = "";
-    origin:string = "";
+    packing:string = "";
+    category:string[] = [];
+    allergen:string[] = [];
+    badArgs:string[] = [];
+    goodArgs:string[] = [];
+    commonInfo:string[] = [];
+    nutriScore:string = "";
+    ecoScore:string = "";
     public code:string = "";
-   
+    minProduct:MinimalProduct;
 
-    constructor(apiString:string)
+    constructor(product:MinimalProduct)
     {
-        this.convertApiString(apiString);   
+        this.minProduct = product;
+        this.error = product.error;
+        this.writeArgsSafe(this.name,product.name);
+        this.writeArgsSafe(this.weight, product.weight);
+        this.writeArgsSafe(this.manufacturer, product.manufacturer);
+        this.writeArgsSafe(this.packing, product.packing);
+        this.writeArgsSafe(this.category, product.category);
+        this.writeArgsSafe( this.allergen, product.allergen);
+        this.writeArgsSafe(this.badArgs, product.badArgs);
+        this.writeArgsSafe(this.goodArgs, product.goodArgs);
+        this.writeArgsSafe(this.commonInfo, product.commonInfo);
+        this.writeArgsSafe(this.nutriScore, product.nutriScore);
+        this.writeArgsSafe(this.ecoScore, product.ecoScore);
+        this.writeArgsSafe(this.code, product.code);  
     }
 
     // public setCode(code:string)
@@ -38,91 +55,41 @@ class Product
     //     this.code = code;
     // }
 
-
-
-    private convertApiString(input:string)
+    public static getEmptyMinimalProduct():MinimalProduct
     {
-        let lineArr:string[] = input.split("\n");
-
-        for(let i:number = 0; i < lineArr.length; i++)
-        {
-            this.fillObjData(lineArr[i]);
-        }
-    }
-
-    private fillObjData(input:string)
-    {
-        if(!input.includes("="))
-        {
-            return;
-        }
-
-        let processValue:string[] = input.split("=");
-        switch(processValue[0])
-        {
-            case "error":
-                this.error = parseInt(processValue[1]);
-                break;
-            case "name":
-                this.name = processValue[1];
-                break;
-            case "detailname":
-                this.detail = processValue[1];
-                break;
-            case "vendor":
-                this.manufacturer = processValue[1];
-                break;
-            case "maincat":
-                this.mainCat = processValue[1];
-                break;
-            case "subcat":
-                this.subCat = processValue[1];
-                break;
-            case "contents":
-                this.contents = parseInt(processValue[1]);
-                break;
-            case "pack":
-                this.packageInfo = parseInt(processValue[1]);
-                break;
-            case "descr":
-                this.description = processValue[1];
-                break;
-            case "origin":
-                this.origin = processValue[1]
-                break;
-           
+        let outProd:MinimalProduct = {
+            error: 0,
+            name: "",
+            weight: "",
+            manufacturer: "",
+            packing: "",
+            category: [],
+            allergen: [],
+            badArgs: [],
+            goodArgs: [],
+            commonInfo: [],
+            nutriScore: "",
+            ecoScore: "",
+            code: ""
         }
 
-        if(this.name == "")
-        {
-            this.name = this.detail;
-        }
-
-
+        return outProd;
     }
 
 
-
-  
 
     public reduceObj():MinimalProduct
     {
-           let outObj:MinimalProduct =  {
-                error:this.error,
-                name:this.name,
-                detail:this.detail,
-                manufacturer:this.manufacturer,
-                mainCat:this.mainCat,
-                subCat:this.subCat,
-                contents:this.contents,
-                packageInfo:this.packageInfo,
-                description:this.description,
-                origin:this.origin,
-                code:this.code,
-            }
-        
+           return this.minProduct;
+    }
 
-            return outObj;
+    private writeArgsSafe(arg:any, input:any)
+    {
+        if(input !== undefined)
+        {
+            arg = input;
+        }
+        
     }
 
 }

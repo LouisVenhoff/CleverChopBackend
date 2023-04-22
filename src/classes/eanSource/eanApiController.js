@@ -1,4 +1,19 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -38,9 +53,13 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var axios_1 = require("axios");
 var Product_1 = require("../static/Product");
-var EanApiController = /** @class */ (function () {
+var infoSource_1 = require("./infoSource");
+var EanApiController = /** @class */ (function (_super) {
+    __extends(EanApiController, _super);
     function EanApiController(_userId) {
-        this._userId = _userId;
+        var _this = _super.call(this) || this;
+        _this._userId = _userId;
+        return _this;
     }
     EanApiController.prototype.requestEan = function (ean) {
         return __awaiter(this, void 0, void 0, function () {
@@ -62,7 +81,7 @@ var EanApiController = /** @class */ (function () {
                                         })];
                                 case 1:
                                     result = _a.sent();
-                                    outObj = new Product_1["default"](result.data.toString("latin1"));
+                                    outObj = new Product_1["default"](this.rawToMinProduct(result.data.toString("latin1"), ean));
                                     outObj.code = ean;
                                     resolve(outObj.reduceObj());
                                     return [3 /*break*/, 3];
@@ -78,6 +97,19 @@ var EanApiController = /** @class */ (function () {
             });
         });
     };
+    EanApiController.prototype.rawToMinProduct = function (rawString, ean) {
+        var outProd = Product_1["default"].getEmptyMinimalProduct(); //Der Produktname wird aus dem String gefiltert und einem neuen leeren Minimalprodukt zugewiesen
+        outProd.code = ean;
+        var cleanedInfo = rawString.split("\n");
+        for (var i = 0; i < cleanedInfo.length; i++) {
+            var infoPair = cleanedInfo[i].split("=");
+            if (infoPair[0] === "name") {
+                outProd.name = infoPair[1];
+                break;
+            }
+        }
+        return outProd;
+    };
     return EanApiController;
-}());
+}(infoSource_1["default"]));
 exports["default"] = EanApiController;

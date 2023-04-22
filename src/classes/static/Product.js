@@ -1,86 +1,64 @@
 "use strict";
 exports.__esModule = true;
 var Product = /** @class */ (function () {
-    function Product(apiString) {
+    function Product(product) {
         this.error = 0;
         this.name = "";
-        this.detail = "";
+        this.weight = "";
         this.manufacturer = "";
-        this.mainCat = "";
-        this.subCat = "";
-        this.contents = 0;
-        this.packageInfo = 0;
-        this.description = "";
-        this.origin = "";
+        this.packing = "";
+        this.category = [];
+        this.allergen = [];
+        this.badArgs = [];
+        this.goodArgs = [];
+        this.commonInfo = [];
+        this.nutriScore = "";
+        this.ecoScore = "";
         this.code = "";
-        this.convertApiString(apiString);
+        this.minProduct = product;
+        this.error = product.error;
+        this.writeArgsSafe(this.name, product.name);
+        this.writeArgsSafe(this.weight, product.weight);
+        this.writeArgsSafe(this.manufacturer, product.manufacturer);
+        this.writeArgsSafe(this.packing, product.packing);
+        this.writeArgsSafe(this.category, product.category);
+        this.writeArgsSafe(this.allergen, product.allergen);
+        this.writeArgsSafe(this.badArgs, product.badArgs);
+        this.writeArgsSafe(this.goodArgs, product.goodArgs);
+        this.writeArgsSafe(this.commonInfo, product.commonInfo);
+        this.writeArgsSafe(this.nutriScore, product.nutriScore);
+        this.writeArgsSafe(this.ecoScore, product.ecoScore);
+        this.writeArgsSafe(this.code, product.code);
     }
     // public setCode(code:string)
     // {
     //     this.code = code;
     // }
-    Product.prototype.convertApiString = function (input) {
-        var lineArr = input.split("\n");
-        for (var i = 0; i < lineArr.length; i++) {
-            this.fillObjData(lineArr[i]);
-        }
-    };
-    Product.prototype.fillObjData = function (input) {
-        if (!input.includes("=")) {
-            return;
-        }
-        var processValue = input.split("=");
-        switch (processValue[0]) {
-            case "error":
-                this.error = parseInt(processValue[1]);
-                break;
-            case "name":
-                this.name = processValue[1];
-                break;
-            case "detailname":
-                this.detail = processValue[1];
-                break;
-            case "vendor":
-                this.manufacturer = processValue[1];
-                break;
-            case "maincat":
-                this.mainCat = processValue[1];
-                break;
-            case "subcat":
-                this.subCat = processValue[1];
-                break;
-            case "contents":
-                this.contents = parseInt(processValue[1]);
-                break;
-            case "pack":
-                this.packageInfo = parseInt(processValue[1]);
-                break;
-            case "descr":
-                this.description = processValue[1];
-                break;
-            case "origin":
-                this.origin = processValue[1];
-                break;
-        }
-        if (this.name == "") {
-            this.name = this.detail;
-        }
+    Product.getEmptyMinimalProduct = function () {
+        var outProd = {
+            error: 0,
+            name: "",
+            weight: "",
+            manufacturer: "",
+            packing: "",
+            category: [],
+            allergen: [],
+            badArgs: [],
+            goodArgs: [],
+            commonInfo: [],
+            nutriScore: "",
+            ecoScore: "",
+            code: ""
+        };
+        return outProd;
     };
     Product.prototype.reduceObj = function () {
-        var outObj = {
-            error: this.error,
-            name: this.name,
-            detail: this.detail,
-            manufacturer: this.manufacturer,
-            mainCat: this.mainCat,
-            subCat: this.subCat,
-            contents: this.contents,
-            packageInfo: this.packageInfo,
-            description: this.description,
-            origin: this.origin,
-            code: this.code
-        };
-        return outObj;
+        return this.minProduct;
+    };
+    Product.prototype.writeArgsSafe = function (arg, input) {
+        if (input !== undefined) {
+            arg = input;
+        }
     };
     return Product;
 }());
