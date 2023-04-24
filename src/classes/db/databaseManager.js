@@ -144,7 +144,6 @@ var DatabaseManager = /** @class */ (function () {
                                     return [4 /*yield*/, this.getCategorys(results[0].id)];
                                 case 6:
                                     categorys = _a.sent();
-                                    console.log(allergens);
                                     outElement = {
                                         error: 0,
                                         code: results[0].code,
@@ -223,7 +222,7 @@ var DatabaseManager = /** @class */ (function () {
     };
     DatabaseManager.prototype.addProduct = function (prod) {
         return __awaiter(this, void 0, void 0, function () {
-            var allArgs, packingId, manufacturerId, nutriScoreId, ecoScoreId, productId;
+            var emptyArr, allArgs, packingId, manufacturerId, nutriScoreId, ecoScoreId, productId;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: 
@@ -259,7 +258,8 @@ var DatabaseManager = /** @class */ (function () {
                         this.checkArgumentArr(prod.commonInfo);
                         this.checkArgumentArr(prod.badArgs);
                         this.checkArgumentArr(prod.goodArgs);
-                        allArgs = [];
+                        emptyArr = [];
+                        allArgs = emptyArr.concat(prod.badArgs, prod.goodArgs, prod.commonInfo);
                         return [4 /*yield*/, this.provideSubtable(tables_1["default"].PACKING, prod.packing)];
                     case 6:
                         packingId = _a.sent();
@@ -664,6 +664,8 @@ var DatabaseManager = /** @class */ (function () {
             case tables_1.HelpTables.ProductCategory:
                 return "ProductCategory";
                 break;
+            case tables_1.HelpTables.ProductArgument:
+                return "ProductArgument";
             default:
                 throw ("The input is not a HelpTable");
         }

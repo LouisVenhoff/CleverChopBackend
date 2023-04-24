@@ -110,7 +110,7 @@ class DatabaseManager {
           let allergens:string[] = await this.getAllergens(results[0].id);
           let categorys:string[] = await this.getCategorys(results[0].id);
 
-          console.log(allergens);
+         
 
           let outElement:MinimalProduct = 
           {
@@ -203,9 +203,11 @@ class DatabaseManager {
       this.checkArgumentArr(prod.badArgs);
       this.checkArgumentArr(prod.goodArgs);
 
-        // let allArgs:string[] = emptyArr.concat(prod.badArgs, prod.goodArgs, prod.commonInfo);
+        let emptyArr:string[] = [];
+
+        let allArgs:string[] = emptyArr.concat(prod.badArgs, prod.goodArgs, prod.commonInfo);
         // console.log(allArgs);
-      let allArgs:string[] = [];
+      
       
       //Packing
       let packingId:number|null = await this.provideSubtable(Tables.PACKING, prod.packing);
@@ -322,8 +324,6 @@ class DatabaseManager {
 
     });
 
-
-    
         
   } 
 
@@ -527,6 +527,8 @@ class DatabaseManager {
         case HelpTables.ProductCategory:
           return "ProductCategory";
           break;
+        case HelpTables.ProductArgument:
+          return "ProductArgument";
         default:
           throw("The input is not a HelpTable");
 
