@@ -53,6 +53,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 var infoSource_1 = require("./infoSource");
 var axios_1 = require("axios");
+var strhelper_1 = require("../helpers/strhelper");
 var cheerio = require("cheerio");
 var WebScraper = /** @class */ (function (_super) {
     __extends(WebScraper, _super);
@@ -252,7 +253,20 @@ var WebScraper = /** @class */ (function (_super) {
             .each(function (index, child) {
             temp.push($(child).text());
         });
-        return temp;
+        return this.formatArgArray(temp);
+    };
+    WebScraper.prototype.formatArgArray = function (input) {
+        var outArr = [];
+        for (var i = 0; i < input.length; i++) {
+            var formatted = (strhelper_1["default"].cleanString(input[i]));
+            if (formatted !== null) {
+                outArr.push(formatted);
+            }
+            else {
+                continue;
+            }
+        }
+        return outArr;
     };
     WebScraper.prototype.checkProductProvided = function (htmlData) {
         if (htmlData(".if-empty-dnone").text() === "Fehler") {
