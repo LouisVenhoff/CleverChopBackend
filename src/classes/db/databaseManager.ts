@@ -1,8 +1,11 @@
 var mysql = require("mysql");
 import Product, { MinimalProduct } from "../static/Product";
-import Tables from "../../enums/tables";
-import EanApiController from "../openEan/eanApiController";
+import Tables, {HelpTables} from "../../enums/tables";
+import EanApiController from "../eanSource/eanApiController";
+import InfoSource from "../eanSource/infoSource";
 import NetworkProvider from "../network/networkProvider";
+import WebScraper from "../eanSource/webScraper";
+import StrHelper from "../helpers/strhelper";
 
 
 class DatabaseManager {
@@ -11,7 +14,8 @@ class DatabaseManager {
   password: string;
   database:string;
   sqlConnection: any;
-  eanSource: EanApiController = new EanApiController("400000000");
+  altEanSource: InfoSource = new EanApiController("400000000");
+  eanSource:InfoSource = new WebScraper();
   dbConAttempts:number = 0;
 
   private connectionState = false;
@@ -61,103 +65,91 @@ class DatabaseManager {
     return this.connectionState;
   }
 
-  public async provideProduct(ean: string): Promise<MinimalProduct> {
-    
-    return new Promise(async (resolve, reject) => {
-      
 
-      let errorCode:number = 0;
-      let productId:number = 0;
-      
-      await this.findProduct(ean)
-      .then((e:number) => {
-        productId = e;
-      })
-      .catch((e:number) => {
-        errorCode = e;
-      });
-      
-      if(errorCode === 0)
-      {
-        try {
-          await this.sqlConnection.query(
-            `SELECT Name, Detail, Code, Content, Pack, Description, Origin, category.category as MainCat, subcategory.category as SubCat FROM product
-                                                                      JOIN origin ON origin.id = product.originId
-                                                                      JOIN category ON category.id = product.catId
-                                                                      JOIN subcategory ON subcategory.id = product.SubCatId
-                                                                      WHERE product.id = ?;`,[productId],
-            (error: any, results: any, fields: any) => {
-              
-              if(error)
+  private async doQuery(queryStr:string):Promise<any[]>
+  {
+      return new Promise(async(resolve, reject) => {
+
+          this.sqlConnection.query(queryStr, (err:any, result:any) => 
+          {
+              if(err)
               {
-                console.log(error.message);
-                reject();
+                reject(err);
               }
+              else
+              {
+                  resolve(result);
+              }
+          });
 
 
-              if (results.length === 0) {
-                console.log("Article Not Found!");
-              }
+      });
+  }
+
+  public async provideProduct(ean: string): Promise<MinimalProduct> 
+  {
   
-              let loadedItem: MinimalProduct = {
-                error: 0,
-                name: results[0].Name,
-                detail: results[0].Detail,
-                code: results[0].Code,
-                contents: results[0].Content,
-                packageInfo: results[0],
-                description: results[0].Description,
-                origin: results[0].Origin,
-                mainCat: results[0].MainCat,
-                subCat: results[0].SubCat,
-                manufacturer: "",
-              };
-  
-              resolve(loadedItem);
-            }
-          );
-        } catch {
-          //reject(null);
-        }
+    let sqlQuery:string = `SELECT product.id as id, product.name, code, weight, manufacturer.name as manufacturer, packing.name as packing, nutriScore.name as nutriScore, ecoScore.name as ecoScore 
+    FROM Product
+    JOIN manufacturer ON manufacturer.id = manufacturer 
+    JOIN packing ON packing.id = packing
+    JOIN nutriScore ON nutriScore.id = nutriScore
+    JOIN ecoScore ON ecoScore.id = ecoScore
+    WHERE code = ${ean}`;
+
+    return new Promise(async(resolve, reject) => 
+    {
+      let results:any[] = await this.doQuery(sqlQuery);
+     
+      if(results.length != 0)
+      {
+          
+          let commonArgs:string[] = await this.getArguments("common", results[0].id);
+          let badArgs:string[] = await this.getArguments("bad", results[0].id);
+          let goodArgs:string[] = await this.getArguments("good", results[0].id);
+          let allergens:string[] = await this.getAllergens(results[0].id);
+          let categorys:string[] = await this.getCategorys(results[0].id);
+
+         
+
+          let outElement:MinimalProduct = 
+          {
+            error:0,
+            code: results[0].code,
+            name: results[0].name,
+            weight: results[0].weight,
+            manufacturer: results[0].manufacturer,
+            packing: results[0].packing,
+            category: categorys,
+            allergen: allergens,
+            badArgs: badArgs,
+            goodArgs: goodArgs,
+            commonInfo: commonArgs,
+            nutriScore: results[0].nutriScore,
+            ecoScore: results[0].ecoScore,
+          }
+          resolve(outElement);
       }
       else
       {
-        resolve(this.generateErrorObj(errorCode));
+        let newProduct:MinimalProduct = await this.eanSource.requestEan(ean);
+       
+        if(newProduct.error > 0)
+        {
+            newProduct = await this.altEanSource.requestEan(ean);
+            
+        }
+       
+        
+        await this.addProduct(newProduct);
+        resolve(newProduct);
       }
-      
     });
+
+    
   }
 
-  public async writeUnknownEan(ean:string):Promise<boolean>
-  {
-      return new Promise((resolve, reject) => {
-            this.sqlConnection.query(`INSERT INTO unknowncode (Code) VALUES (?)`,[ean]);
-        });
-  }
-
-  public async getUnknownCodeRows():Promise<any[]>
-  {
-      return new Promise(async (resolve, reject) => {
-        await this.sqlConnection.query(`SELECT code FROM unknowncode`, (error:any, results:any, fields:any) => {
-            if(!error)
-            {
-                resolve(results);
-            }
-            else
-            {
-                throw error;
-            }
-        });
-      });
-  }
-
-  public deleteUnknownCode(code:string)
-  {
-      this.sqlConnection.query(`DELETE FROM unknowncode WHERE code = ?`,[code]);
-  }
-
-
-
+  
   private async findProduct(ean: string): Promise<number> {
     return new Promise(async (resolve, reject) => {
       this.sqlConnection.query(
@@ -177,16 +169,8 @@ class DatabaseManager {
           }
           
           if (checkedRes.length === 0) {
-            let Product: MinimalProduct = await this.eanSource.requestEan(ean);
-            if(Product.error !== 0)
-            {
-                reject(Product.error);
-                return;
-            }
-            await this.addProduct(Product);
-            this.findProduct(ean).then((e: number) => {
-              resolve(e);
-            });
+              let currentProduct:MinimalProduct = await this.eanSource.requestEan(ean);
+              this.addProduct(currentProduct);
           } else {
             resolve(checkedRes[0].id);
           }
@@ -195,30 +179,364 @@ class DatabaseManager {
     });
   }
 
+  
+
+
+
   private async addProduct(prod: MinimalProduct) {
-    let mainCatId: number | null = await this.provideSecTable(prod.mainCat, Tables.CATEGORY);
-    let subCatId: number | null = await this.provideSecTable(prod.subCat, Tables.SUBCATEGORY);
-    let originId: number | null = await this.provideSecTable(prod.origin,Tables.ORIGIN);
+      //TODO: Provide all secundary tables
+              //-Category
+              //-Allergen
+              //-Packing
+      
+      //Category
 
-    mainCatId = this.proveIsNotNaN(mainCatId);
-    subCatId = this.proveIsNotNaN(subCatId);
-    originId = this.proveIsNotNaN(originId);
+      await this.provideMultipleSubtable(Tables.CATEGORY, prod.category);
+      //Allergen
+      await this.provideMultipleSubtable(Tables.ALLERGEN, prod.allergen);
+      //Arguments
+      await this.provideMultipleArguments("average", prod.commonInfo);
+      await this.provideMultipleArguments("bad", prod.badArgs);
+      await this.provideMultipleArguments("good", prod.goodArgs);
+      
+      this.checkArgumentArr(prod.commonInfo);
+      this.checkArgumentArr(prod.badArgs);
+      this.checkArgumentArr(prod.goodArgs);
 
-    this.formatMinimalProductBytes(prod);
+        let emptyArr:string[] = [];
+
+        let allArgs:string[] = emptyArr.concat(prod.badArgs, prod.goodArgs, prod.commonInfo);
+        // console.log(allArgs);
+      
+      
+      //Packing
+      let packingId:number|null = await this.provideSubtable(Tables.PACKING, prod.packing);
+      //Manufacturer
+      let manufacturerId:number|null = await this.provideSubtable(Tables.MANUFACTURER, prod.manufacturer);
+      //NutriScore
+      let nutriScoreId:number|null = await this.provideSubtable(Tables.NUTRISCORE, prod.nutriScore);
+      //EcoScore
+      let ecoScoreId:number|null = await this.provideSubtable(Tables.ECOSCORE, prod.ecoScore);
+     
+      await this.doQuery(`INSERT INTO Product (name, code,  weight, manufacturer, packing, nutriScore, ecoScore) VALUES ("${prod.name}", "${prod.code}" ,"${prod.weight}", ${manufacturerId}, ${packingId}, ${nutriScoreId}, ${ecoScoreId});`);
+      
+      let productId:number = await this.findProduct(prod.code);
+      
+      if(prod.category.length !== 0){
+        await this.createConnectionArr(HelpTables.ProductCategory,Tables.CATEGORY, productId, prod.category);
+      }
+
+      if(prod.allergen.length !== 0){
+        await this.createConnectionArr(HelpTables.ProductAllergen, Tables.ALLERGEN, productId, prod.allergen);
+      }
+
+      if(allArgs.length !== 0)
+      {
+        await this.createConnectionArr(HelpTables.ProductArgument, Tables.ARGUMENTS, productId, allArgs);
+      }
+      
+  }
+
+  private checkArgumentArr(processStr:string[]){
+
+    if(processStr === undefined){
+     
+      processStr = [];
+    }
     
-
-    await this.sqlConnection.query(
-      `INSERT INTO product (Name, Detail, Code, Content, Pack, Description, OriginId, CatId, SubCatId)` +
-        `VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [prod.name,prod.detail,prod.code,prod.contents,prod.packageInfo,prod.description,originId,mainCatId,subCatId]
-    );
   }
 
-  private formatMinimalProductBytes(prod:MinimalProduct)
+  private async addToSubtable(tab:Tables, word:string)
   {
-      prod.contents = this.proveIsNotNaN(prod.contents);
-      prod.packageInfo = this.proveIsNotNaN(prod.packageInfo);
+        let tableName:string = this.resolveTablesName(tab);
+        let sqlQuery:string = `INSERT INTO ${tableName} (name) VALUES ("${word}");`
+        await this.sqlConnection.query(sqlQuery);
   }
+
+  private async checkSubTable(tab:Tables, word:string):Promise<number>
+  {
+      let tableName:string = this.resolveTablesName(tab);
+      let columnName:string = "name";
+      
+      if(tab == Tables.ARGUMENTS)
+      {
+        columnName = "text";
+      }
+      
+      
+      let sqlQuery:string = `SELECT id FROM ${tableName} WHERE ${columnName} = "${StrHelper.cleanString(word)}";`;
+     
+      return new Promise(async(resolve, reject) => {
+
+          let result:any[] = await this.doQuery(sqlQuery);
+          if(result.length !== 0)
+          {
+              resolve(parseInt(result[0].id));
+          }
+          else
+          {
+              resolve(-1);
+          }
+      });
+
+  }
+
+  private async  provideMultipleSubtable(tab:Tables, word:string[])
+  {
+        if(word === undefined){
+          return;
+        }
+
+        if(word.length === 0)
+        {
+            return;
+        }
+  
+        for(let i = 0; i < word.length; i++)
+        {
+            await this.provideSubtable(tab, word[i]);
+        }
+  }
+
+  private async provideSubtable(tab:Tables, word:string):Promise<number | null>
+  {
+       
+    return new Promise(async(resolve, reject) => {
+
+      if(word === "" || word === undefined)
+      {
+         
+          resolve(null);
+          return;
+      }
+
+      let id:number = await this.checkSubTable(tab, word);
+      if(id === -1)
+      {
+         await this.addToSubtable(tab, word);
+         resolve(await this.provideSubtable(tab, word));
+      }
+      else
+      {
+          resolve(id);
+      }
+
+
+    });
+
+        
+  } 
+
+
+  private async provideMultipleArguments(effect:string, text:string[])
+  {
+      if(text === undefined){
+        return;
+      }
+
+      if(text.length === 0){
+        return;
+      }
+
+      for(let i = 0; i < text.length; i++)
+      {
+          this.provideArgumentSubtable(effect, text[i]);
+      }
+  }
+
+  private async provideArgumentSubtable(effect:string, text:string):Promise<number>
+  {
+      return new Promise(async(resolve, reject) => {
+
+        let checkResult:number = await this.checkArgumentSubtable(text);
+
+        if(checkResult != -1)
+        {
+          resolve(checkResult);
+        }
+        else
+        {
+          resolve(await this.addArgument(effect, text));
+        }
+
+
+      });
+
+  }
+
+  private async checkArgumentSubtable(text:string):Promise<number>
+  {
+      let sqlQuery:string = `SELECT id FROM Argument WHERE text = "${StrHelper.cleanString(text)}"`;
+
+      return new Promise(async(resolve, reject) => {
+
+          let results:any[] = await this.doQuery(sqlQuery);
+
+          if(results.length == 0)
+          {
+            resolve(-1);
+          }
+          else
+          {
+            resolve(parseInt(results[0]));
+          }
+      });
+  }
+
+  private async addArgument(effect:string, argument:string):Promise<number>
+  {
+      let effectId:number|null = await this.provideSubtable(Tables.EFFECT, effect);
+
+      let cleanedArgument:string | null  = StrHelper.cleanString(argument);
+
+
+      let sqlQuery:string = `INSERT INTO Argument (text, effectId) VALUES ("${cleanedArgument}","${effectId}")`;
+
+      return new Promise(async (resolve, reject) => 
+      {
+          await this.doQuery(sqlQuery);
+          resolve(await this.checkArgumentSubtable(argument));
+      });
+
+
+      
+  }
+
+
+  private async addContableEntry(helpTable:HelpTables, productId:number, elementId:number):Promise<number>
+  {
+      let tableName:string = this.resolveHelptableName(helpTable);
+
+      let sqlQuery:string = `INSERT INTO ${tableName} (productId, elementId) VALUES ("${productId}", "${elementId}");`;
+
+      let checkQuery:string = `SELECT id FROM ${tableName} WHERE productId = ${productId} AND elementId = ${elementId};`;
+
+      return new Promise(async(resolve, reject) => {
+
+          await this.doQuery(sqlQuery); //Insert Query
+          let checkResult:any[] = await this.doQuery(checkQuery);
+
+          resolve(parseInt(checkResult[0]));
+      });
+  }
+
+  private async createConnectionArr(helpTable:HelpTables, subTable:Tables, productId:number, elements:string[])
+  {
+      for(let i = 0; i < elements.length; i++)
+      {
+        
+        let elementId:number|null = await this.provideSubtable(subTable, elements[i]);
+        
+        if(elementId === null){
+          continue;
+        }
+        await this.addContableEntry(helpTable, productId, elementId);
+      }
+  }
+
+  private async getConnectionId(helpTable:HelpTables, productId:string, elementId:string):Promise<number>
+  {
+      let tableName = this.resolveHelptableName(helpTable);
+
+      let sqlQuery:string = `SELECT id FROM ${tableName} WHERE productId = ${productId} AND elementId = ${elementId};`;
+
+      return new Promise(async(resolve, reject) => {
+
+        let result:any[] = await this.doQuery(sqlQuery);
+        
+        if(result.length === 0)
+        {
+            resolve(-1);
+        }
+        else
+        {
+          resolve(parseInt(result[0]));
+        }
+
+      });
+  }
+
+  private async getAllConnectionIds(helpTabs:HelpTables, productId:number):Promise<number[]>
+  {
+      
+      let sqlQuery:string = `SELECT id FROM ${this.resolveHelptableName(helpTabs)} WHERE productId = ${productId}`;
+    
+      return new Promise(async(resolve, reject) => {
+
+        let results:any[] = await this.doQuery(sqlQuery);
+
+        let resultNumbers:number[] = [];
+        
+        for(let i = 0; i < results.length; i++)
+        {
+            resultNumbers.push(parseInt(results[i]));
+        }
+      });
+  }
+
+
+
+
+  private resolveTablesName(tab:Tables):string
+  {
+      switch(tab)
+      {
+        case Tables.PRODUCT:
+            return "Product";
+          break;
+        case Tables.ALLERGEN:
+          return "Allergen";
+          break;
+        case Tables.CATEGORY:
+          return "Category";
+          break;
+        case Tables.ECOSCORE:
+          return "EcoScore";
+          break;
+        case Tables.NUTRISCORE:
+          return "NutriScore";
+          break;
+        case Tables.PACKING:
+          return "Packing";
+          break;
+        case Tables.MANUFACTURER:
+          return "Manufacturer";
+          break;
+        case Tables.EFFECT:
+          return "Effect";
+          break;
+        case Tables.ARGUMENTS:
+          return "Argument";
+        default:
+            throw("The input is not a Table!");
+          break;
+      }
+  }
+
+
+  private resolveHelptableName(tab:HelpTables):string
+  {
+      switch(tab)
+      {
+        case HelpTables.ProductAllergen:
+          return "ProductAllergen"
+          break;
+        case HelpTables.ProductArgument:
+          return "ProductArgument";
+          break;
+        case HelpTables.ProductCategory:
+          return "ProductCategory";
+          break;
+        case HelpTables.ProductArgument:
+          return "ProductArgument";
+        default:
+          throw("The input is not a HelpTable");
+
+      }
+        
+  }
+
+ 
 
   private proveIsNotNaN(nr:number | null):number | null
   {
@@ -236,99 +554,105 @@ class DatabaseManager {
       }
   }
 
-  private async addToSecTable(value: string, table: Tables): Promise<boolean> {
-    let catType: string;
-    let tableName: string;
-
-    return new Promise(async (resolve, reject) => {
-      let dbConfig: any = this.getSecTableConfig(table);
-
-      await this.sqlConnection.query(
-        `INSERT INTO ${dbConfig.tableName} (${dbConfig.catType}) VALUES (?)`,[value],
-        async (error: any, results: any, fields: any) => {
-          if (error) {
-            resolve(false);
-          } else {
-            resolve(true);
-          }
-        }
-      );
-    });
-  }
-
-  private async checkSecTable(value: string, table: Tables): Promise<number> {
-    //const rows:any[] = await this.sqlConnection.query("SELECT id FROM ");
-
-    let dbConfig: any = this.getSecTableConfig(table);
-
-    return new Promise(async (resolve, reject) => {
-      await this.sqlConnection.query(
-        `SELECT id FROM ${dbConfig.tableName} WHERE ${dbConfig.catType} = ?`,[value],
-        (error: any, result: any, fields: any) => {
-          if (result.length > 0) {
-            resolve(parseInt(result[0].id));
-          } else {
-            resolve(0);
-          }
-        }
-      );
-    });
-  }
-
-  private async provideSecTable(value: string, table: Tables): Promise<number> {
-    return new Promise(async (resolve, reject) => {
-      let secId: number = await this.checkSecTable(value, table);
-      let finalId: number;
-
-      if (secId === 0) {
-        await this.addToSecTable(value, table);
-        resolve(await this.checkSecTable(value, table));
-      } else {
-        resolve(secId);
-      }
-    });
-  }
-
-
-  private getSecTableConfig(
-    table: Tables
-  ): { catType: string; tableName: string } | null {
-    let catType: string;
-    let tableName: string;
-
-    switch (table) {
-      case Tables.CATEGORY:
-        catType = "Category";
-        tableName = "category";
-        break;
-      case Tables.SUBCATEGORY:
-        catType = "Category";
-        tableName = "subcategory";
-        break;
-      case Tables.ORIGIN:
-        catType = "Origin";
-        tableName = "origin";
-        break;
-      default:
-        return null;
-    }
-
-    return { catType: catType, tableName: tableName };
-  }
+  
 
   private generateErrorObj(errorCode:number):MinimalProduct
   {
-      return({error: errorCode,
-              name: "",
-              detail: "",
-              code: "",
-              contents: 0,
-              packageInfo: 0,
-              description: "",
-              origin: "",
-              mainCat: "",
-              subCat: "",
-              manufacturer: ""});
+      return({
+        error: errorCode,
+        code: "",
+        name: "",
+        weight: "",
+        manufacturer: "",
+        packing: "",
+        category: [],
+        allergen: [],
+        badArgs: [],
+        goodArgs: [],
+        commonInfo: [],
+        nutriScore: "",
+        ecoScore: "",
+      });
+  }
+
+
+  private async getArguments(effect:string, productId:string):Promise<string[]>
+  {
+    let sqlQuery:string = `SELECT argument.text 
+    FROM argument
+    JOIN ProductArgument ON argument.id = ProductArgument.elementid
+    JOIN Product ON productId = Product.id
+    JOIN Effect ON Argument.effectId = Effect.id
+    WHERE Effect.name = "${effect}"
+    AND Product.id = ${productId};`;
+
+    return new Promise(async(resolve, reject) => {
+
+        let outArr:string[] = [];
+        
+        let results:any[] = await this.doQuery(sqlQuery);
+  
+        if(results.length == 0)
+        {
+          resolve(outArr);
+        }
+
+        for(let i = 0; i < results.length; i++)
+        {
+          outArr.push(results[i].text);
+        }
+
+        resolve(outArr);
+
+    });
+
+
+  }
+
+  private async getAllergens(productId:string):Promise<string[]>
+  {
+      let sqlQuery:string = `SELECT allergen.name
+      FROM allergen
+      JOIN ProductAllergen ON allergen.id = ProductAllergen.elementId
+      JOIN Product ON Product.id = ProductAllergen.productId
+      WHERE Product.id = ${productId};`
+
+      return new Promise(async(resolve, reject) => 
+      {
+        let allergens:string[] = [];
+        let results:any[] = await this.doQuery(sqlQuery);
+
+        for(let i = 0; i < results.length; i++)
+        {
+          allergens.push(results[i].name);
+        }
+
+        resolve(allergens);
+
+      });
+  }
+
+  private async getCategorys(productId:string):Promise<string[]>
+  {
+    let sqlQuery:string = `SELECT Category.name 
+    FROM Category
+    JOIN ProductCategory ON Category.id = ProductCategory.elementId
+    JOIN Product ON Product.id = productCategory.productId
+    WHERE Product.id = ${productId};`
+
+    return new Promise(async(resolve, reject) => 
+    {
+      let categorys:string[] = [];
+      let results:any[] = await this.doQuery(sqlQuery);
+
+      for(let i = 0; i < results.length; i++)
+      {
+          categorys.push(results[i].name);
+      }
+
+      resolve(categorys);
+
+    });
   }
 
 

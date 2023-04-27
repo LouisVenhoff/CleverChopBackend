@@ -36,33 +36,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var databaseManager_1 = require("./src/classes/db/databaseManager");
-var cors = require("cors");
-var express = require("express");
-var app = express();
-var port = 3014;
-//const dbMng:DatabaseManager = new DatabaseManager("localhost", "system", "Iwaaz2001g!", "cleverchopdb");
-//const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724", "heroku_554b26e8f85d455");
-//const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b712eb9ae277d5", "865f45a8", "heroku_9e52a98d5b35c1a");
-var dbMng = new databaseManager_1["default"]("localhost", "root", "", "cleverchopdb");
-app.use(cors());
-app.get("/", function (req, res) {
-    console.log("Working");
-});
-app.get("/api/sendCode/:code", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var result;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, dbMng.provideProduct(req.params.code)];
-            case 1:
-                result = _a.sent();
-                res.send(JSON.stringify(result));
-                return [2 /*return*/];
-        }
-    });
-}); });
-app.listen(port, function () {
-    console.log("Listening on Port " + port);
-});
-//Schatzi war hier und louis gehört nur mir !!
-// You are my boyfriend forever i love you so much.<3<3
+var InfoSource = /** @class */ (function () {
+    function InfoSource() {
+    }
+    //This method must be overwritten!
+    InfoSource.prototype.requestEan = function (ean) {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                throw ("RequestEan function is not implemented in subclass");
+            });
+        });
+    };
+    return InfoSource;
+}());
+exports["default"] = InfoSource;
