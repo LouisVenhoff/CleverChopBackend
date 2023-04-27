@@ -230,6 +230,8 @@ class WebScraper extends InfoSource {
     return this.loadArrInfo($, ".evaluation__title");
   }
 
+  
+
 
   private loadArrInfoWithChild($: any, cssLink: string): string[] {
     let temp: string[] = [];
@@ -252,7 +254,26 @@ class WebScraper extends InfoSource {
         temp.push($(child).text());
       })
 
-      return temp;
+      return this.formatArgArray(temp);
+  }
+
+
+  private formatArgArray(input:string[]):string[]{
+
+    let outArr:string[] = [];
+
+      for(let i = 0; i < input.length; i++){
+          let formatted:string|null  = (StrHelper.cleanString(input[i]));
+          if(formatted !== null){
+            outArr.push(formatted);
+          }
+          else{
+            continue;
+          }
+      
+        }
+
+    return outArr;
   }
 
   private checkProductProvided(htmlData: any): boolean {

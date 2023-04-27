@@ -56,8 +56,6 @@ app.get("/api/sendCode/:code", function (req, res) { return __awaiter(void 0, vo
             case 0: return [4 /*yield*/, dbMng.provideProduct(req.params.code)];
             case 1:
                 result = _a.sent();
-                console.log("Result: ");
-                console.log(result);
                 res.send(JSON.stringify(result));
                 return [2 /*return*/];
         }

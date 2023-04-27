@@ -110,6 +110,7 @@ class DatabaseManager {
           let allergens:string[] = await this.getAllergens(results[0].id);
           let categorys:string[] = await this.getCategorys(results[0].id);
 
+         
 
           let outElement:MinimalProduct = 
           {
@@ -190,21 +191,23 @@ class DatabaseManager {
       
       //Category
 
-      this.provideMultipleSubtable(Tables.CATEGORY, prod.category);
+      await this.provideMultipleSubtable(Tables.CATEGORY, prod.category);
       //Allergen
-      this.provideMultipleSubtable(Tables.ALLERGEN, prod.allergen);
+      await this.provideMultipleSubtable(Tables.ALLERGEN, prod.allergen);
       //Arguments
-      this.provideMultipleArguments("average", prod.commonInfo);
-      this.provideMultipleArguments("bad", prod.badArgs);
-      this.provideMultipleArguments("good", prod.goodArgs);
+      await this.provideMultipleArguments("average", prod.commonInfo);
+      await this.provideMultipleArguments("bad", prod.badArgs);
+      await this.provideMultipleArguments("good", prod.goodArgs);
       
       this.checkArgumentArr(prod.commonInfo);
       this.checkArgumentArr(prod.badArgs);
       this.checkArgumentArr(prod.goodArgs);
 
-        // let allArgs:string[] = emptyArr.concat(prod.badArgs, prod.goodArgs, prod.commonInfo);
+        let emptyArr:string[] = [];
+
+        let allArgs:string[] = emptyArr.concat(prod.badArgs, prod.goodArgs, prod.commonInfo);
         // console.log(allArgs);
-      let allArgs:string[] = [];
+      
       
       //Packing
       let packingId:number|null = await this.provideSubtable(Tables.PACKING, prod.packing);
@@ -321,8 +324,6 @@ class DatabaseManager {
 
     });
 
-
-    
         
   } 
 
@@ -526,6 +527,8 @@ class DatabaseManager {
         case HelpTables.ProductCategory:
           return "ProductCategory";
           break;
+        case HelpTables.ProductArgument:
+          return "ProductArgument";
         default:
           throw("The input is not a HelpTable");
 
@@ -621,7 +624,7 @@ class DatabaseManager {
 
         for(let i = 0; i < results.length; i++)
         {
-          allergens.push(results[i]);
+          allergens.push(results[i].name);
         }
 
         resolve(allergens);
