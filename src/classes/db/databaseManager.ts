@@ -90,7 +90,7 @@ class DatabaseManager {
   {
   
     let sqlQuery:string = `SELECT product.id as id, product.name, code, weight, manufacturer.name as manufacturer, packing.name as packing, nutriScore.name as nutriScore, ecoScore.name as ecoScore 
-    FROM Product
+    FROM product
     JOIN manufacturer ON manufacturer.id = manufacturer 
     JOIN packing ON packing.id = packing
     JOIN nutriScore ON nutriScore.id = nutriScore
@@ -218,7 +218,7 @@ class DatabaseManager {
       //EcoScore
       let ecoScoreId:number|null = await this.provideSubtable(Tables.ECOSCORE, prod.ecoScore);
      
-      await this.doQuery(`INSERT INTO Product (name, code,  weight, manufacturer, packing, nutriScore, ecoScore) VALUES ("${prod.name}", "${prod.code}" ,"${prod.weight}", ${manufacturerId}, ${packingId}, ${nutriScoreId}, ${ecoScoreId});`);
+      await this.doQuery(`INSERT INTO product (name, code,  weight, manufacturer, packing, nutriScore, ecoScore) VALUES ("${prod.name}", "${prod.code}" ,"${prod.weight}", ${manufacturerId}, ${packingId}, ${nutriScoreId}, ${ecoScoreId});`);
       
       let productId:number = await this.findProduct(prod.code);
       
@@ -366,7 +366,7 @@ class DatabaseManager {
 
   private async checkArgumentSubtable(text:string):Promise<number>
   {
-      let sqlQuery:string = `SELECT id FROM Argument WHERE text = "${StrHelper.cleanString(text)}"`;
+      let sqlQuery:string = `SELECT id FROM argument WHERE text = "${StrHelper.cleanString(text)}"`;
 
       return new Promise(async(resolve, reject) => {
 
@@ -390,7 +390,7 @@ class DatabaseManager {
       let cleanedArgument:string | null  = StrHelper.cleanString(argument);
 
 
-      let sqlQuery:string = `INSERT INTO Argument (text, effectId) VALUES ("${cleanedArgument}","${effectId}")`;
+      let sqlQuery:string = `INSERT INTO argument (text, effectId) VALUES ("${cleanedArgument}","${effectId}")`;
 
       return new Promise(async (resolve, reject) => 
       {
@@ -482,31 +482,31 @@ class DatabaseManager {
       switch(tab)
       {
         case Tables.PRODUCT:
-            return "Product";
+            return "product";
           break;
         case Tables.ALLERGEN:
-          return "Allergen";
+          return "allergen";
           break;
         case Tables.CATEGORY:
-          return "Category";
+          return "category";
           break;
         case Tables.ECOSCORE:
-          return "EcoScore";
+          return "ecoScore";
           break;
         case Tables.NUTRISCORE:
-          return "NutriScore";
+          return "nutriScore";
           break;
         case Tables.PACKING:
-          return "Packing";
+          return "packing";
           break;
         case Tables.MANUFACTURER:
-          return "Manufacturer";
+          return "manufacturer";
           break;
         case Tables.EFFECT:
-          return "Effect";
+          return "effect";
           break;
         case Tables.ARGUMENTS:
-          return "Argument";
+          return "argument";
         default:
             throw("The input is not a Table!");
           break;
@@ -519,16 +519,16 @@ class DatabaseManager {
       switch(tab)
       {
         case HelpTables.ProductAllergen:
-          return "ProductAllergen"
+          return "productAllergen"
           break;
         case HelpTables.ProductArgument:
-          return "ProductArgument";
+          return "productArgument";
           break;
         case HelpTables.ProductCategory:
-          return "ProductCategory";
+          return "productCategory";
           break;
         case HelpTables.ProductArgument:
-          return "ProductArgument";
+          return "productArgument";
         default:
           throw("The input is not a HelpTable");
 
@@ -580,11 +580,11 @@ class DatabaseManager {
   {
     let sqlQuery:string = `SELECT argument.text 
     FROM argument
-    JOIN ProductArgument ON argument.id = ProductArgument.elementid
-    JOIN Product ON productId = Product.id
-    JOIN Effect ON Argument.effectId = Effect.id
-    WHERE Effect.name = "${effect}"
-    AND Product.id = ${productId};`;
+    JOIN productArgument ON argument.id = productArgument.elementid
+    JOIN product ON productId = product.id
+    JOIN effect ON argument.effectId = effect.id
+    WHERE effect.name = "${effect}"
+    AND product.id = ${productId};`;
 
     return new Promise(async(resolve, reject) => {
 
@@ -613,9 +613,9 @@ class DatabaseManager {
   {
       let sqlQuery:string = `SELECT allergen.name
       FROM allergen
-      JOIN ProductAllergen ON allergen.id = ProductAllergen.elementId
-      JOIN Product ON Product.id = ProductAllergen.productId
-      WHERE Product.id = ${productId};`
+      JOIN productAllergen ON allergen.id = productAllergen.elementId
+      JOIN product ON product.id = productAllergen.productId
+      WHERE product.id = ${productId};`
 
       return new Promise(async(resolve, reject) => 
       {
@@ -634,11 +634,11 @@ class DatabaseManager {
 
   private async getCategorys(productId:string):Promise<string[]>
   {
-    let sqlQuery:string = `SELECT Category.name 
-    FROM Category
-    JOIN ProductCategory ON Category.id = ProductCategory.elementId
-    JOIN Product ON Product.id = productCategory.productId
-    WHERE Product.id = ${productId};`
+    let sqlQuery:string = `SELECT category.name 
+    FROM category
+    JOIN productCategory ON category.id = productCategory.elementId
+    JOIN product ON product.id = productCategory.productId
+    WHERE product.id = ${productId};`
 
     return new Promise(async(resolve, reject) => 
     {

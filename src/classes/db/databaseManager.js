@@ -120,7 +120,7 @@ var DatabaseManager = /** @class */ (function () {
             var sqlQuery;
             var _this = this;
             return __generator(this, function (_a) {
-                sqlQuery = "SELECT product.id as id, product.name, code, weight, manufacturer.name as manufacturer, packing.name as packing, nutriScore.name as nutriScore, ecoScore.name as ecoScore \n    FROM Product\n    JOIN manufacturer ON manufacturer.id = manufacturer \n    JOIN packing ON packing.id = packing\n    JOIN nutriScore ON nutriScore.id = nutriScore\n    JOIN ecoScore ON ecoScore.id = ecoScore\n    WHERE code = ".concat(ean);
+                sqlQuery = "SELECT product.id as id, product.name, code, weight, manufacturer.name as manufacturer, packing.name as packing, nutriScore.name as nutriScore, ecoScore.name as ecoScore \n    FROM product\n    JOIN manufacturer ON manufacturer.id = manufacturer \n    JOIN packing ON packing.id = packing\n    JOIN nutriScore ON nutriScore.id = nutriScore\n    JOIN ecoScore ON ecoScore.id = ecoScore\n    WHERE code = ".concat(ean);
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var results, commonArgs, badArgs, goodArgs, allergens, categorys, outElement, newProduct;
                         return __generator(this, function (_a) {
@@ -272,7 +272,7 @@ var DatabaseManager = /** @class */ (function () {
                         return [4 /*yield*/, this.provideSubtable(tables_1["default"].ECOSCORE, prod.ecoScore)];
                     case 9:
                         ecoScoreId = _a.sent();
-                        return [4 /*yield*/, this.doQuery("INSERT INTO Product (name, code,  weight, manufacturer, packing, nutriScore, ecoScore) VALUES (\"".concat(prod.name, "\", \"").concat(prod.code, "\" ,\"").concat(prod.weight, "\", ").concat(manufacturerId, ", ").concat(packingId, ", ").concat(nutriScoreId, ", ").concat(ecoScoreId, ");"))];
+                        return [4 /*yield*/, this.doQuery("INSERT INTO product (name, code,  weight, manufacturer, packing, nutriScore, ecoScore) VALUES (\"".concat(prod.name, "\", \"").concat(prod.code, "\" ,\"").concat(prod.weight, "\", ").concat(manufacturerId, ", ").concat(packingId, ", ").concat(nutriScoreId, ", ").concat(ecoScoreId, ");"))];
                     case 10:
                         _a.sent();
                         return [4 /*yield*/, this.findProduct(prod.code)];
@@ -464,7 +464,7 @@ var DatabaseManager = /** @class */ (function () {
             var sqlQuery;
             var _this = this;
             return __generator(this, function (_a) {
-                sqlQuery = "SELECT id FROM Argument WHERE text = \"".concat(strhelper_1["default"].cleanString(text), "\"");
+                sqlQuery = "SELECT id FROM argument WHERE text = \"".concat(strhelper_1["default"].cleanString(text), "\"");
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var results;
                         return __generator(this, function (_a) {
@@ -495,7 +495,7 @@ var DatabaseManager = /** @class */ (function () {
                     case 1:
                         effectId = _a.sent();
                         cleanedArgument = strhelper_1["default"].cleanString(argument);
-                        sqlQuery = "INSERT INTO Argument (text, effectId) VALUES (\"".concat(cleanedArgument, "\",\"").concat(effectId, "\")");
+                        sqlQuery = "INSERT INTO argument (text, effectId) VALUES (\"".concat(cleanedArgument, "\",\"").concat(effectId, "\")");
                         return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                                 var _a;
                                 return __generator(this, function (_b) {
@@ -623,31 +623,31 @@ var DatabaseManager = /** @class */ (function () {
     DatabaseManager.prototype.resolveTablesName = function (tab) {
         switch (tab) {
             case tables_1["default"].PRODUCT:
-                return "Product";
+                return "product";
                 break;
             case tables_1["default"].ALLERGEN:
-                return "Allergen";
+                return "allergen";
                 break;
             case tables_1["default"].CATEGORY:
-                return "Category";
+                return "category";
                 break;
             case tables_1["default"].ECOSCORE:
-                return "EcoScore";
+                return "ecoScore";
                 break;
             case tables_1["default"].NUTRISCORE:
-                return "NutriScore";
+                return "nutriScore";
                 break;
             case tables_1["default"].PACKING:
-                return "Packing";
+                return "packing";
                 break;
             case tables_1["default"].MANUFACTURER:
-                return "Manufacturer";
+                return "manufacturer";
                 break;
             case tables_1["default"].EFFECT:
-                return "Effect";
+                return "effect";
                 break;
             case tables_1["default"].ARGUMENTS:
-                return "Argument";
+                return "argument";
             default:
                 throw ("The input is not a Table!");
                 break;
@@ -656,16 +656,16 @@ var DatabaseManager = /** @class */ (function () {
     DatabaseManager.prototype.resolveHelptableName = function (tab) {
         switch (tab) {
             case tables_1.HelpTables.ProductAllergen:
-                return "ProductAllergen";
+                return "productAllergen";
                 break;
             case tables_1.HelpTables.ProductArgument:
-                return "ProductArgument";
+                return "productArgument";
                 break;
             case tables_1.HelpTables.ProductCategory:
-                return "ProductCategory";
+                return "productCategory";
                 break;
             case tables_1.HelpTables.ProductArgument:
-                return "ProductArgument";
+                return "productArgument";
             default:
                 throw ("The input is not a HelpTable");
         }
@@ -703,7 +703,7 @@ var DatabaseManager = /** @class */ (function () {
             var sqlQuery;
             var _this = this;
             return __generator(this, function (_a) {
-                sqlQuery = "SELECT argument.text \n    FROM argument\n    JOIN ProductArgument ON argument.id = ProductArgument.elementid\n    JOIN Product ON productId = Product.id\n    JOIN Effect ON Argument.effectId = Effect.id\n    WHERE Effect.name = \"".concat(effect, "\"\n    AND Product.id = ").concat(productId, ";");
+                sqlQuery = "SELECT argument.text \n    FROM argument\n    JOIN productArgument ON argument.id = productArgument.elementid\n    JOIN product ON productId = product.id\n    JOIN effect ON argument.effectId = effect.id\n    WHERE effect.name = \"".concat(effect, "\"\n    AND product.id = ").concat(productId, ";");
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var outArr, results, i;
                         return __generator(this, function (_a) {
@@ -732,7 +732,7 @@ var DatabaseManager = /** @class */ (function () {
             var sqlQuery;
             var _this = this;
             return __generator(this, function (_a) {
-                sqlQuery = "SELECT allergen.name\n      FROM allergen\n      JOIN ProductAllergen ON allergen.id = ProductAllergen.elementId\n      JOIN Product ON Product.id = ProductAllergen.productId\n      WHERE Product.id = ".concat(productId, ";");
+                sqlQuery = "SELECT allergen.name\n      FROM allergen\n      JOIN productAllergen ON allergen.id = productAllergen.elementId\n      JOIN product ON product.id = productAllergen.productId\n      WHERE product.id = ".concat(productId, ";");
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var allergens, results, i;
                         return __generator(this, function (_a) {
@@ -758,7 +758,7 @@ var DatabaseManager = /** @class */ (function () {
             var sqlQuery;
             var _this = this;
             return __generator(this, function (_a) {
-                sqlQuery = "SELECT Category.name \n    FROM Category\n    JOIN ProductCategory ON Category.id = ProductCategory.elementId\n    JOIN Product ON Product.id = productCategory.productId\n    WHERE Product.id = ".concat(productId, ";");
+                sqlQuery = "SELECT category.name \n    FROM category\n    JOIN productCategory ON category.id = productCategory.elementId\n    JOIN product ON product.id = productCategory.productId\n    WHERE product.id = ".concat(productId, ";");
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
                         var categorys, results, i;
                         return __generator(this, function (_a) {
