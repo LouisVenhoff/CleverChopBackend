@@ -44,13 +44,13 @@ class DatabaseManager {
         console.log("Database Connection successfully!");
         this.connectionState = true;
       } else {
-        if(this.dbConAttempts < 100)
+        if(this.dbConAttempts < 10)
         {
            setTimeout(() => {this.connect();}, 1000)
         }
         else
         {
-          console.log("Connection error!");
+          console.log("Connection error!",err);
         }
       }
     });

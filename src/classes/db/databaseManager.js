@@ -76,11 +76,11 @@ var DatabaseManager = /** @class */ (function () {
                                 _this.connectionState = true;
                             }
                             else {
-                                if (_this.dbConAttempts < 100) {
+                                if (_this.dbConAttempts < 10) {
                                     setTimeout(function () { _this.connect(); }, 1000);
                                 }
                                 else {
-                                    console.log("Connection error!");
+                                    console.log("Connection error!", err);
                                 }
                             }
                         });

@@ -37,14 +37,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var databaseManager_1 = require("./src/classes/db/databaseManager");
+var pjson = require("./package.json");
 var cors = require("cors");
 var express = require("express");
 var app = express();
 var port = 3014;
-//const dbMng:DatabaseManager = new DatabaseManager("localhost", "system", "Iwaaz2001g!", "cleverchopdb");
+var dbMng = new databaseManager_1["default"]("localhost", "system", "Iwaaz2001g!", "CleverChopDb");
 //const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724", "heroku_554b26e8f85d455");
 //const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b712eb9ae277d5", "865f45a8", "heroku_9e52a98d5b35c1a");
-var dbMng = new databaseManager_1["default"]("localhost", "root", "", "cleverchopdb");
+//const dbMng:DatabaseManager = new DatabaseManager("localhost", "root", "", "cleverchopdb");
 app.use(cors());
 app.get("/", function (req, res) {
     console.log("Working");
@@ -62,6 +63,7 @@ app.get("/api/sendCode/:code", function (req, res) { return __awaiter(void 0, vo
     });
 }); });
 app.listen(port, function () {
+    console.log("CleverChop Server Version: " + pjson.version);
     console.log("Listening on Port " + port);
 });
 //Schatzi war hier und louis gehört nur mir !!

@@ -4,7 +4,7 @@ import { MinimalProduct } from "./src/classes/static/Product";
 import DatabaseManager from "./src/classes/db/databaseManager";
 import InfoSource from "./src/classes/eanSource/infoSource";
 
-
+var pjson = require("./package.json");
 
 var cors = require("cors");
 
@@ -37,6 +37,7 @@ app.get("/api/sendCode/:code", async (req:any, res:any) => {
 
 
 app.listen(port, () => {
+    console.log("CleverChop Server Version: " + pjson.version);
     console.log("Listening on Port " + port);
     
 })
