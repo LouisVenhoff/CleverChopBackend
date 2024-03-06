@@ -35,20 +35,22 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var databaseManager_1 = require("./src/classes/db/databaseManager");
+var databaseConfigSystem_1 = require("./src/classes/databaseConfigSystem/databaseConfigSystem");
 var pjson = require("./package.json");
 var cors = require("cors");
 var express = require("express");
 var app = express();
 var port = 3014;
-var dbMng = new databaseManager_1["default"]("localhost", "system", "Iwaaz2001g!", "CleverChopDb");
+var dbConfig = new databaseConfigSystem_1.default("db.json");
+var dbMng = new databaseManager_1.default(dbConfig.config);
 //const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724", "heroku_554b26e8f85d455");
 //const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b712eb9ae277d5", "865f45a8", "heroku_9e52a98d5b35c1a");
 //const dbMng:DatabaseManager = new DatabaseManager("localhost", "root", "", "cleverchopdb");
 app.use(cors());
 app.get("/", function (req, res) {
-    console.log("Working");
+    res.send({ version: pjson.version, status: "ok" });
 });
 app.get("/api/sendCode/:code", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var result;

@@ -50,7 +50,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var axios_1 = require("axios");
 var Product_1 = require("../static/Product");
 var infoSource_1 = require("./infoSource");
@@ -73,7 +73,7 @@ var EanApiController = /** @class */ (function (_super) {
                             switch (_a.label) {
                                 case 0:
                                     _a.trys.push([0, 2, , 3]);
-                                    return [4 /*yield*/, axios_1["default"].request({
+                                    return [4 /*yield*/, axios_1.default.request({
                                             method: 'GET',
                                             url: queryString,
                                             responseType: 'arraybuffer',
@@ -81,7 +81,7 @@ var EanApiController = /** @class */ (function (_super) {
                                         })];
                                 case 1:
                                     result = _a.sent();
-                                    outObj = new Product_1["default"](this.rawToMinProduct(result.data.toString("latin1"), ean));
+                                    outObj = new Product_1.default(this.rawToMinProduct(result.data.toString("latin1"), ean));
                                     outObj.code = ean;
                                     resolve(outObj.reduceObj());
                                     return [3 /*break*/, 3];
@@ -98,7 +98,7 @@ var EanApiController = /** @class */ (function (_super) {
         });
     };
     EanApiController.prototype.rawToMinProduct = function (rawString, ean) {
-        var outProd = Product_1["default"].getEmptyMinimalProduct(); //Der Produktname wird aus dem String gefiltert und einem neuen leeren Minimalprodukt zugewiesen
+        var outProd = Product_1.default.getEmptyMinimalProduct(); //Der Produktname wird aus dem String gefiltert und einem neuen leeren Minimalprodukt zugewiesen
         outProd.code = ean;
         var cleanedInfo = rawString.split("\n");
         for (var i = 0; i < cleanedInfo.length; i++) {
@@ -111,5 +111,5 @@ var EanApiController = /** @class */ (function (_super) {
         return outProd;
     };
     return EanApiController;
-}(infoSource_1["default"]));
-exports["default"] = EanApiController;
+}(infoSource_1.default));
+exports.default = EanApiController;

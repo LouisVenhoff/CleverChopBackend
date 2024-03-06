@@ -36,25 +36,73 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var NetworkProvider = /** @class */ (function () {
-    function NetworkProvider() {
+var databaseConfigError_1 = require("./databaseConfigError");
+var fs = require("fs");
+var DatabaseConfigSystem = /** @class */ (function () {
+    function DatabaseConfigSystem(configFileName) {
+        this.configFileName = configFileName;
+        this.readConfigFile();
     }
-    NetworkProvider.checkConnection = function () {
+    Object.defineProperty(DatabaseConfigSystem.prototype, "config", {
+        get: function () {
+            if (this.configObj !== undefined) {
+                return this.configObj;
+            }
+            else {
+                throw new databaseConfigError_1.default("Database Config could not be loaded!");
+            }
+        },
+        enumerable: false,
+        configurable: true
+    });
+    DatabaseConfigSystem.prototype.readConfigFile = function () {
         return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
+            return __generator(this, function (_a) {
+                fs.readFile(this.configFileName, "utf8", function (err, data) { return __awaiter(_this, void 0, void 0, function () {
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                if (!err) return [3 /*break*/, 2];
+                                return [4 /*yield*/, this.createConfigFile()];
+                            case 1:
+                                _a.sent();
+                                console.error("Please enter the database credentials to: ".concat(this.configFileName));
+                                process.exit(1);
+                                return [3 /*break*/, 3];
+                            case 2:
+                                try {
+                                    this.configFileName = JSON.parse(data);
+                                }
+                                catch (_b) {
+                                    throw ("Config file (".concat(this.configFileName, ") is corrupt, please delete it and let the software recreate it!"));
+                                }
+                                _a.label = 3;
+                            case 3: return [2 /*return*/];
+                        }
+                    });
+                }); });
+                return [2 /*return*/];
+            });
+        });
+    };
+    DatabaseConfigSystem.prototype.createConfigFile = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
             return __generator(this, function (_a) {
                 return [2 /*return*/, new Promise(function (resolve, reject) {
-                        require("dns").resolve("www.google.com", function (err) {
-                            if (!err) {
-                                resolve(true);
+                        fs.writeFile(_this.configFileName, JSON.stringify({ host: "", username: "", password: "", database: "" }), function (err) {
+                            if (err) {
+                                reject();
                             }
                             else {
-                                resolve(false);
+                                resolve(true);
                             }
                         });
                     })];
             });
         });
     };
-    return NetworkProvider;
+    return DatabaseConfigSystem;
 }());
-exports.default = NetworkProvider;
+exports.default = DatabaseConfigSystem;

@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.HelpTables = void 0;
 var Tables;
 (function (Tables) {
@@ -20,4 +20,4 @@ var HelpTables;
     HelpTables[HelpTables["ProductAllergen"] = 2] = "ProductAllergen";
 })(HelpTables || (HelpTables = {}));
 exports.HelpTables = HelpTables;
-exports["default"] = Tables;
+exports.default = Tables;

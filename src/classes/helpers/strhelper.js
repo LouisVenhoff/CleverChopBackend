@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var StrHelper = /** @class */ (function () {
     function StrHelper() {
     }
@@ -14,4 +14,4 @@ var StrHelper = /** @class */ (function () {
     };
     return StrHelper;
 }());
-exports["default"] = StrHelper;
+exports.default = StrHelper;

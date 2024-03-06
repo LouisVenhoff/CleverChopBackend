@@ -1,11 +1,11 @@
 {
   "name": "cleverchopbackend",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Backend for Cleverchop App",
-  "main": "indexer.ts",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "tsc index.ts && nodemon index.js",
+    "start": "tsc -t es5 index.ts && nodemon index.js",
     "build-linux": "npx pkg -t node16-linux-x64 -o CleverChopServer index.js"
   },
   "author": "Louis Venhoff",

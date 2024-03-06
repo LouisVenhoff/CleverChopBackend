@@ -50,7 +50,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var infoSource_1 = require("./infoSource");
 var axios_1 = require("axios");
 var strhelper_1 = require("../helpers/strhelper");
@@ -74,11 +74,11 @@ var WebScraper = /** @class */ (function (_super) {
                             switch (_a.label) {
                                 case 0:
                                     _a.trys.push([0, 2, , 3]);
-                                    return [4 /*yield*/, axios_1["default"].request({
+                                    return [4 /*yield*/, axios_1.default.request({
                                             method: "GET",
                                             url: productQuery,
                                             responseType: "arraybuffer",
-                                            responseEncoding: "binary"
+                                            responseEncoding: "binary",
                                         })];
                                 case 1:
                                     result = _a.sent();
@@ -258,7 +258,7 @@ var WebScraper = /** @class */ (function (_super) {
     WebScraper.prototype.formatArgArray = function (input) {
         var outArr = [];
         for (var i = 0; i < input.length; i++) {
-            var formatted = (strhelper_1["default"].cleanString(input[i]));
+            var formatted = (strhelper_1.default.cleanString(input[i]));
             if (formatted !== null) {
                 outArr.push(formatted);
             }
@@ -277,5 +277,5 @@ var WebScraper = /** @class */ (function (_super) {
         }
     };
     return WebScraper;
-}(infoSource_1["default"]));
-exports["default"] = WebScraper;
+}(infoSource_1.default));
+exports.default = WebScraper;

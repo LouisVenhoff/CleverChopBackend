@@ -6,7 +6,7 @@ import InfoSource from "../eanSource/infoSource";
 import NetworkProvider from "../network/networkProvider";
 import WebScraper from "../eanSource/webScraper";
 import StrHelper from "../helpers/strhelper";
-
+import { DatabaseConfig } from "../databaseConfigSystem/databaseConfigSystem";
 
 class DatabaseManager {
   host: string;
@@ -20,11 +20,11 @@ class DatabaseManager {
 
   private connectionState = false;
 
-  constructor(host: string, username: string, password: string, database:string) {
-    this.host = host;
-    this.username = username;
-    this.password = password;
-    this.database = database;
+  constructor(config:DatabaseConfig) {
+    this.host = config.host;
+    this.username = config.username;
+    this.password = config.password;
+    this.database = config.database;
     this.connect();
   }
 
