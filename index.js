@@ -43,30 +43,33 @@ var cors = require("cors");
 var express = require("express");
 var app = express();
 var port = 3014;
-var dbConfig = new databaseConfigSystem_1.default("db.json");
-var dbMng = new databaseManager_1.default(dbConfig.config);
 //const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b08e03be91e09c", "17c36724", "heroku_554b26e8f85d455");
 //const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b712eb9ae277d5", "865f45a8", "heroku_9e52a98d5b35c1a");
 //const dbMng:DatabaseManager = new DatabaseManager("localhost", "root", "", "cleverchopdb");
-app.use(cors());
-app.get("/", function (req, res) {
-    res.send({ version: pjson.version, status: "ok" });
-});
-app.get("/api/sendCode/:code", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var result;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, dbMng.provideProduct(req.params.code)];
-            case 1:
-                result = _a.sent();
-                res.send(JSON.stringify(result));
-                return [2 /*return*/];
-        }
+var startSystem = function (dbConfig) {
+    console.log(dbConfig);
+    var dbMng = new databaseManager_1.default(dbConfig);
+    app.use(cors());
+    app.get("/", function (req, res) {
+        res.send({ version: pjson.version, status: "ok" });
     });
-}); });
-app.listen(port, function () {
-    console.log("CleverChop Server Version: " + pjson.version);
-    console.log("Listening on Port " + port);
-});
+    app.get("/api/sendCode/:code", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+        var result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, dbMng.provideProduct(req.params.code)];
+                case 1:
+                    result = _a.sent();
+                    res.send(JSON.stringify(result));
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+    app.listen(port, function () {
+        console.log("CleverChop Server Version: " + pjson.version);
+        console.log("Listening on Port " + port);
+    });
+};
+var dbConfig = new databaseConfigSystem_1.default("db.json", startSystem);
 //Schatzi war hier und louis gehört nur mir !!
 // You are my boyfriend forever i love you so much.<3<3

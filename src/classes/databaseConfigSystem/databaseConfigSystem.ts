@@ -9,19 +9,18 @@ export type DatabaseConfig = {
 }
 
 
-
-
-
-
 class DatabaseConfigSystem{
 
     private configObj:DatabaseConfig | undefined;
 
     private configFileName:string;
 
-    constructor(configFileName:string)
+    private startCallback:(config:DatabaseConfig) => void;
+
+    constructor(configFileName:string, startCallback:(config:DatabaseConfig) => void)
     {
         this.configFileName = configFileName;
+        this.startCallback = startCallback;
         this.readConfigFile();
     }
 
@@ -48,11 +47,12 @@ class DatabaseConfigSystem{
             else{
                 try
                 {
-                    this.configFileName = JSON.parse(data);
+                    this.configObj = JSON.parse(data);
+                    this.startCallback(this.configObj!);
                 }
                 catch
                 {
-                    throw (`Config file (${this.configFileName}) is corrupt, please delete it and let the software recreate it!`)
+                    throw new DatabaseConfigError(`Config file (${this.configFileName}) is corrupt, please delete it and let the software recreate it!`);
                 }
             }
         });

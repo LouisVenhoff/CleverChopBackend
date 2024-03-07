@@ -39,8 +39,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var databaseConfigError_1 = require("./databaseConfigError");
 var fs = require("fs");
 var DatabaseConfigSystem = /** @class */ (function () {
-    function DatabaseConfigSystem(configFileName) {
+    function DatabaseConfigSystem(configFileName, startCallback) {
         this.configFileName = configFileName;
+        this.startCallback = startCallback;
         this.readConfigFile();
     }
     Object.defineProperty(DatabaseConfigSystem.prototype, "config", {
@@ -72,10 +73,11 @@ var DatabaseConfigSystem = /** @class */ (function () {
                                 return [3 /*break*/, 3];
                             case 2:
                                 try {
-                                    this.configFileName = JSON.parse(data);
+                                    this.configObj = JSON.parse(data);
+                                    this.startCallback(this.configObj);
                                 }
                                 catch (_b) {
-                                    throw ("Config file (".concat(this.configFileName, ") is corrupt, please delete it and let the software recreate it!"));
+                                    throw new databaseConfigError_1.default("Config file (".concat(this.configFileName, ") is corrupt, please delete it and let the software recreate it!"));
                                 }
                                 _a.label = 3;
                             case 3: return [2 /*return*/];
