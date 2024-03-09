@@ -149,6 +149,23 @@ class DatabaseManager {
     
   }
 
+  public async fetchBackup():Promise<string[]>{
+    
+    const queryString:string = "SELECT code from product";
+    
+    return new Promise(async(resolve, reject) => {
+        let result:any = await this.doQuery(queryString);
+        
+        let outArr:string[] = [];
+
+        for(let i = 0; i < result.length; i++){
+          outArr.push(result[i].code);
+        }
+
+        resolve(outArr);
+    });
+  }
+
   
   private async findProduct(ean: string): Promise<number> {
     return new Promise(async (resolve, reject) => {
@@ -473,6 +490,8 @@ class DatabaseManager {
         }
       });
   }
+
+  
 
 
 

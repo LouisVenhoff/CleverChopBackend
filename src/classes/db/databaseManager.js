@@ -181,6 +181,31 @@ var DatabaseManager = /** @class */ (function () {
             });
         });
     };
+    DatabaseManager.prototype.fetchBackup = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var queryString;
+            var _this = this;
+            return __generator(this, function (_a) {
+                queryString = "SELECT code from product";
+                return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+                        var result, outArr, i;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0: return [4 /*yield*/, this.doQuery(queryString)];
+                                case 1:
+                                    result = _a.sent();
+                                    outArr = [];
+                                    for (i = 0; i < result.length; i++) {
+                                        outArr.push(result[i].code);
+                                    }
+                                    resolve(outArr);
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); })];
+            });
+        });
+    };
     DatabaseManager.prototype.findProduct = function (ean) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;

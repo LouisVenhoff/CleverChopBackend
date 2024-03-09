@@ -47,7 +47,6 @@ var port = 3014;
 //const dbMng:DatabaseManager = new DatabaseManager("eu-cdbr-west-03.cleardb.net", "b712eb9ae277d5", "865f45a8", "heroku_9e52a98d5b35c1a");
 //const dbMng:DatabaseManager = new DatabaseManager("localhost", "root", "", "cleverchopdb");
 var startSystem = function (dbConfig) {
-    console.log(dbConfig);
     var dbMng = new databaseManager_1.default(dbConfig);
     app.use(cors());
     app.get("/", function (req, res) {
@@ -61,6 +60,18 @@ var startSystem = function (dbConfig) {
                 case 1:
                     result = _a.sent();
                     res.send(JSON.stringify(result));
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+    app.get("/api/v1/backup", function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+        var backupData;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, dbMng.fetchBackup()];
+                case 1:
+                    backupData = _a.sent();
+                    res.send(JSON.stringify(backupData));
                     return [2 /*return*/];
             }
         });

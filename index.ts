@@ -16,7 +16,6 @@ const port = 3014;
 //const dbMng:DatabaseManager = new DatabaseManager("localhost", "root", "", "cleverchopdb");
 
 const startSystem = (dbConfig: DatabaseConfig) => {
-  console.log(dbConfig);
   const dbMng: DatabaseManager = new DatabaseManager(dbConfig);
 
   app.use(cors());
@@ -29,6 +28,12 @@ const startSystem = (dbConfig: DatabaseConfig) => {
     let result: MinimalProduct = await dbMng.provideProduct(req.params.code);
 
     res.send(JSON.stringify(result));
+  });
+
+  app.get("/api/v1/backup", async (req:any, res:any) => {
+    let backupData:string[] = await dbMng.fetchBackup();
+
+    res.send(JSON.stringify(backupData));
   });
 
   app.listen(port, () => {
