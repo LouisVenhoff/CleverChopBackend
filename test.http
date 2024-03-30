@@ -1,5 +1,8 @@
-GET http://localhost:3014/api/sendCode/4063367249747
+GET http://87.106.127.217:3014/api/sendCode/440255644
 
+###
+
+GET http://87.106.127.217:3014/api/v1/backup
 ###
 GET http://localhost:3014/api/admin/addtodb
 

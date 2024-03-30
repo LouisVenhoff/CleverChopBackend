@@ -24,8 +24,9 @@ class WebScraper extends InfoSource {
 
         resultHtml = result.data;
       } catch (ex: any) {
-        console.error(ex.message);
-        throw "Error while accessing Product Source!";
+        let errorObj:MinimalProduct = this.getErrorObj(1, ean);
+        resolve(errorObj);
+        return;
       }
 
       let resultHtmlStr: string = resultHtml.toString("utf8");

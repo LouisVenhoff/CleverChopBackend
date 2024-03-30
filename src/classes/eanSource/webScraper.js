@@ -69,7 +69,7 @@ var WebScraper = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 productQuery = this.queryUri + ean;
                 return [2 /*return*/, new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-                        var resultHtml, result, ex_1, resultHtmlStr;
+                        var resultHtml, result, ex_1, errorObj, resultHtmlStr;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -86,8 +86,9 @@ var WebScraper = /** @class */ (function (_super) {
                                     return [3 /*break*/, 3];
                                 case 2:
                                     ex_1 = _a.sent();
-                                    console.error(ex_1.message);
-                                    throw "Error while accessing Product Source!";
+                                    errorObj = this.getErrorObj(1, ean);
+                                    resolve(errorObj);
+                                    return [2 /*return*/];
                                 case 3:
                                     resultHtmlStr = resultHtml.toString("utf8");
                                     resolve(this.generateMinimalProduct(resultHtmlStr, ean));

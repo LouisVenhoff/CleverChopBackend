@@ -47,6 +47,24 @@ var InfoSource = /** @class */ (function () {
             });
         });
     };
+    InfoSource.prototype.getErrorObj = function (errorCode, ean) {
+        var tempObj = {
+            error: errorCode,
+            name: "",
+            weight: "",
+            manufacturer: "",
+            packing: "",
+            category: [],
+            allergen: [],
+            badArgs: [],
+            goodArgs: [],
+            commonInfo: [],
+            nutriScore: "",
+            ecoScore: "",
+            code: ean
+        };
+        return tempObj;
+    };
     return InfoSource;
 }());
 exports.default = InfoSource;

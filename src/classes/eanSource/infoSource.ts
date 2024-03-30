@@ -8,6 +8,27 @@ abstract class InfoSource
         throw("RequestEan function is not implemented in subclass");
     }
 
+    protected getErrorObj(errorCode:number, ean:string):MinimalProduct
+    {
+        let tempObj: MinimalProduct = {
+            error: errorCode,
+            name:  "",
+            weight: "",
+            manufacturer: "",
+            packing: "",
+            category: [],
+            allergen: [],
+            badArgs: [],
+            goodArgs: [],
+            commonInfo:[],
+            nutriScore: "",
+            ecoScore: "",
+            code: ean
+          };
+
+          return tempObj;
+    }
+
 }
 
 
