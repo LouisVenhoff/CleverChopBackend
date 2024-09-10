@@ -42,6 +42,3 @@ app.listen(port, () => {
     
 })
 
-//Schatzi war hier und louis gehört nur mir !!
-
-// You are my boyfriend forever i love you so much.<3<3
